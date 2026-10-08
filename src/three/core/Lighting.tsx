@@ -11,10 +11,10 @@ export function Lighting() {
   const shadows = quality !== 'low';
   return (
     <>
-      <hemisphereLight args={['#ffffff', scene.ground, 0.55]} />
+      <hemisphereLight args={['#ffffff', scene.ground, 0.4]} />
       <directionalLight
         position={[9, 14, 6]}
-        intensity={1.9}
+        intensity={1.45}
         color="#fff0d8"
         castShadow={shadows}
         shadow-mapSize={quality === 'high' ? [2048, 2048] : [1024, 1024]}

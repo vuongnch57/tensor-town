@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { ExtrudeGeometry, MeshStandardMaterial, Shape } from 'three';
-import { matte, shade } from './materials';
+import { matte } from './materials';
+import { derived } from './palette';
 
 function roundedRect(w: number, d: number, r: number): Shape {
   const s = new Shape();
@@ -24,7 +25,7 @@ type GroundProps = { width?: number; depth?: number; thickness?: number; radius?
  * The rounded "diorama" base every zone sits on. Top surface is y = 0; the soil block hangs below it.
  */
 export function Ground({ width = 22, depth = 18, thickness = 1.2, radius = 2.2 }: GroundProps) {
-  const soil = useMemo(() => new MeshStandardMaterial({ color: shade('parcel', 'roof', 0.5).multiplyScalar(0.9), roughness: 0.95, metalness: 0 }), []);
+  const soil = useMemo(() => new MeshStandardMaterial({ color: derived.soil, roughness: 0.95, metalness: 0 }), []);
   // Soil block: y in [-thickness, -0.12]. Grass slab: y in [-0.2, 0] so props can stand at y = 0.
   const soilGeo = useMemo(() => {
     const bt = 0.06;

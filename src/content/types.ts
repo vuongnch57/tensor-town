@@ -80,4 +80,9 @@ export type Zone = {
 };
 
 /** Position of an object in the 3D scene (world units) plus hotspot label. */
-export type Anchor = { position: [number, number, number]; label: string };
+export type Anchor = {
+  position: [number, number, number];
+  label: string;
+  /** Where the camera looks when this object is selected (defaults to the hotspot position). */
+  focus?: [number, number, number];
+};
