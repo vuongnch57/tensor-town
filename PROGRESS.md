@@ -3,7 +3,7 @@
 | Phase | Branch | PR | Status |
 |---|---|---|---|
 | 0 Scaffold | `phase-0-scaffold` | https://github.com/vuongnch57/tensor-town/pull/1 (base `main`) | Done, in review |
-| 1 Zone 1 end to end | `phase-1-gpu-hall` (from phase-0) | PR link added after opening (base `phase-0-scaffold`) | Done, in review |
+| 1 Zone 1 end to end | `phase-1-gpu-hall` (from phase-0) | https://github.com/vuongnch57/tensor-town/pull/2 (base `phase-0-scaffold`) | Done, in review |
 
 ## Phase 1 summary
 Zone 1 (GPU Hall): procedural isometric scene, 8 hotspots, zone index, detail panel, 11 items, 3 comparisons,
