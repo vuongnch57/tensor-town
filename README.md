@@ -24,6 +24,7 @@ Node 20 or newer. No environment variables or secrets are needed.
 2. Settings are read from `vercel.json`: framework **Vite**, build command `npm run build`, output directory `dist`.
 3. `vercel.json` rewrites every path to `/index.html`, so deep links such as `/zone/gpu-hall/hbm` work.
 4. No environment variables. Leave them empty.
+5. Every push to a branch builds a preview. Open the preview on a machine with a real GPU and run Lighthouse (Chrome DevTools, Performance, mobile) to check the 80+ target; cloud sandboxes only have software WebGL.
 
 For Cloudflare Pages use build command `npm run build`, output `dist`; `public/_redirects` provides the SPA fallback.
 
