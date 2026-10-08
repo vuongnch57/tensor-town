@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Generated from design/tokens.json: UI tokens switch with the theme class on <html> (dark by default). */
+:root {
+  --surface-100: 247 246 241;
+  --surface-200: 255 255 255;
+  --surface-300: 238 241 236;
+  --line: 221 226 218;
+  --ink: 28 36 48;
+  --muted: 91 102 117;
+  --accent: 47 107 90;
+  --accent-ink: 255 255 255;
+  --accent-soft: 226 238 233;
+  --warn: 180 83 47;
+  --warn-soft: 251 233 225;
+  --marker: 242 166 90;
+  --shadow-panel: 0 8px 24px rgba(28,36,48,0.08);
+  --shadow-marker: 0 2px 6px rgba(28,36,48,0.18);
+}
+:root.dark {
+  --surface-100: 20 24 29;
+  --surface-200: 28 34 41;
+  --surface-300: 37 44 53;
+  --line: 46 54 64;
+  --ink: 231 235 240;
+  --muted: 154 165 180;
+  --accent: 124 196 169;
+  --accent-ink: 15 26 22;
+  --accent-soft: 30 51 44;
+  --warn: 240 153 123;
+  --warn-soft: 58 36 32;
+  --marker: 242 166 90;
+  --shadow-panel: 0 8px 24px rgba(0,0,0,0.35);
+  --shadow-marker: 0 2px 6px rgba(0,0,0,0.5);
+}
+
+@layer base {
+  html { color-scheme: light; }
+  html.dark { color-scheme: dark; }
+  body {
+    @apply bg-surface-100 text-ink font-sans antialiased;
+    margin: 0;
+  }
+  :focus-visible { outline: 2px solid rgb(var(--accent)); outline-offset: 2px; }
+  .tabular { font-variant-numeric: tabular-nums; }
+}
