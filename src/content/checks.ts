@@ -1,9 +1,9 @@
 import { ALLOWED_NUMBERS, TODO_MARK } from './facts';
 import type { Anchor, Comparison, Item } from './types';
 
-/** Numbers in free text, ignoring product/format identifiers (H100, FP8, HBM3, L2, E4M3) and ordinals (4th). */
+/** Numbers in free text, ignoring "24/7" (SPEC metaphor), product/format identifiers (H100, FP8, HBM3, L2, E4M3) and ordinals (4th). */
 export function numbersIn(text: string): string[] {
-  const stripped = text.replace(/\b[A-Za-z]+\d+[A-Za-z0-9]*\b/g, ' ').replace(/\b\d+(?:st|nd|rd|th)\b/g, (m) => m.replace(/(?:st|nd|rd|th)$/, ''));
+  const stripped = text.replace(/\b24\/7\b/g, ' ').replace(/\b[A-Za-z]+\d+[A-Za-z0-9]*\b/g, ' ').replace(/\b\d+(?:st|nd|rd|th)\b/g, (m) => m.replace(/(?:st|nd|rd|th)$/, ''));
   return stripped.match(/\d+(?:\.\d+)?/g) ?? [];
 }
 
