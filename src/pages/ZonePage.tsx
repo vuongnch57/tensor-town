@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { itemsById, itemsInZone } from '@/content/registry';
 import { zoneBySlug } from '@/content/zones';
@@ -8,14 +8,9 @@ import { hasWebGL } from '@/lib/webgl';
 import { useReducedMotion } from '@/lib/useReducedMotion';
 import { useFactoryStore } from '@/state/useFactoryStore';
 import { pin } from '@/three/core/palette';
-import { IsoCamera } from '@/three/core/IsoCamera';
-import { SceneCanvas } from '@/three/core/SceneCanvas';
-import { SceneInteractionContext } from '@/three/primitives/Selectable';
 import { anchors } from '@/three/zones/gpu-hall/anchors';
-import { FallbackArt, FALLBACK_PINS } from '@/three/zones/gpu-hall/FallbackArt';
-import { GpuHallScene } from '@/three/zones/gpu-hall/Scene';
+const ZoneScene = lazy(() => import('@/three/zones/gpu-hall/ZoneScene'));
 import { DetailPanel } from '@/ui/DetailPanel';
-import { Fallback2D } from '@/ui/Fallback2D';
 import { SimulateBar } from '@/ui/SimulateBar';
 import { ZoneIndex } from '@/ui/ZoneIndex';
 
@@ -72,7 +67,7 @@ function ZoneView({ zoneSlug, itemId }: { zoneSlug: Parameters<typeof itemsInZon
       aria-label={zoneText.sceneLabel(zone.title)}
       className="relative flex min-w-0 flex-col overflow-hidden rounded-lg border border-line bg-scene-ground lg:min-h-[680px]"
     >
-      <div className="relative z-10 flex flex-wrap items-start justify-between gap-3 p-3 pb-0 sm:p-5 sm:pb-0 max-lg:absolute max-lg:right-0 max-lg:top-0 max-lg:p-3">
+      <div className="relative z-10 flex flex-wrap items-start justify-between gap-3 bg-gradient-to-b from-scene-ground via-scene-ground/85 to-transparent p-3 pb-8 sm:p-5 sm:pb-8 max-lg:absolute max-lg:right-0 max-lg:top-0 max-lg:bg-none max-lg:p-3">
         <div className="hidden flex-col gap-0.5 lg:flex">
           <h2 className="m-0 text-xl font-semibold leading-7" style={{ color: pin.ink }}>{zone.title}</h2>
           <span className="text-sm leading-5" style={{ color: pin.muted }}>{zone.blurb}</span>
@@ -87,16 +82,9 @@ function ZoneView({ zoneSlug, itemId }: { zoneSlug: Parameters<typeof itemsInZon
         </div>
       </div>
       <div className="relative h-[270px] flex-none sm:h-[440px] lg:absolute lg:inset-0 lg:h-auto">
-        {webgl ? (
-          <SceneInteractionContext.Provider value={interaction}>
-            <SceneCanvas onMiss={() => selectedId && goTo(null)} label={zoneText.sceneLabel(zone.title)}>
-              <IsoCamera focus={focusAnchor ? focusAnchor.focus ?? focusAnchor.position : null} fitWidth={29} fitHeight={25} reducedMotion={reduced} />
-              <GpuHallScene />
-            </SceneCanvas>
-          </SceneInteractionContext.Provider>
-        ) : (
-          <Fallback2D art={<FallbackArt />} pins={FALLBACK_PINS} onSelect={goTo} title={zoneText.sceneLabel(zone.title)} note={zoneText.fallbackNote} />
-        )}
+        <Suspense fallback={<p className="absolute inset-0 grid place-items-center text-sm" style={{ color: pin.muted }}>{zoneText.loadingScene}</p>}>
+          <ZoneScene webgl={webgl} title={zoneText.sceneLabel(zone.title)} focus={focusAnchor} interaction={interaction} onMiss={() => selectedId && goTo(null)} />
+        </Suspense>
       </div>
       <div className="relative z-10 lg:mt-auto">
         <SimulateBar />
@@ -105,7 +93,7 @@ function ZoneView({ zoneSlug, itemId }: { zoneSlug: Parameters<typeof itemsInZon
   );
 
   return (
-    <div className="mx-auto w-full max-w-[1440px] flex-1 p-4 pb-[calc(33dvh+16px)] lg:grid lg:grid-cols-[240px_minmax(0,1fr)_360px] lg:items-start lg:gap-5 lg:p-6">
+    <div className="mx-auto w-full max-w-[1440px] flex-1 p-4 pb-[calc(31dvh+16px)] lg:grid lg:grid-cols-[240px_minmax(0,1fr)_360px] lg:items-start lg:gap-5 lg:p-6">
       <div className="mb-3 flex items-center justify-between gap-2 lg:hidden">
         <h1 className="m-0 text-xl font-semibold">{zone.title}</h1>
         <button type="button" onClick={() => setIndexOpen(true)} className="inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-pill border border-line bg-surface-200 px-3 text-[13px] font-semibold text-ink">
@@ -128,13 +116,13 @@ function ZoneView({ zoneSlug, itemId }: { zoneSlug: Parameters<typeof itemsInZon
       <aside
         aria-live="polite"
         aria-label="Details"
-        className={`fixed inset-x-0 bottom-0 z-30 flex flex-col rounded-t-lg border border-b-0 border-line bg-surface-200 shadow-panel lg:hidden ${expanded ? 'h-[88dvh]' : 'h-[33dvh]'}`}
+        className={`fixed inset-x-0 bottom-0 z-30 flex flex-col rounded-t-lg border border-b-0 border-line bg-surface-200 shadow-panel lg:hidden ${expanded ? 'h-[88dvh]' : 'h-[31dvh]'}`}
       >
         <button type="button" aria-label={expanded ? zoneText.readLess : zoneText.readMore} onClick={() => setExpanded((v) => !v)} className="mx-auto mt-2 h-5 w-24 shrink-0 cursor-pointer border-0 bg-transparent p-0">
           <span className="mx-auto block h-[5px] w-10 rounded-pill bg-line" />
         </button>
         <div className="flex items-center justify-between gap-2 px-4 pb-1 pt-1">
-          <span className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{pos >= 0 ? zoneText.position(pos + 1, items.length) : zoneText.overviewTitle}</span>
+          <span className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{pos >= 0 ? zoneText.position(pos + 1, items.length) : ''}</span>
           <span className="flex gap-1.5">
             <NavButton label={zoneText.previous} onClick={() => step(-1)} path="M15 18l-6-6 6-6" />
             <NavButton label={zoneText.next} onClick={() => step(1)} path="M9 6l6 6-6 6" />

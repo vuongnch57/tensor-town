@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { ExtrudeGeometry, MeshStandardMaterial, Shape } from 'three';
 import { matte } from './materials';
-import { derived } from './palette';
+import { derived } from './derived';
 
 function roundedRect(w: number, d: number, r: number): Shape {
   const s = new Shape();

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Color, CylinderGeometry, IcosahedronGeometry, InstancedMesh, Object3D } from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
-import { derived, scene } from '../core/palette';
+import { scene } from '../core/palette';
+import { derived } from '../core/derived';
 import { useSceneInteraction } from './Selectable';
 
 /** Procedural prop library. Same interface a GLB-based version would have: positions in, meshes out. */

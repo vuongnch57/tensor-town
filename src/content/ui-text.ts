@@ -20,6 +20,7 @@ export const zoneText = {
   readMore: 'Read more ↑',
   readLess: 'Show less ↓',
   closeSheet: 'Close',
+  loadingScene: 'Loading scene…',
   position: (n: number, total: number) => `${n} of ${total}`,
   inTheFactory: 'In the factory:',
   prevZone: '‹ Zone 9',

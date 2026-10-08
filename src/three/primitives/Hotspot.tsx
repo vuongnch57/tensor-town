@@ -14,7 +14,7 @@ export function Hotspot({ itemId, number, anchor, onSelect }: Props) {
   const hovered = useFactoryStore((s) => s.hoveredId === itemId);
   const hover = useFactoryStore((s) => s.hover);
   return (
-    <Html position={anchor.position} zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
+    <Html position={anchor.position} zIndexRange={[9, 0]} style={{ pointerEvents: 'none' }}>
       <button
         type="button"
         aria-pressed={selected}

@@ -1,4 +1,5 @@
-import { derived, scene } from '../../core/palette';
+import { scene } from '../../core/palette';
+import { derived } from '../../core/derived';
 import type { Pin } from '@/ui/Fallback2D';
 
 /** Flat isometric picture of the zone for browsers without WebGL. Pin positions are % of the picture. */

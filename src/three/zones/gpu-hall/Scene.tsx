@@ -3,7 +3,7 @@ import type { Pt } from '@/lib/path';
 import { itemsInZone } from '@/content/registry';
 import { useFactoryStore } from '@/state/useFactoryStore';
 import { Ground } from '../../core/Ground';
-import { derived } from '../../core/palette';
+import { derived } from '../../core/derived';
 import { Box } from '../../primitives/Box';
 import { Conveyor } from '../../primitives/Conveyor';
 import { Hotspot } from '../../primitives/Hotspot';

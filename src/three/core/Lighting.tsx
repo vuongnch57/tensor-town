@@ -1,10 +1,10 @@
-import { Environment, Lightformer, SoftShadows } from '@react-three/drei';
+import { Environment, Lightformer } from '@react-three/drei';
 import { scene } from './palette';
 import { useQuality } from './quality';
 
 /**
  * Soft daylight rig shared by every zone: hemisphere + one warm directional light,
- * a procedural studio environment for gentle reflections (no network fetch), soft shadows.
+ * a procedural studio environment for gentle reflections (no network fetch), PCF soft shadows (set on the canvas).
  */
 export function Lighting() {
   const quality = useQuality();
@@ -32,7 +32,6 @@ export function Lighting() {
         <Lightformer form="rect" intensity={1.2} position={[-8, 4, 6]} scale={[10, 6, 1]} color="#fff0d8" />
         <Lightformer form="rect" intensity={0.8} position={[8, 3, -6]} scale={[10, 6, 1]} color="#dfeaf5" />
       </Environment>
-      {quality === 'high' && <SoftShadows size={18} samples={12} focus={0.6} />}
     </>
   );
 }

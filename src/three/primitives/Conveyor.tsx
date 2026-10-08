@@ -1,4 +1,4 @@
-import { derived } from '../core/palette';
+import { derived } from '../core/derived';
 import { Box } from './Box';
 import { Parcels } from './Parcels';
 import type { Pt } from '@/lib/path';

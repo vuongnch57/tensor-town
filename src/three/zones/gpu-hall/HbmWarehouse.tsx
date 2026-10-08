@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { ExtrudeGeometry, Shape } from 'three';
-import { derived, scene } from '../../core/palette';
+import { scene } from '../../core/palette';
+import { derived } from '../../core/derived';
 import { Box } from '../../primitives/Box';
 
 const W = 3.6;

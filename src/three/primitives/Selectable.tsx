@@ -54,10 +54,10 @@ export function Selectable({ id, position = [0, 0, 0], lift = 0.14, children }: 
     st.lift = nextLift;
     if (settled && !selected) return;
     if (inner.current) inner.current.position.y = st.lift + pulse * 0.03;
-    const intensity = st.glow * (0.1 + 0.1 * pulse);
+    const intensity = st.glow * (0.3 + 0.15 * pulse);
     for (const { m, base } of mats.current) {
       m.color.copy(base).lerp(DIM, st.dim * DIM_AMOUNT);
-      m.emissive.copy(GLOW);
+      m.emissive.copy(base).lerp(GLOW, 0.25); // brighten the object's own colour, with a warm touch
       m.emissiveIntensity = intensity;
     }
   });

@@ -10,10 +10,10 @@ type Props = { children: ReactNode; onMiss?: () => void; label?: string };
 
 /**
  * Shared canvas: DPR clamped to [1,2], ACES tone mapping, soft shadows, shared lighting + AO.
- * PerformanceMonitor steps quality down high -> medium -> low.
+ * Starts at 'medium' so first paint is cheap; PerformanceMonitor steps up to 'high' when the device is fast, and down to 'low' when it is not.
  */
 export function SceneCanvas({ children, onMiss, label }: Props) {
-  const [quality, setQuality] = useState<Quality>('high');
+  const [quality, setQuality] = useState<Quality>('medium');
   const down = () => setQuality((q) => (q === 'high' ? 'medium' : 'low'));
   const up = () => setQuality((q) => (q === 'low' ? 'medium' : 'high'));
   return (
