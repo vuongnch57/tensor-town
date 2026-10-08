@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { checkContent, numbersIn, unverifiedNumbers } from './checks';
-import { allItems, anchorsBySlug } from './registry';
+import { allItems, anchorsBySlug, forwardRefs, itemsInZone } from './registry';
 import { comparisons } from './comparisons';
 import type { Item } from './types';
 
@@ -10,7 +10,13 @@ const run = (items: Item[], forwardRefs: string[] = []) => checkContent({ items,
 
 describe('shipped content', () => {
   it('passes every content check', () => {
-    expect(checkContent({ items: allItems, anchors: anchorsBySlug as never, comparisons, forwardRefs: [] })).toEqual([]);
+    expect(checkContent({ items: allItems, anchors: anchorsBySlug as never, comparisons, forwardRefs: Object.keys(forwardRefs) })).toEqual([]);
+  });
+  it('has the 8 objects and 3 concepts of Zone 1, objects first', () => {
+    const zone = itemsInZone('gpu-hall');
+    expect(zone.filter((i) => i.kind === 'object')).toHaveLength(8);
+    expect(zone.filter((i) => i.kind === 'concept')).toHaveLength(3);
+    expect(zone.slice(0, 8).every((i) => i.kind === 'object')).toBe(true);
   });
 });
 

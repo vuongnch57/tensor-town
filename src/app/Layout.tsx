@@ -3,7 +3,7 @@ import { zoneBySlug } from '@/content/zones';
 import { chrome } from '@/content/chrome';
 
 const navClass = ({ isActive }: { isActive: boolean }) =>
-  `px-3 py-2.5 text-sm font-semibold rounded-sm ${isActive ? 'text-ink' : 'text-muted hover:text-ink'}`;
+  `px-2 py-2.5 text-sm sm:px-3 font-semibold rounded-sm ${isActive ? 'text-ink' : 'text-muted hover:text-ink'}`;
 
 export function Layout() {
   const { slug } = useParams();
@@ -17,7 +17,7 @@ export function Layout() {
               <path d="M3 21V10l6 4V10l6 4V6l6 4v11z" />
             </svg>
           </span>
-          {chrome.siteName}
+          <span className="max-sm:sr-only">{chrome.siteName}</span>
         </Link>
         {zone && (
           <span className="hidden text-[15px] text-muted sm:inline">
