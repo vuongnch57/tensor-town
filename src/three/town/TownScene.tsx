@@ -6,6 +6,7 @@ import { useFactoryStore } from '@/state/useFactoryStore';
 import { Ground } from '../core/Ground';
 import { IsoCamera } from '../core/IsoCamera';
 import { SceneCanvas } from '../core/SceneCanvas';
+import { SceneInteractionContext } from '../primitives/Selectable';
 import { Buildings } from './Buildings';
 import { connectionPaths, districtCenter, TOWN_D, TOWN_W } from './layout';
 import { Markers } from './Markers';
@@ -51,16 +52,19 @@ export function TownScene({ focus, reducedMotion, onSelect }: Props) {
   const highlighted = useMemo(() => (step ? stepConnectionIds(step) : new Set<string>()), [step]);
   const dimmed = useCallback((id: string) => isDimmed(id, step !== null, highlighted), [step, highlighted]);
   const sensorsHidden = hiddenGroups.includes('sensors');
+  const interaction = useMemo(() => ({ onSelect: () => {}, reducedMotion }), [reducedMotion]);
   return (
+    <SceneInteractionContext.Provider value={interaction}>
     <SceneCanvas label="Isometric town: nine districts joined by roads, rail, belts, a river, cables and sensor lines">
-      <IsoCamera focus={focus ? districtCenter(focus) : null} home={[0, 0.6, 0]} fitWidth={25.5} fitHeight={20} focusZoom={2.4} smoothTime={0.2} reducedMotion={reducedMotion} />
-      <Ground width={TOWN_W + 1} depth={TOWN_D + 1} radius={2.6} thickness={1.4} />
-      <Buildings />
+      <IsoCamera focus={focus ? districtCenter(focus) : null} home={[0, 0.6, 0]} fitWidth={59} fitHeight={42} focusZoom={2.6} smoothTime={0.2} reducedMotion={reducedMotion} />
+      <Ground width={TOWN_W} depth={TOWN_D} radius={3} thickness={1.6} />
+      <Buildings reducedMotion={reducedMotion} />
       <Ribbons hiddenGroups={hiddenGroups} isDimmed={dimmed} />
       <Parcels hiddenGroups={hiddenGroups} isDimmed={dimmed} reducedMotion={reducedMotion} />
       <Sensors hidden={sensorsHidden} isDimmed={dimmed} reducedMotion={reducedMotion} />
       {step && <TourLabels ids={highlighted} />}
       <Markers focus={focus} dimExcept={step ? step.districts : null} onSelect={onSelect} />
     </SceneCanvas>
+    </SceneInteractionContext.Provider>
   );
 }

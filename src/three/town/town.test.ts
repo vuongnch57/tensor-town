@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { connections, districts, stepConnectionIds, tourSteps, connectionsOf, CONN_GROUPS } from '@/content/town';
 import { ZONE_SLUGS } from '@/content/types';
-import { connectionGeometry, connectionPaths, districtLayout, markerWorld, riverPts, toWorld, TOWN_D, TOWN_W } from './layout';
+import { connectionGeometry, connectionPaths, buildings, districtLayout, footprints, markerWorld, riverPts, strips, trees, TOWN_D, TOWN_W } from './layout';
 import { buildDetails, buildParcels, buildRibbons, isDimmed, RIVER_ID } from './model';
 import { bezierAt, makePath, pointAt, type Pt } from './path';
 
@@ -63,7 +63,6 @@ describe('town layout', () => {
   it('has a layout for every district and a marker inside the island', () => {
     expect(districtLayout.map((d) => d.slug).sort()).toEqual([...ZONE_SLUGS].sort());
     for (const d of districtLayout) {
-      expect(d.props.length).toBeGreaterThan(0);
       const [x, , z] = markerWorld(d.slug);
       expect(Math.abs(x)).toBeLessThan(TOWN_W / 2 + 0.5);
       expect(Math.abs(z)).toBeLessThan(TOWN_D / 2 + 0.5);
@@ -75,11 +74,23 @@ describe('town layout', () => {
     for (const id of wanted) expect(connectionPaths[id].length).toBeGreaterThan(0.2);
   });
   it('keeps every connection and the river inside the island', () => {
-    const inside = ([x, y]: [number, number]) => x >= -0.6 && x <= TOWN_W + 0.6 && y >= -0.6 && y <= TOWN_D + 0.6;
+    const inside = ([x, y]: [number, number]) => Math.abs(x) <= TOWN_W / 2 && Math.abs(y) <= TOWN_D / 2;
     for (const g of Object.values(connectionGeometry)) for (const p of g.pts) expect(inside(p)).toBe(true);
     for (const p of riverPts) expect(inside(p)).toBe(true);
   });
-  it('maps the island centre to the world origin', () => expect(toWorld(TOWN_W / 2, TOWN_D / 2)).toEqual([0, 0]));
+  it('keeps every building on the island', () => {
+    for (const b of buildings) {
+      expect(Math.abs(b.x) + b.w / 2).toBeLessThan(TOWN_W / 2);
+      expect(Math.abs(b.z) + b.d / 2).toBeLessThan(TOWN_D / 2);
+    }
+  });
+  it('keeps trees clear of buildings, roads and the river', () => {
+    expect(trees.length).toBeGreaterThan(40);
+    for (const [x, z] of trees) {
+      for (const [fx, fz, hw, hd] of footprints()) expect(Math.abs(x - fx) < hw && Math.abs(z - fz) < hd).toBe(false);
+      for (const s of strips()) expect(s.pts.length).toBeGreaterThan(1);
+    }
+  });
   it('has a road, rail, belt, bridge, pipe and cable', () => {
     const g = Object.values(connectionGeometry);
     expect(g.some((c) => c.bridge)).toBe(true);

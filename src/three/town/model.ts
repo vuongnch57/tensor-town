@@ -1,7 +1,7 @@
 import { Color } from 'three';
 import { connections, type ConnGroup } from '@/content/town';
 import { scene } from '../core/palette';
-import { connectionGeometry, districtLayout, HS, riverPts, toWorld, type BoxProp } from './layout';
+import { buildings, connectionGeometry, riverPts } from './layout';
 
 /** Pure builders: turn the layout into flat instance lists so the scene renders each kind in one draw call. */
 
@@ -69,17 +69,17 @@ function segments(id: string, group: ConnGroup, pts: [number, number][], ls: { w
 /** Every road, rail, belt, bridge, pipe, cable and the river as box segments and posts. */
 export function buildRibbons(): RibbonItem[] {
   const out: RibbonItem[] = [];
-  segments(RIVER_ID, 'river', riverPts.map(([x, y]) => toWorld(x, y)), layers.river, out);
+  segments(RIVER_ID, 'river', riverPts, layers.river, out);
   for (const cn of connections) {
     const g = connectionGeometry[cn.id];
     if (!g) continue; // sensor lines are curves, drawn separately
-    const pts = g.pts.map(([x, y]) => toWorld(x, y)) as [number, number][];
+    const pts = g.pts;
     if (g.pipe) segments(cn.id, cn.group, pts, layers.pipe, out);
     else if (g.cable) {
       segments(cn.id, cn.group, pts, [{ w: 0.08, y: 0.66, h: 0.06, color: mix(scene.roof, '#000000', 0.2) }], out, false);
       for (const p of pts) out.push({ connId: cn.id, group: cn.group, shape: 'post', x: p[0], y: 0.35, z: p[1], sx: 0.07, sy: 0.7, sz: 0.07, rotY: 0, color: col(scene.roof) });
     } else if (g.bridge) {
-      const zb = (g.z ?? 2.6) * HS;
+      const zb = (g.z ?? 2.6);
       segments(cn.id, cn.group, pts, [{ w: 0.46, y: zb - 0.23, h: 0.46, color: col(scene.wall) }, { w: 0.54, y: zb + 0.23, h: 0.07, color: col(scene.network) }], out);
       for (const p of pts) out.push({ connId: cn.id, group: cn.group, shape: 'post', x: p[0], y: zb / 2 - 0.23, z: p[1], sx: 0.09, sy: zb - 0.46, sz: 0.09, rotY: 0, color: mix(scene.wall, scene.roof, 0.35) });
     } else segments(cn.id, cn.group, pts, layers[cn.group], out);
@@ -89,23 +89,28 @@ export function buildRibbons(): RibbonItem[] {
 
 export type DetailItem = { x: number; y: number; z: number; sx: number; sy: number; sz: number; color: Color };
 
-const boxes = () => districtLayout.flatMap((d) => d.props).filter((p): p is BoxProp => p.kind === 'box');
-
-/** Windows and doors on the +z face of the buildings that ask for them. */
+/** Windows (and doors) on the +z and +x faces of the buildings that ask for them: one instanced draw call for all of them. */
 export function buildDetails(): DetailItem[] {
   const out: DetailItem[] = [];
-  const glass = mix(scene.coolant, '#000000', 0.1);
-  const door = mix(scene.wall, scene.roof, 0.7);
-  for (const b of boxes()) {
-    const [cx0, zmin] = toWorld(b.x, b.y);
-    const zface = zmin + b.d + 0.005;
-    const base = (b.z0 ?? 0) * HS;
-    const hh = b.h * HS;
+  const glass = mix(scene.coolant, '#000000', 0.08);
+  const door = mix(scene.roof, '#000000', 0.2);
+  for (const b of buildings) {
+    const base = b.y0 ?? 0;
     if (b.win) {
-      const n = Math.max(1, Math.floor(b.w * 1.4));
-      for (let i = 0; i < n; i++) out.push({ x: cx0 + (b.w * (i + 0.5)) / n, y: base + hh * 0.45, z: zface, sx: 0.24, sy: hh * 0.25, sz: 0.02, color: glass });
+      const [cols, rows] = b.win;
+      const wy = (j: number) => base + b.h * (0.34 + (0.56 * (j + 0.5)) / rows);
+      const sy = Math.min(0.4, ((b.h * 0.56) / rows) * 0.55);
+      for (let j = 0; j < rows; j++) {
+        for (let i = 0; i < cols; i++) {
+          out.push({ x: b.x - b.w / 2 + (b.w * (i + 0.5)) / cols, y: wy(j), z: b.z + b.d / 2 + 0.01, sx: Math.min(0.5, (b.w / cols) * 0.5), sy, sz: 0.06, color: glass });
+        }
+        const side = Math.max(1, Math.round(cols * (b.d / b.w)));
+        for (let i = 0; i < side; i++) {
+          out.push({ x: b.x + b.w / 2 + 0.01, y: wy(j), z: b.z - b.d / 2 + (b.d * (i + 0.5)) / side, sx: 0.06, sy, sz: Math.min(0.5, (b.d / side) * 0.5), color: glass });
+        }
+      }
     }
-    if (b.door) out.push({ x: cx0 + b.w / 2, y: base + hh * 0.2, z: zface + 0.002, sx: 0.4, sy: hh * 0.4, sz: 0.02, color: door });
+    if (b.door) out.push({ x: b.x - b.w * 0.22, y: base + Math.min(0.45, b.h * 0.3), z: b.z + b.d / 2 + 0.012, sx: 0.55, sy: Math.min(0.9, b.h * 0.6), sz: 0.06, color: door });
   }
   return out;
 }
@@ -118,7 +123,7 @@ export function buildParcels(): ParcelSpec[] {
     const g = connectionGeometry[cn.id];
     if (!g?.parcels) return;
     const seconds = 7 + (i % 4) * 2;
-    const y = g.bridge ? (g.z ?? 2.6) * HS + 0.27 : cn.group === 'belts' ? 0.24 : 0.18;
+    const y = g.bridge ? (g.z ?? 2.6) + 0.27 : cn.group === 'belts' ? 0.24 : 0.18;
     for (let k = 0; k < 2; k++) out.push({ connId: cn.id, group: cn.group, seconds, offset: k / 2, y, rail: cn.group === 'rail' });
   });
   return out;
