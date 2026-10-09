@@ -62,6 +62,10 @@ export type StorageSimParams = { cache: boolean; path: StoragePath; epoch: numbe
 export type LineNeed = 'tools' | 'prepare' | 'train' | 'optimize' | 'serve-custom' | 'serve-ready';
 export type LineSimParams = { need: LineNeed };
 
+/** Simulation state for Zone 7 (the control room): how one GPU is shared between jobs. */
+export type GpuSharing = 'one' | 'mig' | 'time-slicing' | 'vgpu';
+export type ShareSimParams = { sharing: GpuSharing };
+
 export type Item = {
   id: string; // unique across the site, e.g. 'hbm'
   zone: ZoneSlug;
@@ -94,6 +98,8 @@ export type Item = {
   storageSim?: Partial<StorageSimParams>;
   /** Zone 6: simulation state to apply on select. */
   lineSim?: Partial<LineSimParams>;
+  /** Zone 7: simulation state to apply on select. */
+  shareSim?: Partial<ShareSimParams>;
 };
 
 export type Comparison = {
