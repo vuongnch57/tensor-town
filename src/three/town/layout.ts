@@ -1,6 +1,7 @@
 import type { ZoneSlug } from '@/content/types';
 import { connections } from '@/content/town';
 import type { SceneColor } from '../core/palette';
+import { YARD_FOOTPRINT as LINE_FOOTPRINT } from '../zones/production-line/layout';
 import { YARD_FOOTPRINT as STORAGE_FOOTPRINT } from '../zones/storage-yard/layout';
 import { YARD_FOOTPRINT } from '../zones/transport-network/layout';
 import { makePath, type Path, type Pt } from './path';
@@ -51,9 +52,7 @@ export const buildings: Building[] = [
   // Harbour Depot: the storage yard is its own scene (see zones/storage-yard)
   // Packing Dock
   { x: 11.4, z: -8.5, w: 4.4, d: 3.2, h: 2, roof: 'parcel', door: true, win: [3, 1] },
-  // Assembly Row
-  { x: 14.6, z: 0.4, w: 2.8, d: 6.6, h: 1.8, roof: 'hall', win: [2, 1] },
-  { x: 18, z: 0.4, w: 2.2, d: 6.6, h: 1.4, roof: 'storage', win: [2, 1] },
+  // Assembly Row: the production line is its own scene (see zones/production-line)
   // New Development
   { x: 17, z: 9, w: 3, d: 2.4, h: 1.6, roof: 'storage' },
   { x: 20.2, z: 9, w: 2.4, d: 2.4, h: 1.6, roof: 'storage' },
@@ -90,7 +89,7 @@ export const districtLayout: District[] = [
   { slug: 'dgx-building', focus: [-6.4, 4.8], marker: [-9.3, 3.2, 1.7], zoom: 3.5 },
   { slug: 'transport-network', focus: [-7.4, 10.4], marker: [-14.3, 3.7, 12.6], zoom: 3.0 },
   { slug: 'storage-yard', focus: [6.6, 8.6], marker: [5.7, 4.2, 10.8], zoom: 3.2, view: { azimuth: 78, elevation: 42 } },
-  { slug: 'production-line', focus: [16, 0.4], marker: [16.4, 3.4, 0.4] },
+  { slug: 'production-line', focus: [18.2, 0.6], marker: [13.6, 2.6, 5.8], zoom: 3.3, view: { azimuth: 12, elevation: 52 } },
   { slug: 'control-room', focus: [-14, -9], marker: [-14, 7.6, -9] },
   { slug: 'power-cooling', focus: [-13, 2.5], marker: [-16.4, 3.6, 2.6] },
   { slug: 'campus-expansion', focus: [18.4, 10.6], marker: [18.5, 2.8, 10.6] },
@@ -176,6 +175,7 @@ export function footprints(): [number, number, number, number][] {
     [-6.4, 4.6, 3.8, 4.9],
     YARD_FOOTPRINT,
     STORAGE_FOOTPRINT,
+    LINE_FOOTPRINT,
   ];
 }
 

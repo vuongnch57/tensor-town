@@ -85,7 +85,7 @@ describe('town layout', () => {
     }
   });
   it('keeps trees clear of buildings, roads and the river', () => {
-    expect(trees.length).toBeGreaterThan(30);
+    expect(trees.length).toBeGreaterThan(20);
     for (const [x, z] of trees) {
       for (const [fx, fz, hw, hd] of footprints()) expect(Math.abs(x - fx) < hw && Math.abs(z - fz) < hd).toBe(false);
       for (const s of strips()) expect(s.pts.length).toBeGreaterThan(1);
