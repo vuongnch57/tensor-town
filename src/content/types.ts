@@ -47,6 +47,8 @@ export type Item = {
   kind: ItemKind;
   number?: number; // objects only; matches the hotspot and the zone index
   name: string;
+  /** Other names people search for (spelled-out forms, plurals). Never numbers or claims. */
+  aliases?: string[];
   category: string;
   metaphor: string;
   swatch?: SceneToken;

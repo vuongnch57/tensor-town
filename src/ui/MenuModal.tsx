@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { chrome } from '@/content/chrome';
 import { CONN_GROUPS, connGroupNames, districts } from '@/content/town';
 import { zoneBySlug } from '@/content/zones';
+import { itemsInZone } from '@/content/registry';
+import { search as searchContent, type SearchHit } from '@/lib/search';
 import { zonePath } from '@/lib/urls';
 import { toggleTheme } from '@/lib/theme';
 import { useFactoryStore } from '@/state/useFactoryStore';
@@ -33,8 +35,12 @@ export function MenuModal() {
   const navigate = useNavigate();
   const ref = useRef<HTMLDialogElement>(null);
   const search = useRef<HTMLInputElement>(null);
-  const [query, setQuery] = useState('');
+  const query = useFactoryStore((s) => s.searchQuery);
+  const setQuery = useFactoryStore((s) => s.setSearchQuery);
   const list = useMemo(() => matchDistricts(query), [query]);
+  const results = useMemo(() => searchContent(query), [query]);
+  const searching = query.trim().length > 0;
+  const firstHit: SearchHit | undefined = results.items[0] ?? results.comparisons[0];
 
   useEffect(() => {
     const d = ref.current;
@@ -45,10 +51,17 @@ export function MenuModal() {
       else d.setAttribute('open', '');
       search.current?.focus();
     } else if (!open && d.open) {
+      setQuery('');
       if (typeof d.close === 'function') d.close();
       else d.removeAttribute('open');
     }
-  }, [open]);
+  }, [open, setQuery]);
+
+  const goTo = (to: string) => {
+    setTour(null);
+    setOpen(false);
+    navigate(to);
+  };
 
   const go = (slug: string) => {
     setTour(null);
@@ -79,12 +92,22 @@ export function MenuModal() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && list[0]) go(list[0].slug);
+            if (e.key !== 'Enter') return;
+            if (firstHit) goTo(firstHit.to);
+            else if (list[0]) go(list[0].slug);
           }}
           placeholder={chrome.menu.searchPlaceholder}
           aria-label={chrome.menu.searchLabel}
           className="w-full rounded-md border border-line bg-surface-100 px-3.5 py-2.5 text-ink placeholder:text-muted"
         />
+        {searching && (
+          <>
+            <HitList title={chrome.menu.items} hits={results.items} onOpen={goTo} />
+            <HitList title={chrome.menu.comparisons} hits={results.comparisons} onOpen={goTo} />
+          </>
+        )}
+        {searching && list.length === 0 && !firstHit && <p className="m-0 px-2.5 text-sm text-muted">{chrome.menu.noMatch}</p>}
+        {list.length > 0 && (
         <section>
           <h3 className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{chrome.menu.districts}</h3>
           <ul className="mt-2 flex flex-col gap-1 p-0">
@@ -94,14 +117,19 @@ export function MenuModal() {
                   <span className="grid h-[26px] w-[26px] shrink-0 place-items-center rounded-pill bg-marker text-[13px] font-bold text-[#1c2430] shadow-marker">{d.number}</span>
                   <span className="min-w-0">
                     <span className="block font-semibold leading-5">{d.name}</span>
-                    <span className="block text-xs text-muted">{chrome.district.zone} {d.number} · {zoneBySlug(d.slug)?.title}</span>
+                    <span className="block text-xs text-muted">
+                      {chrome.district.zone} {d.number} · {zoneBySlug(d.slug)?.title} · {itemsInZone(d.slug).length > 0 ? chrome.menu.itemCount(itemsInZone(d.slug).length) : chrome.menu.soon}
+                    </span>
                   </span>
                 </button>
               </li>
             ))}
-            {list.length === 0 && <li className="list-none px-2.5 py-2 text-sm text-muted">{chrome.menu.noMatch}</li>}
+
           </ul>
         </section>
+        )}
+        {!searching && (
+        <>
         <section>
           <h3 className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{chrome.menu.pages}</h3>
           <nav className="mt-2 flex flex-wrap gap-2" aria-label="Pages">
@@ -136,7 +164,30 @@ export function MenuModal() {
         <button type="button" onClick={toggleTheme} className="cursor-pointer self-start rounded-md border border-line bg-surface-300 px-4 py-2 font-semibold text-ink">
           {chrome.menu.theme}
         </button>
+        </>
+        )}
       </div>
     </dialog>
+  );
+}
+
+function HitList({ title, hits, onOpen }: { title: string; hits: SearchHit[]; onOpen: (to: string) => void }) {
+  if (hits.length === 0) return null;
+  return (
+    <section>
+      <h3 className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{title}</h3>
+      <ul className="mt-2 flex flex-col gap-1 p-0">
+        {hits.slice(0, 6).map((h) => (
+          <li key={`${h.kind}-${h.id}`} className="list-none">
+            <button type="button" onClick={() => onOpen(h.to)} className="flex w-full cursor-pointer items-center gap-3 rounded-md border-0 bg-transparent px-2.5 py-2 text-left text-ink hover:bg-accent-soft focus-visible:bg-accent-soft">
+              <span className="min-w-0">
+                <span className="block font-semibold leading-5">{h.title}</span>
+                <span className="block text-xs text-muted">{h.subtitle}</span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
