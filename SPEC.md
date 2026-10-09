@@ -113,7 +113,7 @@ Rules: a district keeps its colour family everywhere (halls orange, storage blue
 ### 3.1 Pages
 There is **no top navigation bar**. Every page shows only the small wordmark and the hamburger button (§3.6). All navigation, search and links live in the hamburger modal.
 - `/` **Town.** Full-screen panorama of the whole town with 9 numbered district markers and the connections between them. Each marker has a name label beside it on desktop (numbers only on mobile; the label appears on tap). Activating a marker flies the camera into that district. Parcels travel along the roads, rail and conveyors. No cards, no tables, no side panels at rest.
-- `/zone/:slug` **District view.** The same 3D scene, camera eased into the district (no page reload, no separate scene). Zone index (left), numbered hotspots in the scene, "Simulate" bar (bottom centre), detail panel (right). The neighbouring districts stay visible at the edges, and the connections leading out of the district are labelled ("Conveyor to HBM warehouse, from Harbour Depot"); activating one flies to the other end. Selecting an item updates the URL: `/zone/:slug/:itemId`, so every item is linkable.
+- `/zone/:slug` **District view.** The same 3D scene, camera eased into the district (no page reload, no separate scene). Zone index (left), numbered hotspots in the scene, "Simulate" bar (bottom centre), detail panel (right). The neighbouring districts stay visible at the edges, and the connections leading out of the district are listed as chips in the district card ("Harbour Depot · conveyor"); activating one flies to the other end. Selecting an item updates the URL: `/zone/:slug/:itemId`, so every item is linkable.
 - `/index` **Index.** Every clickable item on the site (objects and concepts), grouped by zone or A–Z, filterable by type and category, searchable.
 - `/compare/:compareId` **Compare.** List of comparisons on the left, CompareTable on the right, "Why people mix them up" note. Concepts can be added or removed (2–3 columns).
 - `/about` **About.** What the site is, how to use it, disclaimer, credits.
@@ -165,6 +165,8 @@ The exact placement is drawn in `design/mockup-town.html`; that file is the layo
 | River | Water channel with pipes | Power Station, Factory Quarter, Tower Block | Coolant (liquid cooling) |
 | Power cable | Poles and cable | Power Station to Tower Block, and along the south edge to New Development | Electricity |
 | Sensor lines | Thin light lines from the tower | Control Tower to every district | Telemetry (DCGM) |
+
+Connections carry **no permanent labels** (they are identified by their look and by the guided tour). A label such as "Freight rail" appears only while a guided-tour step highlights that connection.
 
 On the Town page a few slow parcels move along every connection so the town reads as one running system. Connection types can be switched on and off from the hamburger modal (roads, freight rail, belts and bridges, river and pipes, power cables, sensor lines).
 
