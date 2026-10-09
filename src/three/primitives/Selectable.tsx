@@ -1,6 +1,6 @@
-import { createContext, useContext, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { createContext, useContext, useLayoutEffect, useMemo, useRef, type ReactNode } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { BoxGeometry, Box3, Color, Group, InstancedMesh, Mesh, MeshBasicMaterial, MeshStandardMaterial, Vector3 } from 'three';
+import { Color, Group, Mesh, MeshStandardMaterial } from 'three';
 import { useFactoryStore } from '@/state/useFactoryStore';
 import { pin, scene } from '../core/palette';
 
@@ -8,9 +8,11 @@ export type SceneInteraction = { onSelect: (id: string) => void; reducedMotion: 
 export const SceneInteractionContext = createContext<SceneInteraction>({ onSelect: () => {}, reducedMotion: false });
 export const useSceneInteraction = () => useContext(SceneInteractionContext);
 
-const GLOW = new Color(pin.accent);
+// Selected objects turn a vivid, lit version of the UI accent; the rest fade toward the ground colour.
+const TINT = new Color(pin.accent).offsetHSL(0, 0.15, 0.16);
+const GLOW = new Color(pin.accent).offsetHSL(0, 0.2, 0.3);
 const DIM = new Color(scene.ground);
-const DIM_AMOUNT = 0.6; // others fade about half way toward the ground colour so the selection stands out
+const DIM_AMOUNT = 0.6; // others fade most of the way toward the ground colour so the selection stands out
 const EASE = 12;
 
 type Props = { id: string; position?: [number, number, number]; lift?: number; children: ReactNode };
@@ -24,42 +26,6 @@ export function Selectable({ id, position = [0, 0, 0], lift = 0.14, children }: 
   const inner = useRef<Group>(null);
   const mats = useRef<{ m: MeshStandardMaterial; base: Color }[]>([]);
   const st = useMemo(() => ({ glow: 0, dim: 0, lift: 0 }), []);
-  const halo = useRef<Group>(null);
-  const selected = useFactoryStore((s) => s.selectedId === id);
-  const edgeMat = useMemo(() => new MeshBasicMaterial({ color: pin.accent, transparent: true, opacity: 0, depthTest: false, depthWrite: false }), []);
-  const fillMat = useMemo(() => new MeshBasicMaterial({ color: pin.accent, transparent: true, opacity: 0, depthWrite: false, depthTest: false }), []);
-  // A glowing box around the whole object while it is selected, so small parts inside a building stay easy to find.
-  // Measured on the first frame after selection: instanced children only get their matrices in their own effects.
-  const [dims, setDims] = useState<{ size: Vector3; center: Vector3 } | null>(null);
-  const measure = useRef(false);
-  useLayoutEffect(() => {
-    measure.current = selected;
-  }, [selected]);
-  const fit = () => {
-    if (!inner.current || !halo.current) return;
-    inner.current.updateWorldMatrix(true, true);
-    inner.current.traverse((o) => {
-      const im = o as InstancedMesh;
-      if (im.isInstancedMesh) im.computeBoundingBox();
-    });
-    const b = new Box3().setFromObject(inner.current);
-    if (b.isEmpty()) return;
-    const size = b.getSize(new Vector3()).addScalar(0.24);
-    const center = b.getCenter(new Vector3());
-    halo.current.parent?.updateWorldMatrix(true, false);
-    setDims({ size, center: halo.current.parent ? halo.current.parent.worldToLocal(center) : center });
-  };
-  const unit = useMemo(() => new BoxGeometry(1, 1, 1), []);
-  const beams = useMemo(() => {
-    if (!dims) return [];
-    const { x, y, z } = dims.size;
-    const t = 0.06;
-    const out: { p: [number, number, number]; s: [number, number, number] }[] = [];
-    for (const sy of [-1, 1]) for (const sz of [-1, 1]) out.push({ p: [0, (sy * y) / 2, (sz * z) / 2], s: [x, t, t] });
-    for (const sx of [-1, 1]) for (const sz of [-1, 1]) out.push({ p: [(sx * x) / 2, 0, (sz * z) / 2], s: [t, y, t] });
-    for (const sx of [-1, 1]) for (const sy of [-1, 1]) out.push({ p: [(sx * x) / 2, (sy * y) / 2, 0], s: [t, t, z] });
-    return out;
-  }, [dims]);
 
   useLayoutEffect(() => {
     const list: { m: MeshStandardMaterial; base: Color }[] = [];
@@ -76,10 +42,6 @@ export function Selectable({ id, position = [0, 0, 0], lift = 0.14, children }: 
   useFrame(({ clock }, dt) => {
     const s = useFactoryStore.getState();
     const selected = s.selectedId === id;
-    if (measure.current && selected) {
-      measure.current = false;
-      fit();
-    }
     const hovered = s.hoveredId === id;
     const tGlow = selected ? 1 : hovered ? 0.45 : 0;
     const tDim = s.selectedId && !selected && !hovered ? 1 : 0;
@@ -94,17 +56,11 @@ export function Selectable({ id, position = [0, 0, 0], lift = 0.14, children }: 
     st.lift = nextLift;
     if (settled && !selected) return;
     if (inner.current) inner.current.position.y = st.lift + pulse * 0.03;
-    const intensity = st.glow * (0.9 + 0.3 * pulse);
+    const intensity = st.glow * (0.5 + 0.2 * pulse);
     for (const { m, base } of mats.current) {
-      m.color.copy(base).lerp(DIM, st.dim * DIM_AMOUNT);
-      m.emissive.copy(base).lerp(GLOW, 0.4); // the object's own colour pushed toward the accent
+      m.color.copy(base).lerp(DIM, st.dim * DIM_AMOUNT).lerp(TINT, st.glow * 0.65);
+      m.emissive.copy(GLOW);
       m.emissiveIntensity = intensity;
-    }
-    if (halo.current) {
-      const on = selected ? 1 : 0;
-      halo.current.visible = on > 0 || st.glow > 0.02;
-      edgeMat.opacity = st.glow * (0.8 + 0.2 * pulse);
-      fillMat.opacity = st.glow * (0.2 + 0.1 * pulse);
     }
   });
 
@@ -127,12 +83,6 @@ export function Selectable({ id, position = [0, 0, 0], lift = 0.14, children }: 
       }}
     >
       <group ref={inner}>{children}</group>
-      <group ref={halo} visible={false} renderOrder={20} position={dims?.center}>
-        {dims && <mesh geometry={unit} material={fillMat} scale={dims.size} renderOrder={20} />}
-        {beams.map((b, i) => (
-          <mesh key={i} geometry={unit} material={edgeMat} position={b.p} scale={b.s} renderOrder={21} />
-        ))}
-      </group>
     </group>
   );
 }
