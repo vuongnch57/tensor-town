@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { itemsById } from '@/content/registry';
 import type { ConnGroup } from '@/content/town';
-import type { PackSimParams, SimParams } from '@/content/types';
+import type { FabricSimParams, PackSimParams, SimParams } from '@/content/types';
 
 type FactoryState = {
   selectedId: string | null;
@@ -10,6 +10,9 @@ type FactoryState = {
   sim: SimParams;
   /** Zone 2 simulation (format and model size). */
   packSim: PackSimParams;
+  /** Zone 3 simulation (interconnect) and whether an all-to-all run is in progress. */
+  fabricSim: FabricSimParams;
+  fabricRunning: boolean;
   /** Hamburger modal (SPEC §3.6). */
   menuOpen: boolean;
   /** Connection groups switched off in the menu. */
@@ -22,6 +25,8 @@ type FactoryState = {
   setSearchQuery: (q: string) => void;
   setSim: (patch: Partial<SimParams>) => void;
   setPackSim: (patch: Partial<PackSimParams>) => void;
+  setFabricSim: (patch: Partial<FabricSimParams>) => void;
+  setFabricRunning: (running: boolean) => void;
   setMenuOpen: (open: boolean) => void;
   toggleGroup: (group: ConnGroup) => void;
   setTourStep: (step: number | null) => void;
@@ -29,6 +34,7 @@ type FactoryState = {
 
 export const DEFAULT_SIM: SimParams = { workload: 'inference', gpu: 'h100', format: 'fp16' };
 export const DEFAULT_PACK_SIM: PackSimParams = { format: 'bf16', model: '70b' };
+export const DEFAULT_FABRIC_SIM: FabricSimParams = { interconnect: 'nvswitch' };
 
 export const useFactoryStore = create<FactoryState>((set) => ({
   selectedId: null,
@@ -36,6 +42,8 @@ export const useFactoryStore = create<FactoryState>((set) => ({
   searchQuery: '',
   sim: DEFAULT_SIM,
   packSim: DEFAULT_PACK_SIM,
+  fabricSim: DEFAULT_FABRIC_SIM,
+  fabricRunning: false,
   menuOpen: false,
   hiddenGroups: [],
   tourStep: null,
@@ -46,12 +54,15 @@ export const useFactoryStore = create<FactoryState>((set) => ({
         selectedId: itemId,
         sim: item?.sim ? { ...s.sim, ...item.sim } : s.sim,
         packSim: item?.packSim ? { ...s.packSim, ...item.packSim } : s.packSim,
+        fabricSim: item?.fabricSim ? { ...s.fabricSim, ...item.fabricSim } : s.fabricSim,
       };
     }),
   hover: (hoveredId) => set({ hoveredId }),
   setSearchQuery: (searchQuery) => set({ searchQuery }),
   setSim: (patch) => set((s) => ({ sim: { ...s.sim, ...patch } })),
   setPackSim: (patch) => set((s) => ({ packSim: { ...s.packSim, ...patch } })),
+  setFabricSim: (patch) => set((s) => ({ fabricSim: { ...s.fabricSim, ...patch } })),
+  setFabricRunning: (fabricRunning) => set({ fabricRunning }),
   setMenuOpen: (menuOpen) => set({ menuOpen }),
   toggleGroup: (group) => set((s) => ({ hiddenGroups: s.hiddenGroups.includes(group) ? s.hiddenGroups.filter((g) => g !== group) : [...s.hiddenGroups, group] })),
   setTourStep: (tourStep) => set({ tourStep }),

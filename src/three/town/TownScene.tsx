@@ -9,7 +9,7 @@ import { IsoCamera } from '../core/IsoCamera';
 import { SceneCanvas } from '../core/SceneCanvas';
 import { SceneInteractionContext } from '../primitives/Selectable';
 import { Buildings } from './Buildings';
-import { connectionPaths, districtCenter, TOWN_D, TOWN_W } from './layout';
+import { connectionPaths, districtCenter, districtZoom, TOWN_D, TOWN_W } from './layout';
 import { Markers } from './Markers';
 import { isDimmed } from './model';
 import { Parcels } from './Parcels';
@@ -67,9 +67,9 @@ export function TownScene({ focus, itemFocus = null, reducedMotion, onSelect, on
   return (
     <SceneInteractionContext.Provider value={interaction}>
     <SceneCanvas onMiss={onMiss} label="Isometric town: nine districts joined by roads, rail, belts, a river, cables and sensor lines">
-      <IsoCamera focus={itemFocus ?? (focus ? districtCenter(focus) : null)} home={[0, 0.6, 0]} fitWidth={59} fitHeight={42} focusZoom={itemFocus ? 5 : 2.6} smoothTime={0.2} reducedMotion={reducedMotion} />
+      <IsoCamera focus={itemFocus ?? (focus ? districtCenter(focus) : null)} home={[0, 0.6, 0]} fitWidth={59} fitHeight={42} focusZoom={itemFocus ? 5 : focus ? districtZoom(focus) : 2.6} smoothTime={0.2} reducedMotion={reducedMotion} />
       <Ground width={TOWN_W} depth={TOWN_D} radius={3} thickness={1.6} />
-      <Buildings factoryActive={focus === 'gpu-hall'} packingActive={focus === 'packing-station'} />
+      <Buildings factoryActive={focus === 'gpu-hall'} packingActive={focus === 'packing-station'} dgxActive={focus === 'dgx-building'} />
       <Ribbons hiddenGroups={hiddenGroups} isDimmed={dimmed} />
       <Parcels hiddenGroups={hiddenGroups} isDimmed={dimmed} reducedMotion={reducedMotion} />
       <Sensors hidden={sensorsHidden} isDimmed={dimmed} reducedMotion={reducedMotion} />

@@ -11,15 +11,15 @@ afterEach(cleanup);
 
 describe('IndexPage', () => {
   const setup = () => render(<MemoryRouter><IndexPage /></MemoryRouter>);
-  it('lists all 20 items grouped by zone, each linking to its page', () => {
+  it('lists all 29 items grouped by zone, each linking to its page', () => {
     setup();
-    expect(screen.getByText('20 items')).toBeTruthy();
+    expect(screen.getByText('29 items')).toBeTruthy();
     expect(screen.getByText('HBM').closest('a')?.getAttribute('href')).toBe('/zone/gpu-hall/hbm');
   });
   it('filters by type and by text', () => {
     setup();
     fireEvent.click(screen.getByRole('button', { name: 'Concepts' }));
-    expect(screen.getByText('6 items')).toBeTruthy();
+    expect(screen.getByText('10 items')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'All' }));
     fireEvent.change(screen.getByLabelText('Filter the index'), { target: { value: 'delivery' } });
     expect(screen.getByText('1 item')).toBeTruthy();
