@@ -9,3 +9,5 @@ What the mockup defines:
 - **Colours:** only tokens from `design/tokens.json`; the scene keeps daylight colours in both UI themes.
 
 Not defined by the mockup: 3D model detail, lighting and simulation UI (see SPEC §4.4, §4.9, §4.13).
+
+The mockup also has a **Follow the data** guided tour (button at the bottom of the Town page): 7 steps that highlight, one at a time, how a job moves through the connected districts. The real app should keep this tour.

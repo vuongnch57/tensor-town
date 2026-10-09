@@ -105,6 +105,25 @@ button{font:inherit;color:inherit}
 .mk:focus-visible .dot{stroke:var(--ink)}
 .dim{opacity:.35}
 g.off{display:none}
+.lbl rect{fill:var(--surface-200);stroke:var(--line)}
+.lbl text{fill:var(--ink);font:600 11px var(--font);text-anchor:middle;dominant-baseline:central}
+.zoomed .lbls{display:none}
+.cx{transition:opacity .3s}
+.touring .cx{opacity:.12}
+.touring .cx.hot{opacity:1;filter:drop-shadow(0 0 4px var(--marker))}
+.touring [data-g="parcels"]{opacity:.3}
+.touring .lbl{opacity:.25}
+.tour{position:absolute;left:50%;bottom:calc(40px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:4;
+  width:min(560px,calc(100% - 32px));background:var(--surface-200);border:1px solid var(--line);border-radius:24px;
+  box-shadow:var(--shadow-panel);padding:16px 20px;display:none}
+.tour.on{display:block}
+.tour h2{margin:2px 0 4px;font-size:20px;line-height:28px;font-weight:600}
+.tour p{margin:0 0 12px;font-size:14px;line-height:20px;color:var(--muted)}
+.tbtns{display:flex;gap:8px;align-items:center}
+.tbtns button{border:1px solid var(--line);background:var(--surface-300);border-radius:14px;padding:6px 14px;font-weight:600;cursor:pointer}
+.tbtns button.pri{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.tbtns .cnt{margin-left:auto;font-size:12px;color:var(--muted)}
+.hint button{border:0;background:var(--accent);color:var(--accent-ink);border-radius:999px;padding:2px 12px;font-weight:600;cursor:pointer;margin-left:8px}
 
 @media (max-width:640px){
   .note{display:none}
@@ -126,7 +145,13 @@ g.off{display:none}
     <div class="note">Design mockup. A flat drawing of the layout; the real scene is 3D.</div>
   </div>
 
-  <div class="hint" id="hint">Choose a numbered marker to fly into a district</div>
+  <div class="hint" id="hint">Choose a numbered marker to fly into a district <button id="tourBtn">Follow the data</button></div>
+  <section class="tour" id="tour" aria-live="polite">
+    <div class="label" id="tLabel"></div>
+    <h2 id="tName"></h2>
+    <p id="tText"></p>
+    <div class="tbtns"><button id="tPrev">‹ Previous</button><button class="pri" id="tNext">Next ›</button><button id="tExit">Exit</button><span class="cnt" id="tCnt"></span></div>
+  </section>
 
   <section class="card" id="card" aria-live="polite">
     <div class="label" id="cLabel"></div>
@@ -201,22 +226,22 @@ g.off{display:none}
   var BY={};DIST.forEach(function(d){BY[d.id]=d;});
 
   var CONN=[
-    {g:'roads',kind:'Main road',joins:['gate','harbour'],pts:[[1,12.5],[10.8,12.5]],par:1},
+    {g:'roads',kind:'Main road',joins:['gate','harbour'],pts:[[1,12.5],[10.8,12.5]],par:1,lab:'Road · Ethernet'},
     {g:'roads',kind:'Road',joins:['gate','factory'],pts:[[7.6,12.5],[7.6,7.2],[8,7.2]],par:1},
     {g:'roads',kind:'Road',joins:['factory','assembly'],pts:[[13.7,7.4],[15,7.4]],par:1},
     {g:'roads',kind:'Road',joins:['harbour','assembly'],pts:[[13.3,11.4],[14.5,11.4],[14.5,9],[15,9]],par:1},
     {g:'roads',kind:'Road',joins:['harbour','newdev'],pts:[[14.5,11.4],[14.5,12.3],[14.8,12.3]]},
-    {g:'rail',kind:'Private freight rail',joins:['gate','harbour'],pts:[[1,13.2],[10.8,13.2]],par:1},
+    {g:'rail',kind:'Private freight rail',joins:['gate','harbour'],pts:[[1,13.2],[10.8,13.2]],par:1,lab:'Freight rail · InfiniBand'},
     {g:'rail',kind:'Private freight rail',joins:['tower','gate'],pts:[[5.5,11.2],[5.5,13.2]]},
     {g:'rail',kind:'Private freight rail',joins:['harbour','factory'],pts:[[11.8,10.8],[11.8,8.5]],par:1},
-    {g:'belts',kind:'Conveyor',joins:['harbour','factory'],pts:[[10.8,11.5],[9.2,11.5],[9.2,9.9]],par:1},
-    {g:'belts',kind:'Belt',joins:['packing','factory'],pts:[[13.5,3],[12.6,3],[12.6,5.5]],par:1},
+    {g:'belts',kind:'Conveyor',joins:['harbour','factory'],pts:[[10.8,11.5],[9.2,11.5],[9.2,9.9]],par:1,lab:'Conveyor'},
+    {g:'belts',kind:'Belt',joins:['packing','factory'],pts:[[13.5,3],[12.6,3],[12.6,5.5]],par:1,lab:'Belt · resized crates'},
     {g:'belts',kind:'Tray lane',joins:['packing','assembly'],pts:[[16,4.2],[16,5.5]]},
-    {g:'belts',kind:'Sky-bridge',joins:['tower','factory'],pts:[[6.7,8.4],[6.7,6.6],[8,6.6]],z:2.6,bridge:1,par:1},
-    {g:'river',kind:'Coolant pipe',joins:['power','factory'],pts:[[6.6,4.6],[8,5.8]],pipe:1},
+    {g:'belts',kind:'Sky-bridge',joins:['tower','factory'],pts:[[6.7,8.4],[6.7,6.6],[8,6.6]],z:2.6,bridge:1,par:1,lab:'Sky-bridge · NVLink'},
+    {g:'river',kind:'Coolant pipe',joins:['power','factory'],pts:[[6.6,4.6],[8,5.8]],pipe:1,lab:'Coolant pipe'},
     {g:'river',kind:'Coolant pipe',joins:['power','tower'],pts:[[5.5,5.9],[5.5,8.2]],pipe:1},
     {g:'power',kind:'Power cable',joins:['power','tower'],pts:[[3.4,8.2],[4.2,8.5]],cable:1},
-    {g:'power',kind:'Power cable',joins:['power','newdev'],pts:[[2.1,9.1],[2.1,13.8],[15.6,13.8],[15.6,13.4]],cable:1},
+    {g:'power',kind:'Power cable',joins:['power','newdev'],pts:[[2.1,9.1],[2.1,13.8],[15.6,13.8],[15.6,13.4]],cable:1,lab:'Power cable'},
     {g:'sensors',kind:'Sensor line',joins:['control','factory']},{g:'sensors',kind:'Sensor line',joins:['control','packing']},
     {g:'sensors',kind:'Sensor line',joins:['control','tower']},{g:'sensors',kind:'Sensor line',joins:['control','gate']},
     {g:'sensors',kind:'Sensor line',joins:['control','harbour']},{g:'sensors',kind:'Sensor line',joins:['control','assembly']},
@@ -255,25 +280,25 @@ g.off{display:none}
   CONN.forEach(function(c,i){
     if(!c.pts)return;
     c.id='cn'+i;
-    var gr=ground(c.g),z=c.z||0,d=pathD(c.pts,z);
+    var gr=el('g',{'class':'cx','data-cid':i},ground(c.g)),z=c.z||0,d=pathD(c.pts,z);
     if(c.g==='roads'){
-      el('path',{d:d,fill:'none',stroke:C.edge,'stroke-width':15,'stroke-linejoin':'round','stroke-linecap':'butt'},gr);
-      el('path',{d:d,fill:'none',stroke:C.path,'stroke-width':12,'stroke-linejoin':'round'},gr);
+      el('path',{d:d,fill:'none',stroke:shade(C.edge,.8),'stroke-width':19,'stroke-linejoin':'round','stroke-linecap':'butt'},gr);
+      el('path',{d:d,fill:'none',stroke:C.path,'stroke-width':15,'stroke-linejoin':'round'},gr);
       el('path',{d:d,fill:'none',stroke:shade(C.path,.82),'stroke-width':1.5,'stroke-dasharray':'8 8','stroke-linejoin':'round'},gr);
     }else if(c.g==='rail'){
-      el('path',{d:d,fill:'none',stroke:shade(C.net,.7),'stroke-width':9,'stroke-linejoin':'round'},gr);
-      el('path',{d:d,fill:'none',stroke:C.wall,'stroke-width':6,'stroke-linejoin':'round'},gr);
-      el('path',{d:d,fill:'none',stroke:shade(C.net,.7),'stroke-width':6,'stroke-dasharray':'2 7'},gr);
+      el('path',{d:d,fill:'none',stroke:shade(C.net,.6),'stroke-width':13,'stroke-linejoin':'round'},gr);
+      el('path',{d:d,fill:'none',stroke:C.wall,'stroke-width':9,'stroke-linejoin':'round'},gr);
+      el('path',{d:d,fill:'none',stroke:C.net,'stroke-width':9,'stroke-dasharray':'3 6'},gr);
       el('path',{d:d,fill:'none',stroke:C.net,'stroke-width':1.6},gr);
     }else if(c.g==='belts'&&!c.bridge){
-      el('path',{d:d,fill:'none',stroke:shade(C.roof,.9),'stroke-width':9,'stroke-linejoin':'round'},gr);
-      el('path',{d:d,fill:'none',stroke:C.wall,'stroke-width':6,'stroke-linejoin':'round'},gr);
-      el('path',{d:d,fill:'none',stroke:C.hall,'stroke-width':3,'stroke-dasharray':'6 6','stroke-linejoin':'round'},gr);
+      el('path',{d:d,fill:'none',stroke:shade(C.roof,.9),'stroke-width':12,'stroke-linejoin':'round'},gr);
+      el('path',{d:d,fill:'none',stroke:C.wall,'stroke-width':8,'stroke-linejoin':'round'},gr);
+      el('path',{d:d,fill:'none',stroke:C.hall,'stroke-width':4,'stroke-dasharray':'6 6','stroke-linejoin':'round'},gr);
     }else if(c.pipe){
       el('path',{d:d,fill:'none',stroke:shade(C.water,.75),'stroke-width':8,'stroke-linejoin':'round'},gr);
       el('path',{d:d,fill:'none',stroke:C.water,'stroke-width':5,'stroke-linejoin':'round'},gr);
     }else if(c.cable){
-      el('path',{d:d,fill:'none',stroke:C.roof,'stroke-width':1.6,'stroke-dasharray':'5 4','stroke-linejoin':'round'},gr);
+      el('path',{d:d,fill:'none',stroke:shade(C.roof,.7),'stroke-width':2.4,'stroke-dasharray':'6 4','stroke-linejoin':'round'},gr);
       c.pts.forEach(function(p){var q=P(p[0],p[1]);el('rect',{x:q[0]-2.5,y:q[1]-9,width:5,height:11,rx:1.5,fill:C.roof},gr);});
     }
   });
@@ -370,7 +395,7 @@ g.off{display:none}
   /* ---------- elevated sky-bridge (drawn above buildings) ---------- */
   var sky=CONN.filter(function(c){return c.bridge;})[0];
   var gb=el('g',{'data-g':'belts'},svg);
-  gb.setAttribute('class','skyg');
+  gb.setAttribute('class','cx');gb.setAttribute('data-cid',CONN.indexOf(sky));
   (function(){
     var d=pathD(sky.pts,sky.z);
     sky.pts.forEach(function(p){var a=P(p[0],p[1]),b=P(p[0],p[1],sky.z);el('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:shade(C.wall,.7),'stroke-width':3},gb);});
@@ -379,6 +404,19 @@ g.off{display:none}
     el('path',{d:d,fill:'none',stroke:C.net,'stroke-width':2,'stroke-dasharray':'3 5','stroke-linejoin':'round'},gb);
   })();
 
+  /* ---------- connection labels ---------- */
+  var gl=el('g',{'class':'lbls'},svg);
+  CONN.forEach(function(c){
+    if(!c.lab||!c.pts)return;
+    var best=0,bi=0;
+    for(var k=0;k<c.pts.length-1;k++){var L=Math.abs(c.pts[k+1][0]-c.pts[k][0])+Math.abs(c.pts[k+1][1]-c.pts[k][1]);if(L>best){best=L;bi=k;}}
+    var a=c.pts[bi],b=c.pts[bi+1],q=P((a[0]+b[0])/2,(a[1]+b[1])/2,c.z||0);
+    var g=el('g',{'class':'lbl','data-g':c.g,transform:'translate('+q[0]+' '+(q[1]+(c.g==='rail'?20:c.g==='roads'?-16:-12))+')'},gl);
+    var w=c.lab.length*6.4+16;
+    el('rect',{x:-w/2,y:-10,width:w,height:20,rx:10},g);
+    var t=el('text',{x:0,y:0},g);t.textContent=c.lab;
+  });
+
   /* ---------- sensor lines ---------- */
   var gs=gConn.sensors;
   var top=P(4,3,6.1);
@@ -386,7 +424,7 @@ g.off{display:none}
     var t=BY[c.joins[1]],m=P(t.m[0],t.m[1],t.m[2]-.3);
     var mx=(top[0]+m[0])/2,my=Math.min(top[1],m[1])-40;
     c.id='sn'+i;
-    el('path',{id:c.id,d:'M'+top[0]+' '+top[1]+' Q'+mx+' '+my+' '+m[0]+' '+m[1],fill:'none',stroke:C.accent,'stroke-width':1.6,'stroke-dasharray':'4 6','stroke-opacity':.75},gs);
+    el('path',{'class':'cx','data-cid':CONN.indexOf(c),id:c.id,d:'M'+top[0]+' '+top[1]+' Q'+mx+' '+my+' '+m[0]+' '+m[1],fill:'none',stroke:C.accent,'stroke-width':2.2,'stroke-dasharray':'5 6','stroke-opacity':.9},gs);
   });
   svg.appendChild(gs);
 
@@ -469,13 +507,52 @@ g.off{display:none}
       b.innerHTML=BY[o].name+' <small>· '+cn.kind.toLowerCase()+'</small>';
       b.addEventListener('click',function(){focus(o);});links.appendChild(b);
     });
-    card.classList.add('on');back.classList.add('on');hint.hidden=true;crumb.textContent='/ '+d.name;
+    endTour();svg.classList.add('zoomed');card.classList.add('on');back.classList.add('on');hint.hidden=true;crumb.textContent='/ '+d.name;
     DIST.forEach(function(x){markers[x.id].classList.toggle('sel',x.id===id);markers[x.id].classList.toggle('dim',x.id!==id);});
   }
   function town(){
-    sel=null;fly(TOWN);card.classList.remove('on');back.classList.remove('on');hint.hidden=false;crumb.textContent='';
+    endTour();sel=null;svg.classList.remove('zoomed');fly(TOWN);card.classList.remove('on');back.classList.remove('on');hint.hidden=false;crumb.textContent='';
     DIST.forEach(function(x){markers[x.id].classList.remove('sel','dim');});
   }
+  /* ---------- guided tour: follow one job through the town ---------- */
+  var STEPS=[
+    {t:'Data arrives at the gate',x:'Every job starts at the Gatehouse, where the roads and the private freight rail begin. Parcels of data ride the rail to the Harbour Depot, where they are stored.',c:[['rail','gate','harbour'],['roads','gate','harbour']],d:['gate','harbour']},
+    {t:'Storage feeds the hall',x:'A conveyor carries data from the depot into the production hall. How fast the conveyor runs is the memory bandwidth.',c:[['belts','harbour','factory'],['rail','harbour','factory']],d:['harbour','factory']},
+    {t:'Crates are resized first',x:'At the Packing Dock, crates are resized before they enter the factory. Smaller crates mean more fit on each truck.',c:[['belts','packing','factory'],['belts','packing','assembly']],d:['packing','factory','assembly']},
+    {t:'The halls work together',x:'GPU rooms in the Tower Block exchange results with the halls over the sky-bridge instead of going back out to the road.',c:[['belts','tower','factory'],['rail','tower','gate']],d:['tower','factory']},
+    {t:'Finished work ships out',x:'Output leaves the Factory Quarter by road to Assembly Row, where it is packed and shipped to customers.',c:[['roads','factory','assembly'],['roads','harbour','assembly']],d:['factory','assembly']},
+    {t:'Power and coolant keep it running',x:'The power station feeds cables to the towers and the new development. The river carries coolant through pipes into the halls and towers.',c:[['power','power','tower'],['power','power','newdev'],['river','power','factory'],['river','power','tower']],d:['power','tower','factory','newdev']},
+    {t:'The control tower sees everything',x:'Sensor lines run from the tower on the hill to every district, so the dispatcher can watch and schedule the whole town.',c:[['sensors','control',null]],d:['control']}
+  ];
+  var tour=document.getElementById('tour'),ti=-1;
+  function showStep(i){
+    ti=i;var st=STEPS[i];
+    svg.classList.add('touring');
+    document.querySelectorAll('.cx.hot').forEach(function(n){n.classList.remove('hot');});
+    document.querySelectorAll('.cx').forEach(function(n){
+      var c=CONN[+n.getAttribute('data-cid')];
+      var on=st.c.some(function(f){return c.g===f[0]&&c.joins.indexOf(f[1])>=0&&(!f[2]||c.joins.indexOf(f[2])>=0);});
+      if(on)n.classList.add('hot');
+    });
+    DIST.forEach(function(x){markers[x.id].classList.toggle('dim',st.d.indexOf(x.id)<0);markers[x.id].classList.toggle('sel',false);});
+    document.getElementById('tLabel').textContent='Follow the data';
+    document.getElementById('tName').textContent=st.t;
+    document.getElementById('tText').textContent=st.x;
+    document.getElementById('tCnt').textContent=(i+1)+' of '+STEPS.length;
+    document.getElementById('tPrev').disabled=i===0;
+    document.getElementById('tNext').textContent=i===STEPS.length-1?'Finish':'Next ›';
+  }
+  function startTour(){card.classList.remove('on');back.classList.remove('on');hint.hidden=true;tour.classList.add('on');showStep(0);}
+  function endTour(){
+    if(ti<0)return;ti=-1;tour.classList.remove('on');svg.classList.remove('touring');
+    document.querySelectorAll('.cx.hot').forEach(function(n){n.classList.remove('hot');});
+    DIST.forEach(function(x){markers[x.id].classList.remove('dim');});
+    if(!sel)hint.hidden=false;
+  }
+  document.getElementById('tourBtn').addEventListener('click',startTour);
+  document.getElementById('tPrev').addEventListener('click',function(){if(ti>0)showStep(ti-1);});
+  document.getElementById('tNext').addEventListener('click',function(){if(ti<STEPS.length-1)showStep(ti+1);else endTour();});
+  document.getElementById('tExit').addEventListener('click',endTour);
   back.addEventListener('click',town);
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!scrim.classList.contains('on')&&sel)town();});
 
