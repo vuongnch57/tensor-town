@@ -50,6 +50,10 @@ export type PackSimParams = { format: PackFormat; model: ModelSize };
 export type FabricInterconnect = 'pcie' | 'nvlink' | 'nvswitch';
 export type FabricSimParams = { interconnect: FabricInterconnect };
 
+/** Simulation state for Zone 4 (the transport network). Congestion runs from 0 (empty lanes) to 1 (jammed). */
+export type NetworkKind = 'infiniband' | 'ethernet' | 'spectrumx';
+export type NetSimParams = { network: NetworkKind; congestion: number };
+
 export type Item = {
   id: string; // unique across the site, e.g. 'hbm'
   zone: ZoneSlug;
@@ -76,6 +80,8 @@ export type Item = {
   packSim?: Partial<PackSimParams>;
   /** Zone 3: simulation state to apply on select. */
   fabricSim?: Partial<FabricSimParams>;
+  /** Zone 4: simulation state to apply on select. */
+  netSim?: Partial<NetSimParams>;
 };
 
 export type Comparison = {
