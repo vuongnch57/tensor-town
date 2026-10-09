@@ -1,4 +1,4 @@
-import type { GpuModel, NumberFormat, Workload } from './types';
+import type { GpuModel, ModelSize, NumberFormat, PackFormat, Workload } from './types';
 
 /** User-facing text for the zone page UI. */
 export const zoneText = {
@@ -23,8 +23,8 @@ export const zoneText = {
   loadingScene: 'Loading scene…',
   position: (n: number, total: number) => `${n} of ${total}`,
   inTheFactory: 'In the factory:',
-  prevZone: '‹ Zone 9',
-  nextZone: 'Zone 2 ›',
+  prevZone: (n: number) => `‹ Zone ${n}`,
+  nextZone: (n: number) => `Zone ${n} ›`,
   zoneSoon: 'This zone is not built yet. It arrives in a later phase.',
   backToMap: 'Back to the map',
   fallbackNote: '3D is not available in this browser, so this is a flat picture of the zone. Everything is still reachable from the index.',
@@ -53,5 +53,36 @@ export const gpuHallText = {
       { value: 'fp16', label: 'FP16' },
       { value: 'fp8', label: 'FP8' },
     ] as { value: NumberFormat; label: string }[],
+  },
+};
+
+export const packText = {
+  simulate: {
+    title: 'Simulate',
+    format: 'Number format',
+    model: 'Model size',
+    weights: 'Weights need',
+    fits: 'Fits on one 80 GB GPU',
+    fitsYes: 'Fits',
+    fitsNo: 'Does not fit',
+    legendTitle: 'Bits on each crate lid',
+    legend: [
+      { key: 'roof', label: 'Sign' },
+      { key: 'parcelHot', label: 'Exponent (range)' },
+      { key: 'coolant', label: 'Mantissa or value (detail)' },
+    ],
+    illustrative: 'Illustrative, not measured. Weights only: no activations or cache.',
+    formatOptions: [
+      { value: 'fp32', label: 'FP32' },
+      { value: 'bf16', label: 'BF16' },
+      { value: 'fp8', label: 'FP8' },
+      { value: 'int8', label: 'INT8' },
+    ] as { value: PackFormat; label: string }[],
+    modelOptions: [
+      { value: '7b', label: '7B' },
+      { value: '13b', label: '13B' },
+      { value: '70b', label: '70B' },
+    ] as { value: ModelSize; label: string }[],
+    gb: (n: number) => `${n} GB`,
   },
 };

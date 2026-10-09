@@ -58,7 +58,6 @@ export const buildings: Building[] = [
   { x: 3.6, z: 6.9, w: 1.8, d: 1.5, h: 1.1, roof: 'roof', door: true },
   // Packing Dock
   { x: 11.4, z: -8.5, w: 4.4, d: 3.2, h: 2, roof: 'parcel', door: true, win: [3, 1] },
-  { x: 16.6, z: -5.2, w: 2.4, d: 1.2, h: 1, wall: 'network', roof: 'wall', flat: true },
   // Assembly Row
   { x: 14.6, z: 0.4, w: 2.8, d: 6.6, h: 1.8, roof: 'hall', win: [2, 1] },
   { x: 18, z: 0.4, w: 2.2, d: 6.6, h: 1.4, roof: 'storage', win: [2, 1] },
@@ -94,7 +93,7 @@ type District = { slug: ZoneSlug; focus: Pt; marker: [number, number, number] };
 
 export const districtLayout: District[] = [
   { slug: 'gpu-hall', focus: [4, 1], marker: [1.9, 3.1, 1] },
-  { slug: 'packing-station', focus: [12.5, -7.5], marker: [11.4, 3.5, -8.5] },
+  { slug: 'packing-station', focus: [15.5, -8], marker: [11.4, 3.5, -8.5] },
   { slug: 'dgx-building', focus: [-6.3, 5], marker: [-6.3, 7.4, 3.9] },
   { slug: 'transport-network', focus: [-12, 12], marker: [-14.3, 3.7, 12.6] },
   { slug: 'storage-yard', focus: [6.5, 10.5], marker: [5.7, 3.6, 10.8] },
@@ -153,7 +152,7 @@ export const fences: [number, number][][] = [
   [[15.4, 14.4], [22.4, 14.4]],
 ];
 export const crates: readonly (readonly [number, number, number?])[] = [
-  [15.0, -9.0], [15.5, -8.5], [14.6, -9.4], [8.0, 11.8], [8.8, 12.2], [14.4, 11.6], [14.9, 12.2], [-10.8, 12.2],
+  [8.0, 11.8], [8.8, 12.2], [14.4, 11.6], [14.9, 12.2], [-10.8, 12.2],
 ];
 
 // ---- trees: seeded grid with jitter, kept clear of buildings, roads and the river ----
@@ -178,6 +177,7 @@ export function footprints(): [number, number, number, number][] {
     ...cylinders.map((c) => [c.x, c.z, c.r, c.r] as [number, number, number, number]),
     [hill.x, hill.z, hill.w / 2, hill.d / 2],
     [FACTORY_ORIGIN[0] + 1, FACTORY_ORIGIN[1] + 0.5, 9, 7],
+    [17.9, -9.1, 4, 4.3],
   ];
 }
 

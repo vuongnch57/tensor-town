@@ -3,6 +3,7 @@ import { useFactoryStore } from '@/state/useFactoryStore';
 import { zonePath } from '@/lib/urls';
 import { zoneText } from '@/content/ui-text';
 import type { Item, Zone } from '@/content/types';
+import { zones } from '@/content/zones';
 
 type Props = { zone: Zone; items: Item[]; selectedId: string | null; onSelect: (id: string) => void };
 
@@ -41,8 +42,10 @@ export function ZoneIndex({ zone, items, selectedId, onSelect }: Props) {
               </svg>
             </span>
           )}
-          <span className="min-w-0">{i.name}</span>
-          {i.kind === 'object' && <span className="ml-auto shrink-0 text-xs font-normal text-muted">{i.category}</span>}
+          <span className="flex min-w-0 flex-col">
+            <span>{i.name}</span>
+            {i.kind === 'object' && <span className="text-xs font-normal leading-4 text-muted">{i.category}</span>}
+          </span>
         </Link>
       </li>
     );
@@ -59,8 +62,8 @@ export function ZoneIndex({ zone, items, selectedId, onSelect }: Props) {
       <ul className="m-0 flex list-none flex-col gap-0.5 p-0">{concepts.map(row)}</ul>
       <div className="mx-2 my-2 h-px bg-surface-300" />
       <div className="flex justify-between px-2 text-[13px] text-accent">
-        <span className="py-1 opacity-60">{zoneText.prevZone}</span>
-        <span className="py-1 opacity-60">{zoneText.nextZone}</span>
+        <span className="py-1 opacity-60">{zoneText.prevZone(zone.number === 1 ? zones.length : zone.number - 1)}</span>
+        <span className="py-1 opacity-60">{zoneText.nextZone(zone.number === zones.length ? 1 : zone.number + 1)}</span>
       </div>
     </nav>
   );

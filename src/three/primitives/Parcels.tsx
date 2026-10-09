@@ -15,6 +15,8 @@ type Props = {
   y?: number;
   size?: number;
   hot?: boolean;
+  /** Overrides the sand/hot colour. */
+  tint?: string;
 };
 
 const SAND = new Color(scene.parcel);
@@ -25,7 +27,7 @@ const SMOOTH = (t: number) => t * t * (3 - 2 * t);
  * Instanced parcels (rounded crates) riding a path in a loop. They shrink in and out at the ends so
  * they appear to arrive and be taken inside. With reduced motion they stand still, spread along the path.
  */
-export function Parcels({ path, count, speed, y = 0.04, size = 0.4, hot = false }: Props) {
+export function Parcels({ path, count, speed, y = 0.04, size = 0.4, hot = false, tint }: Props) {
   const ref = useRef<InstancedMesh>(null);
   const { reducedMotion } = useSceneInteraction();
   const len = useMemo(() => pathLength(path), [path]);
@@ -37,9 +39,9 @@ export function Parcels({ path, count, speed, y = 0.04, size = 0.4, hot = false 
   useEffect(() => {
     const m = ref.current;
     if (!m) return;
-    for (let i = 0; i < count; i++) m.setColorAt(i, hot ? HOT : SAND);
+    for (let i = 0; i < count; i++) m.setColorAt(i, tint ? new Color(tint) : hot ? HOT : SAND);
     if (m.instanceColor) m.instanceColor.needsUpdate = true;
-  }, [count, hot]);
+  }, [count, hot, tint]);
 
   useFrame((_, dt) => {
     const m = ref.current;

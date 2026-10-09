@@ -69,7 +69,7 @@ export function TownScene({ focus, itemFocus = null, reducedMotion, onSelect, on
     <SceneCanvas onMiss={onMiss} label="Isometric town: nine districts joined by roads, rail, belts, a river, cables and sensor lines">
       <IsoCamera focus={itemFocus ?? (focus ? districtCenter(focus) : null)} home={[0, 0.6, 0]} fitWidth={59} fitHeight={42} focusZoom={itemFocus ? 5 : 2.6} smoothTime={0.2} reducedMotion={reducedMotion} />
       <Ground width={TOWN_W} depth={TOWN_D} radius={3} thickness={1.6} />
-      <Buildings factoryActive={focus === 'gpu-hall'} />
+      <Buildings factoryActive={focus === 'gpu-hall'} packingActive={focus === 'packing-station'} />
       <Ribbons hiddenGroups={hiddenGroups} isDimmed={dimmed} />
       <Parcels hiddenGroups={hiddenGroups} isDimmed={dimmed} reducedMotion={reducedMotion} />
       <Sensors hidden={sensorsHidden} isDimmed={dimmed} reducedMotion={reducedMotion} />

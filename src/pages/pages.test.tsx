@@ -11,17 +11,17 @@ afterEach(cleanup);
 
 describe('IndexPage', () => {
   const setup = () => render(<MemoryRouter><IndexPage /></MemoryRouter>);
-  it('lists all 11 items grouped under Zone 1, each linking to its page', () => {
+  it('lists all 20 items grouped by zone, each linking to its page', () => {
     setup();
-    expect(screen.getByText('11 items')).toBeTruthy();
+    expect(screen.getByText('20 items')).toBeTruthy();
     expect(screen.getByText('HBM').closest('a')?.getAttribute('href')).toBe('/zone/gpu-hall/hbm');
   });
   it('filters by type and by text', () => {
     setup();
     fireEvent.click(screen.getByRole('button', { name: 'Concepts' }));
-    expect(screen.getByText('3 items')).toBeTruthy();
+    expect(screen.getByText('6 items')).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'All' }));
-    fireEvent.change(screen.getByLabelText('Filter the index'), { target: { value: 'tensor' } });
+    fireEvent.change(screen.getByLabelText('Filter the index'), { target: { value: 'delivery' } });
     expect(screen.getByText('1 item')).toBeTruthy();
     fireEvent.change(screen.getByLabelText('Filter the index'), { target: { value: 'zzzz' } });
     expect(screen.getByText('Nothing matches these filters.')).toBeTruthy();
