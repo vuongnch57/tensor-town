@@ -103,16 +103,17 @@ function Bridge({ a, b, m }: { a: Pt; b: Pt; m: Record<string, MeshStandardMater
   const cx = (a[0] + b[0]) / 2;
   return (
     <group position={[cx, BRIDGE_Y, a[1]]}>
-      <Box size={[len, 0.1, 0.42]} position={[0, -0.1, 0]} color="hall" round={0.25} />
+      <Box size={[len, 0.12, 0.56]} position={[0, -0.12, 0]} color="hall" round={0.25} />
       {[-1, 1].map((s) => (
-        <Slab key={s} size={[len, 0.2, 0.03]} position={[0, 0, s * 0.195]} m={m.glass} />
+        <group key={s}>
+          <Slab size={[len, 0.28, 0.03]} position={[0, 0, s * 0.265]} m={m.glass} />
+          <Slab size={[len, 0.04, 0.06]} position={[0, 0.28, s * 0.265]} m={m.glow} />
+          <Slab size={[0.05, 0.5, 0.05]} position={[0, 0, s * 0.265]} m={m.frame} />
+        </group>
       ))}
+      <Slab size={[0.06, 0.06, 0.6]} position={[0, 0.5, 0]} m={m.frame} />
       {[-1, 1].map((s) => (
-        <Slab key={`p${s}`} size={[0.04, 0.4, 0.04]} position={[0, 0, s * 0.2]} m={m.frame} />
-      ))}
-      <Slab size={[0.05, 0.05, 0.46]} position={[0, 0.4, 0]} m={m.frame} />
-      {[-1, 1].map((s) => (
-        <Slab key={`c${s}`} size={[0.06, 0.34, 0.5]} position={[s * (len / 2 - 0.03), -0.1, 0]} m={m.frame} />
+        <Slab key={`c${s}`} size={[0.07, 0.42, 0.64]} position={[s * (len / 2 - 0.035), -0.12, 0]} m={m.frame} />
       ))}
     </group>
   );
@@ -305,7 +306,7 @@ export function DgxBuilding({ active }: { active: boolean }) {
           bridges.map((b, k) => {
             const half = (Math.abs(b.b[0] - b.a[0]) - ROOM_SIZE + 0.1) / 2;
             const cx = (b.a[0] + b.b[0]) / 2;
-            return <Parcels key={`b${k}`} path={[[cx - half, b.a[1]], [cx + half, b.a[1]]]} count={1} speed={speed(1.2)} y={BRIDGE_Y + 0.02} size={0.22} hot={running} />;
+            return <Parcels key={`b${k}`} path={[[cx - half, b.a[1]], [cx + half, b.a[1]]]} count={2} speed={speed(1.0)} y={BRIDGE_Y + 0.02} size={0.26} hot={running} />;
           })}
         {interconnect === 'nvswitch' &&
           roomsList.map((i) => {

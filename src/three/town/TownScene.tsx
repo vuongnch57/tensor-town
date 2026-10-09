@@ -47,6 +47,8 @@ type Props = {
   focus: ZoneSlug | null;
   /** Camera target when an object inside the focused district is selected. */
   itemFocus?: [number, number, number] | null;
+  /** Camera zoom multiplier and angles for the selected object (see Anchor.view). */
+  itemView?: { zoom?: number; azimuth?: number; elevation?: number } | null;
   reducedMotion: boolean;
   onSelect: (slug: ZoneSlug) => void;
   onSelectItem: (id: string) => void;
@@ -54,7 +56,7 @@ type Props = {
 };
 
 /** The whole town in one scene. `focus` flies the camera into a district; the tour dims everything but the connections it highlights. */
-export function TownScene({ focus, itemFocus = null, reducedMotion, onSelect, onSelectItem, onMiss }: Props) {
+export function TownScene({ focus, itemFocus = null, itemView = null, reducedMotion, onSelect, onSelectItem, onMiss }: Props) {
   const hiddenGroups = useFactoryStore((s) => s.hiddenGroups);
   const tourStep = useFactoryStore((s) => s.tourStep);
   const step = tourStep === null ? null : tourSteps[tourStep];
@@ -67,7 +69,7 @@ export function TownScene({ focus, itemFocus = null, reducedMotion, onSelect, on
   return (
     <SceneInteractionContext.Provider value={interaction}>
     <SceneCanvas onMiss={onMiss} label="Isometric town: nine districts joined by roads, rail, belts, a river, cables and sensor lines">
-      <IsoCamera focus={itemFocus ?? (focus ? districtCenter(focus) : null)} home={[0, 0.6, 0]} fitWidth={59} fitHeight={42} focusZoom={itemFocus ? 5 : focus ? districtZoom(focus) : 2.6} smoothTime={0.2} reducedMotion={reducedMotion} />
+      <IsoCamera focus={itemFocus ?? (focus ? districtCenter(focus) : null)} home={[0, 0.6, 0]} fitWidth={59} fitHeight={42} focusZoom={itemFocus ? itemView?.zoom ?? 5 : focus ? districtZoom(focus) : 2.6} azimuth={itemFocus ? itemView?.azimuth : undefined} elevation={itemFocus ? itemView?.elevation : undefined} smoothTime={0.2} reducedMotion={reducedMotion} />
       <Ground width={TOWN_W} depth={TOWN_D} radius={3} thickness={1.6} />
       <Buildings factoryActive={focus === 'gpu-hall'} packingActive={focus === 'packing-station'} dgxActive={focus === 'dgx-building'} />
       <Ribbons hiddenGroups={hiddenGroups} isDimmed={dimmed} />

@@ -100,4 +100,6 @@ export type Anchor = {
   label: string;
   /** Where the camera looks when this object is selected (defaults to the hotspot position). */
   focus?: [number, number, number];
+  /** Closer or turned camera for small objects: zoom multiplier and the viewing angles in degrees (default 45° azimuth, 35° elevation). */
+  view?: { zoom?: number; azimuth?: number; elevation?: number };
 };

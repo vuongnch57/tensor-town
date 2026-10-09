@@ -11,10 +11,10 @@ export const BOARD_HALF_X = 3.2;
 export const BOARD_HALF_Z = 2.45;
 export const BOARD_TOP = 0.25;
 export const ROOM_COUNT = 8;
-export const ROOM_SIZE = 0.8;
+export const ROOM_SIZE = 0.7;
 export const ROOM_HEIGHT = 1.8;
 export const ROW_Z = 1.5;
-export const ROOM_X = [-2.1, -0.7, 0.7, 2.1] as const;
+export const ROOM_X = [-2.25, -0.75, 0.75, 2.25] as const;
 export const SPINE = { halfX: 2.7, halfZ: 0.45, height: 2.3 };
 export const NVSWITCH_CHIPS = 4;
 export const BRIDGE_Y = 1.3;
@@ -36,8 +36,14 @@ const at = (x: number, y: number, z: number): [number, number, number] => [CENTE
 
 /** World positions of each Zone 3 object. Camera looks from +x +z, so the front row and the blocks face the viewer. */
 export const anchors: Record<string, Anchor> = {
-  'gpu-room': { position: at(0.7, ROOM_HEIGHT + 0.75, ROW_Z), label: 'GPU room', focus: at(0.7, 0.9, ROW_Z) },
-  'nvlink-bridge': { position: at(-1.4, BRIDGE_Y + 0.75, ROW_Z), label: 'NVLink bridge', focus: at(-1.4, BRIDGE_Y - 0.4, ROW_Z) },
+  'gpu-room': { position: at(0.75, ROOM_HEIGHT + 0.75, ROW_Z), label: 'GPU room', focus: at(0.75, 0.9, ROW_Z) },
+  'nvlink-bridge': {
+    position: at(-1.5, BRIDGE_Y + 0.75, ROW_Z),
+    label: 'NVLink bridge',
+    focus: at(-1.5, BRIDGE_Y - 0.1, ROW_Z),
+    // looked at from the south, a little above, and much closer, so the deck, glass sides and arch read clearly
+    view: { zoom: 7.5, azimuth: 18, elevation: 40 },
+  },
   'nvswitch-hub': { position: at(0, SPINE.height + 0.95, 0), label: 'NVSwitch hub', focus: at(0, 1.2, 0) },
   'hgx-board': { position: at(BOARD_HALF_X - 0.2, 0.7, BOARD_HALF_Z - 0.2), label: 'HGX board', focus: at(BOARD_HALF_X - 0.2, 0.2, BOARD_HALF_Z - 0.2) },
   'dgx-system': { position: at(BLOCKS.cpu.x, BLOCKS.cpu.h + 0.85, BLOCKS.cpu.z), label: 'DGX system', focus: at(BLOCKS.cpu.x, 0.5, BLOCKS.cpu.z) },
