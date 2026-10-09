@@ -91,7 +91,7 @@ type District = { slug: ZoneSlug; focus: Pt; marker: [number, number, number]; /
 export const districtLayout: District[] = [
   { slug: 'gpu-hall', focus: [4, 1], marker: [1.9, 3.1, 1] },
   { slug: 'packing-station', focus: [15.5, -8], marker: [11.4, 3.5, -8.5] },
-  { slug: 'dgx-building', focus: [-6.4, 5.2], marker: [-8.9, 3.6, 2.2], zoom: 3.4 },
+  { slug: 'dgx-building', focus: [-6.4, 4.8], marker: [-9.3, 3.2, 1.7], zoom: 3.5 },
   { slug: 'transport-network', focus: [-12, 12], marker: [-14.3, 3.7, 12.6] },
   { slug: 'storage-yard', focus: [6.5, 10.5], marker: [5.7, 3.6, 10.8] },
   { slug: 'production-line', focus: [16, 0.4], marker: [16.4, 3.4, 0.4] },
@@ -128,10 +128,10 @@ export const connectionGeometry: Record<string, ConnGeometry> = {
   'belt-harbour-factory': { pts: [[8.4, 9.3], [8.4, 6.0], [9.9, 6.0], [9.9, 4.0]], parcels: true },
   'belt-packing-factory': { pts: [[9.6, -6.9], [9.6, -3.4], [1.9, -3.4], [1.9, -2.3]], parcels: true },
   'belt-packing-assembly': { pts: [[13.6, -6.9], [13.6, -4.6], [14.6, -4.6], [14.6, -2.9]] },
-  'bridge-tower-factory': { pts: [[-4.4, 3.8], [-1.2, 3.8]], z: 2.6, bridge: true, parcels: true },
+  'bridge-tower-factory': { pts: [[-3.6, 3.8], [-1.2, 3.8]], z: 2.0, bridge: true, parcels: true },
   'pipe-power-factory': { pts: [[0.5, -9.2], [0.5, -2.4]], pipe: true },
-  'pipe-power-tower': { pts: [[-7.8, -1.6], [-7.8, 0.95]], pipe: true },
-  'cable-power-tower': { pts: [[-10.6, 2.0], [-9.6, 2.0], [-9.6, 3.8], [-9.25, 3.8]], cable: true },
+  'pipe-power-tower': { pts: [[-7.8, -1.6], [-7.8, 1.3]], pipe: true },
+  'cable-power-tower': { pts: [[-10.6, 2.0], [-9.6, 2.0], [-9.6, 3.8], [-9.55, 3.8]], cable: true },
   'cable-power-newdev': { pts: [[-13, 3.7], [-13, 16.2], [18.6, 16.2], [18.6, 13.8]], cable: true },
 };
 
@@ -176,7 +176,7 @@ export function footprints(): [number, number, number, number][] {
     [hill.x, hill.z, hill.w / 2, hill.d / 2],
     [FACTORY_ORIGIN[0] + 1, FACTORY_ORIGIN[1] + 0.5, 9, 7],
     [17.9, -9.1, 4, 4.3],
-    [-6.4, 4.6, 3.3, 4.8],
+    [-6.4, 4.6, 3.8, 4.9],
   ];
 }
 
