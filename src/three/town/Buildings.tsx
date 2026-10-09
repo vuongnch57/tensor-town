@@ -246,6 +246,86 @@ function Truck({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** A cog lying on the machine's front face: disc, hub and teeth. */
+function Cog({ r, position, spin }: { r: number; position: [number, number, number]; spin: React.RefObject<Group> }) {
+  const teeth = 8;
+  return (
+    <group position={position}>
+      <group ref={spin}>
+        <mesh rotation={[Math.PI / 2, 0, 0]} castShadow>
+          <cylinderGeometry args={[r, r, 0.06, 20]} />
+          <Matte color="path" />
+        </mesh>
+        <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, 0, 0.035]}>
+          <cylinderGeometry args={[r * 0.35, r * 0.35, 0.03, 12]} />
+          <Matte color="roof" />
+        </mesh>
+        {Array.from({ length: teeth }, (_, i) => {
+          const a = (i / teeth) * Math.PI * 2;
+          return (
+            <mesh key={i} position={[Math.cos(a) * (r + 0.02), Math.sin(a) * (r + 0.02), 0]} rotation={[0, 0, a]} castShadow>
+              <boxGeometry args={[r * 0.4, r * 0.34, 0.06]} />
+              <Matte color="path" />
+            </mesh>
+          );
+        })}
+      </group>
+    </group>
+  );
+}
+
+const LIGHT_ORDER = ['fp32', 'bf16', 'fp8', 'int8'] as const;
+
+/**
+ * The Transformer Engine: a packing machine with an entry and an exit hood for the belts, a control cabin with windows,
+ * two meshing cogs, an exhaust stack, and a row of lights showing which number format it is packing right now.
+ */
+function TransformerEngineModel({ format, reducedMotion }: { format: string; reducedMotion: boolean }) {
+  const stack = useRef<Group>(null);
+  const cogA = useRef<Group>(null);
+  const cogB = useRef<Group>(null);
+  useFrame(({ clock }) => {
+    if (reducedMotion) return;
+    const t = clock.elapsedTime;
+    if (stack.current) stack.current.scale.y = 1 + Math.sin(t * 2.4) * 0.06;
+    if (cogA.current) cogA.current.rotation.z = t * 1.2;
+    if (cogB.current) cogB.current.rotation.z = -t * 1.2 * (0.2 / 0.12) + Math.PI / 8;
+  });
+  return (
+    <>
+      <Box size={[1.9, 0.12, 1.5]} hex={derived.darkTrim} round={0.25} />
+      <Box size={[1.5, 0.62, 1.2]} position={[0, 0.12, 0]} color="network" round={0.1} />
+      {[-1, 1].map((s) => (
+        <group key={s}>
+          <Box size={[0.12, 0.44, 0.66]} position={[s * 0.8, 0.2, 0]} color="roof" round={0.2} />
+          <Box size={[0.03, 0.3, 0.46]} position={[s * 0.865, 0.26, 0]} hex={derived.darkTrim} round={0.1} shadow={false} />
+        </group>
+      ))}
+      <Box size={[1.0, 0.4, 0.8]} position={[0, 0.74, 0]} color="wall" round={0.12} />
+      <Box size={[1.12, 0.06, 0.92]} position={[0, 1.14, 0]} color="roof" round={0.3} />
+      <Box size={[0.7, 0.18, 0.03]} position={[0, 0.85, 0.4]} color="coolant" round={0.2} shadow={false} />
+      <Box size={[0.03, 0.18, 0.5]} position={[0.5, 0.85, 0]} color="coolant" round={0.2} shadow={false} />
+      <group ref={stack} position={[0.55, 0.74, -0.3]}>
+        <Box size={[0.24, 0.78, 0.24]} color="roof" round={0.3} />
+        <Box size={[0.32, 0.06, 0.32]} position={[0, 0.78, 0]} color="path" round={0.3} />
+      </group>
+      <Cog r={0.2} position={[-0.4, 0.44, 0.62]} spin={cogA} />
+      <Cog r={0.12} position={[-0.08, 0.34, 0.62]} spin={cogB} />
+      <Box size={[0.68, 0.2, 0.03]} position={[0.33, 0.45, 0.6]} color="roof" round={0.3} />
+      {LIGHT_ORDER.map((f, i) => (
+        <Box
+          key={f}
+          size={[0.1, 0.1, 0.04]}
+          position={[0.08 + i * 0.15, 0.5, 0.62]}
+          hex={f === format ? scene[PACK_COLOR[formatId(f)]] : derived.darkTrim}
+          round={0.3}
+          shadow={false}
+        />
+      ))}
+    </>
+  );
+}
+
 /** District 2: the Packing Dock yard. Crates by number format (with their bits drawn on the lid), the Transformer Engine and the truck it loads. */
 function PackingDock({ active }: { active: boolean }) {
   const { onSelect, reducedMotion } = useSceneInteraction();
@@ -254,13 +334,11 @@ function PackingDock({ active }: { active: boolean }) {
   const color = PACK_COLOR[formatId(format)];
   const tint = scene[color];
   const truck = useRef<Group>(null);
-  const engine = useRef<Group>(null);
-  // Idle motion: the truck idles with a small bounce and the Transformer Engine's stack pulses.
+  // Idle motion: the truck idles with a small bounce.
   useFrame(({ clock }) => {
     if (reducedMotion) return;
     const t = clock.elapsedTime;
     if (truck.current) truck.current.position.y = Math.abs(Math.sin(t * 3)) * 0.02;
-    if (engine.current) engine.current.scale.y = 1 + Math.sin(t * 2.4) * 0.06;
   });
   const objects = useMemo(() => itemsInZone('packing-station').filter((i) => i.kind === 'object'), []);
   const outLen = BELT_OUT.to[0] - BELT_OUT.from[0];
@@ -275,11 +353,7 @@ function PackingDock({ active }: { active: boolean }) {
         </Selectable>
       ))}
       <Selectable id="transformer-engine" position={[16.8, 0, -5.6]}>
-        <Box size={[1.7, 0.7, 1.3]} color="network" round={0.1} />
-        <Box size={[1.1, 0.5, 0.9]} position={[0, 0.7, 0]} color="wall" round={0.15} />
-        <group ref={engine}>
-          <Box size={[0.3, 0.9, 0.3]} position={[0.5, 1.2, 0]} color="roof" round={0.3} />
-        </group>
+        <TransformerEngineModel format={format} reducedMotion={reducedMotion} />
         {/* In: big FP32 crates from the packing building. Out: crates in the chosen format, onto the truck. */}
         <Conveyor key={`in-${format}`} from={[-3.4, 0]} to={[-0.9, 0]} speed={reducedMotion ? 0 : 0.7} hot={false} parcels={4} size={cargoSize(4)} tint={scene.storage} />
         <Conveyor key={`out-${format}`} from={[...BELT_OUT.from]} to={[...BELT_OUT.to]} speed={reducedMotion ? 0 : outLen / (outCount * LOAD_PERIOD)} hot={false} parcels={outCount} size={cargoSize(bytes)} tint={tint} />
