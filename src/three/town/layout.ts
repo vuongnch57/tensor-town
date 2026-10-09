@@ -75,6 +75,8 @@ export const cylinders: Cylinder[] = [
   { x: -17.2, z: 1.4, r: 0.6, h: 2.2, color: 'coolant' },
   { x: 13.3, z: -2.4, r: 0.4, h: 2.8, y0: 1.8, color: 'roof' },
   { x: -14, z: -9, r: 0.07, h: 1.2, y0: 6.1, color: 'roof' },
+  // Pond where the river begins (low and wide, so it reads as water)
+  { x: 7.6, z: -15.4, r: 2.3, h: 0.07, color: 'coolant' },
 ];
 
 /** The hill under the control tower. */
@@ -112,8 +114,8 @@ export const districtCenter = (slug: ZoneSlug): [number, number, number] => [fin
 /** Where sensor lines leave the control tower. */
 export const sensorStart = (): [number, number, number] => [-14, 6.4, -9];
 
-/** Main river channel, from the top edge past the control hill and the halls, out through the power station's bank. */
-export const riverPts: Pt[] = [[8, -18], [4, -12], [-1, -8.5], [-6.5, -5.5], [-10, -2.2], [-14, -1.2], [-23, -0.8]];
+/** Main river channel, from a pond near the Packing Dock past the control hill and the halls, out through the power station's bank. */
+export const riverPts: Pt[] = [[6.4, -14.6], [4, -12], [-1, -8.5], [-6.5, -5.5], [-10, -2.2], [-14, -1.2], [-23, -0.8]];
 
 export type ConnGeometry = { pts: Pt[]; z?: number; bridge?: boolean; pipe?: boolean; cable?: boolean; parcels?: boolean };
 
