@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { zoneText } from '@/content/ui-text';
 import type { Item, Zone } from '@/content/types';
 import { DetailPanel } from './DetailPanel';
+import { PackSimulateBar } from './PackSimulateBar';
 import { SimulateBar } from './SimulateBar';
 import { ZoneIndex } from './ZoneIndex';
 
@@ -30,7 +31,7 @@ export function ZonePanels({ zone, items, selectedId, onSelect }: Props) {
           <DetailPanel zone={zone} item={item} items={items} onSelect={pick} />
         </aside>
         <div className="pointer-events-auto absolute bottom-6 left-1/2 w-[min(860px,calc(100%-680px))] -translate-x-1/2 [&>div]:m-0">
-          <SimulateBar />
+          {zone.slug === 'packing-station' ? <PackSimulateBar /> : <SimulateBar />}
         </div>
       </div>
 

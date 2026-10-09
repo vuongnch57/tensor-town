@@ -43,3 +43,11 @@ describe('searchDistricts', () => {
     expect(searchDistricts('zzzz')).toEqual([]);
   });
 });
+
+describe('search: Zone 2', () => {
+  it('finds the number formats and the truck', () => {
+    expect(search('fp8').items[0].id).toBe('fp8');
+    expect(search('truck').items.map((i) => i.id)).toContain('delivery-truck');
+    expect(search('quantization').items.map((i) => i.id)).toContain('quantization');
+  });
+});

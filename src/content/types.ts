@@ -41,6 +41,11 @@ export type GpuModel = 'h100' | 'h200';
 export type NumberFormat = 'fp16' | 'fp8';
 export type SimParams = { workload: Workload; gpu: GpuModel; format: NumberFormat };
 
+/** Simulation state for Zone 2 (the packing dock). */
+export type PackFormat = 'fp32' | 'bf16' | 'fp8' | 'int8';
+export type ModelSize = '7b' | '13b' | '70b';
+export type PackSimParams = { format: PackFormat; model: ModelSize };
+
 export type Item = {
   id: string; // unique across the site, e.g. 'hbm'
   zone: ZoneSlug;
@@ -63,6 +68,8 @@ export type Item = {
   related: string[]; // item ids, same zone or other zones
   anchorId?: string; // objects: id of the 3D anchor in anchors.ts
   sim?: Partial<SimParams>;
+  /** Zone 2: simulation state to apply on select. */
+  packSim?: Partial<PackSimParams>;
 };
 
 export type Comparison = {

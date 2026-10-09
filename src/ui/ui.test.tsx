@@ -37,8 +37,8 @@ describe('DetailPanel', () => {
   });
   it('shows cross-zone related items as inert "coming soon" chips', () => {
     render(<MemoryRouter><DetailPanel zone={zone} item={itemsById.hbm} items={items} onSelect={() => {}} /></MemoryRouter>);
-    expect(screen.getByText(/FP8 · Zone 2 · coming soon/)).toBeTruthy();
-    expect(screen.queryByRole('button', { name: /FP8/ })).toBeNull();
+    expect(screen.getByText(/GPUDirect Storage · Zone 5 · coming soon/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /GPUDirect/ })).toBeNull();
   });
   it('shows the empty state with no selection', () => {
     render(<MemoryRouter><DetailPanel zone={zone} item={null} items={items} onSelect={() => {}} /></MemoryRouter>);

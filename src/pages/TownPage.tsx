@@ -8,6 +8,7 @@ import { useReducedMotion } from '@/lib/useReducedMotion';
 import { zonePath } from '@/lib/urls';
 import { useFactoryStore } from '@/state/useFactoryStore';
 import { factoryAnchors } from '@/three/town/factory';
+import { anchorsBySlug } from '@/content/registry';
 import { TownScene } from '@/three/town/TownScene';
 import { DistrictCard } from '@/ui/DistrictCard';
 import { TourCard } from '@/ui/TourCard';
@@ -42,7 +43,7 @@ export default function TownPage() {
 
   const goTo = useCallback((id: string | null) => focus && navigate(zonePath(focus, id)), [focus, navigate]);
   const item = selectedId ? itemsById[selectedId] ?? null : null;
-  const anchor = item?.kind === 'object' ? factoryAnchors[item.anchorId ?? item.id] : undefined;
+  const anchor = item?.kind === 'object' ? (item.zone === 'gpu-hall' ? factoryAnchors : anchorsBySlug[item.zone])?.[item.anchorId ?? item.id] : undefined;
   const itemFocus = anchor ? anchor.focus ?? anchor.position : null;
 
   // Entering a district ends the tour.

@@ -9,6 +9,9 @@ import { useFactoryStore } from '@/state/useFactoryStore';
 import { Hotspot } from '../primitives/Hotspot';
 import { Selectable, useSceneInteraction } from '../primitives/Selectable';
 import { simulate } from '../zones/gpu-hall/sim';
+import { simulate as packSimulate } from '../zones/packing-station/sim';
+import { anchors as packAnchors } from '../zones/packing-station/anchors';
+import type { SceneColor } from '../core/palette';
 import { Crates, Fence, Lamps, Trees } from '../primitives/Props';
 import { Workers } from '../primitives/Workers';
 import { CpuOffice } from '../zones/gpu-hall/CpuOffice';
@@ -121,12 +124,72 @@ function FactoryQuarter({ active }: { active: boolean }) {
   );
 }
 
+const PACK_COLOR: Record<string, SceneColor> = { fp32: 'storage', 'bf16-fp16': 'hall', fp8: 'parcel', int8: 'network' };
+const PACK_CRATES: { id: string; at: [number, number]; size: number }[] = [
+  { id: 'fp32', at: [15.0, -8.4], size: 1.4 },
+  { id: 'bf16-fp16', at: [16.4, -9.8], size: 1.1 },
+  { id: 'fp8', at: [17.8, -11.2], size: 0.8 },
+  { id: 'int8', at: [19.2, -12.6], size: 0.8 },
+];
+const TRUCK_CELLS = 8;
+
+/** Cargo of the delivery truck: the same 8 cells of space hold fewer, bigger crates the more bytes each parameter takes. */
+function TruckCargo() {
+  const format = useFactoryStore((s) => s.packSim.format);
+  const bytes = packSimulate({ format, model: '7b' }).bytesPerParam;
+  const n = TRUCK_CELLS / bytes;
+  const size = 0.34 * Math.sqrt(bytes);
+  const color = PACK_COLOR[format === 'bf16' ? 'bf16-fp16' : format] ?? 'hall';
+  const cols = Math.min(n, 4);
+  return (
+    <>
+      {Array.from({ length: n }, (_, i) => (
+        <Box key={i} size={[size, size, size]} position={[-0.9 + (i % cols) * 0.5, 0.78, (Math.floor(i / cols) - 0.5) * 0.5]} color={color} round={0.15} />
+      ))}
+    </>
+  );
+}
+
+/** District 2: the Packing Dock yard. Crates by number format, the Transformer Engine machine and the delivery truck. */
+function PackingDock({ active }: { active: boolean }) {
+  const { onSelect } = useSceneInteraction();
+  const objects = useMemo(() => itemsInZone('packing-station').filter((i) => i.kind === 'object'), []);
+  return (
+    <>
+      {PACK_CRATES.map((c) => (
+        <Selectable key={c.id} id={c.id} position={[c.at[0], 0, c.at[1]]}>
+          <Box size={[c.size, c.size * 0.8, c.size]} color={PACK_COLOR[c.id]} round={0.12} />
+          <Box size={[c.size * 1.06, 0.08, c.size * 1.06]} position={[0, c.size * 0.8, 0]} color="roof" round={0.3} />
+        </Selectable>
+      ))}
+      <Selectable id="transformer-engine" position={[16.8, 0, -5.6]}>
+        <Box size={[1.7, 0.7, 1.3]} color="network" round={0.1} />
+        <Box size={[1.1, 0.5, 0.9]} position={[0, 0.7, 0]} color="wall" round={0.15} />
+        <Box size={[0.3, 0.9, 0.3]} position={[0.5, 1.2, 0]} color="roof" round={0.3} />
+      </Selectable>
+      <Selectable id="delivery-truck" position={[20.0, 0, -5.6]}>
+        <Box size={[3.0, 0.2, 1.4]} position={[0, 0.25, 0]} color="wall" round={0.2} />
+        <Box size={[0.9, 0.9, 1.4]} position={[1.55, 0.25, 0]} color="parcel" round={0.15} />
+        {[-1.0, 1.4].map((x) => [-0.7, 0.7].map((z) => (
+          <mesh key={`${x}${z}`} position={[x, 0.22, z]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+            <cylinderGeometry args={[0.22, 0.22, 0.16, 14]} />
+            <Matte color="roof" />
+          </mesh>
+        )))}
+        <TruckCargo />
+      </Selectable>
+      {active && objects.map((o) => <Hotspot key={o.id} itemId={o.id} number={o.number ?? 0} anchor={packAnchors[o.anchorId ?? o.id]} onSelect={onSelect} />)}
+    </>
+  );
+}
+
 /** All nine districts, the control hill and the props, in the airy diorama style of the Zone 1 scene. */
-export function Buildings({ factoryActive }: { factoryActive: boolean }) {
+export function Buildings({ factoryActive, packingActive }: { factoryActive: boolean; packingActive: boolean }) {
   return (
     <group>
       <Hill />
       <FactoryQuarter active={factoryActive} />
+      <PackingDock active={packingActive} />
       {buildings.map((b, i) => (
         <Block key={i} b={b} />
       ))}
