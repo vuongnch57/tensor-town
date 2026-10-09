@@ -1,40 +1,62 @@
-import { Link, NavLink, Outlet, useParams } from 'react-router-dom';
-import { zoneBySlug } from '@/content/zones';
+import { useEffect } from 'react';
+import { Link, Outlet, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { chrome } from '@/content/chrome';
+import { districtBySlug } from '@/content/town';
+import { useFactoryStore } from '@/state/useFactoryStore';
+import { HamburgerButton } from '@/ui/HamburgerButton';
+import { MenuModal } from '@/ui/MenuModal';
 
-const navClass = ({ isActive }: { isActive: boolean }) =>
-  `px-3 py-2.5 text-sm font-semibold rounded-sm ${isActive ? 'text-ink' : 'text-muted hover:text-ink'}`;
-
+/**
+ * No navigation bar: only a small hamburger and the wordmark (SPEC §3.6). On the town pages the scene fills the
+ * viewport and these float over it; on the other pages they sit above normal content.
+ */
 export function Layout() {
   const { slug } = useParams();
-  const zone = slug ? zoneBySlug(slug) : undefined;
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const setMenuOpen = useFactoryStore((s) => s.setMenuOpen);
+  const district = slug ? districtBySlug(slug) : undefined;
+  // The scene fills the viewport on '/' and on a district URL; a zone URL with an item is the zone page (normal scrolling layout).
+  const isTown = pathname === '/' || /^\/zone\/[^/]+\/?$/.test(pathname);
+
+  // "/" opens the menu (search focused) unless the user is typing somewhere.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (e.key === '/' && !(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable))) {
+        e.preventDefault();
+        setMenuOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [setMenuOpen]);
+
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex min-h-16 flex-wrap items-center gap-x-4 gap-y-1 border-b border-line bg-surface-200 px-4 py-2 md:px-6">
-        <Link to="/" className="flex items-center gap-2.5 font-bold text-ink no-underline">
-          <span className="grid h-7 w-7 place-items-center rounded-sm bg-accent" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-accent-ink">
-              <path d="M3 21V10l6 4V10l6 4V6l6 4v11z" />
-            </svg>
-          </span>
-          {chrome.siteName}
-        </Link>
-        {zone && (
-          <span className="hidden text-[15px] text-muted sm:inline">
-            <span className="text-line">/ </span>Zone {zone.number} · <b className="font-semibold text-ink">{zone.title}</b>
-          </span>
-        )}
-        <nav aria-label="Main" className="ml-auto flex">
-          <NavLink to="/" end className={navClass}>Map</NavLink>
-          <NavLink to="/index" className={navClass}>Index</NavLink>
-          <NavLink to="/compare" className={navClass}>Compare</NavLink>
-          <NavLink to="/about" className={navClass}>About</NavLink>
-        </nav>
-      </header>
+    <div className={`flex flex-col ${isTown ? 'h-screen' : 'min-h-screen'}`}>
+      <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 flex items-center gap-3 px-4 pt-3">
+        <div className="pointer-events-auto flex items-center gap-3">
+          <HamburgerButton />
+          <Link to="/" className="rounded-md bg-surface-200/85 px-3 py-1.5 text-sm font-semibold text-ink no-underline">
+            {chrome.siteName}
+            {district && <span className="font-normal text-muted"> / {district.name}</span>}
+          </Link>
+          {district && (
+            <button type="button" onClick={() => navigate('/')} className="cursor-pointer rounded-md border border-line bg-surface-200 px-3 py-1.5 text-sm font-semibold text-ink shadow-panel">
+              {chrome.backToTown}
+            </button>
+          )}
+        </div>
+      </div>
       <main className="flex min-h-0 flex-1 flex-col">
         <Outlet />
       </main>
-      <footer className="border-t border-line px-4 py-4 text-center text-sm text-muted md:px-6">{chrome.footer}</footer>
+      {isTown ? (
+        <footer className="pointer-events-none absolute bottom-2 left-0 right-0 z-10 px-4 text-center text-xs text-muted">{chrome.footer}</footer>
+      ) : (
+        <footer className="border-t border-line px-4 py-4 text-center text-sm text-muted md:px-6">{chrome.footer}</footer>
+      )}
+      <MenuModal />
     </div>
   );
 }

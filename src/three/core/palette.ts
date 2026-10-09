@@ -27,3 +27,20 @@ export type SceneColor = keyof typeof scene;
 
 /** Scene token name (as stored in Item.swatch) -> hex. */
 export const sceneByToken = (token: string): string => hex(token as TokenName);
+
+/** The UI accent's light value, used for foliage and the hill so greens stay inside the design tokens. */
+export const accentSolid: string = (() => {
+  const t = tokens.color.tokens.find((x) => x.name === 'accent');
+  const v = t?.value;
+  if (!v || typeof v === 'string') throw new Error('accent token missing');
+  return v.light;
+})();
+
+const light = (name: string): string => {
+  const t = tokens.color.tokens.find((x) => x.name === name);
+  if (!t || typeof t.value === 'string') throw new Error(`ui token ${name} missing`);
+  return t.value.light;
+};
+
+/** Hotspots sit on the daylight scene, so they use the light-theme UI tokens in both themes. */
+export const pin = { ink: light('ink'), muted: light('muted'), accent: light('accent'), surface: light('surface-200') } as const;
