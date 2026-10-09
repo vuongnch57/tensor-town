@@ -12,7 +12,7 @@ import { Selectable, useSceneInteraction } from '../primitives/Selectable';
 import { simulate } from '../zones/gpu-hall/sim';
 import { simulate as packSimulate } from '../zones/packing-station/sim';
 import { anchors as packAnchors } from '../zones/packing-station/anchors';
-import type { SceneColor } from '../core/palette';
+import { scene, type SceneColor } from '../core/palette';
 import { Crates, Fence, Lamps, Trees } from '../primitives/Props';
 import { Workers } from '../primitives/Workers';
 import { CpuOffice } from '../zones/gpu-hall/CpuOffice';
@@ -126,52 +126,152 @@ function FactoryQuarter({ active }: { active: boolean }) {
 }
 
 const PACK_COLOR: Record<string, SceneColor> = { fp32: 'storage', 'bf16-fp16': 'hall', fp8: 'parcel', int8: 'network' };
-const PACK_CRATES: { id: string; at: [number, number]; size: number }[] = [
-  { id: 'fp32', at: [15.0, -8.4], size: 1.4 },
-  { id: 'bf16-fp16', at: [16.4, -9.8], size: 1.1 },
-  { id: 'fp8', at: [17.8, -11.2], size: 0.8 },
-  { id: 'int8', at: [19.2, -12.6], size: 0.8 },
+const PACK_CRATES: { id: string; at: [number, number]; size: number; strips: Strip[] }[] = [
+  { id: 'fp32', at: [15.0, -8.4], size: 1.4, strips: [[1, 8, 23]] },
+  { id: 'bf16-fp16', at: [16.4, -9.8], size: 1.1, strips: [[1, 8, 7], [1, 5, 10]] },
+  { id: 'fp8', at: [17.8, -11.2], size: 0.8, strips: [[1, 4, 3], [1, 5, 2]] },
+  { id: 'int8', at: [19.2, -12.6], size: 0.8, strips: [[1, 0, 7]] },
 ];
 const TRUCK_CELLS = 8;
+const LOAD_PERIOD = 1;
+const BELT_OUT = { from: [0.9, 0], to: [1.9, 0] } as const;
 
-/** Cargo of the delivery truck: the same 8 cells of space hold fewer, bigger crates the more bytes each parameter takes. */
-function TruckCargo() {
-  const format = useFactoryStore((s) => s.packSim.format);
-  const bytes = packSimulate({ format, model: '7b' }).bytesPerParam;
+/** Bits of one number as a strip of cells on a crate lid: [sign, exponent, mantissa] (INT8 has a sign bit and 7 value bits, no exponent). */
+type Strip = readonly [sign: number, exponent: number, mantissa: number];
+
+/** One or more rows of bit cells lying on a crate lid. Every cell is a bit; colour says what the bit is for. */
+function BitStrips({ strips, width, y }: { strips: readonly Strip[]; width: number; y: number }) {
+  const mats = useMemo(
+    () => ({
+      sign: new MeshStandardMaterial({ color: scene.roof, roughness: 0.7 }),
+      exponent: new MeshStandardMaterial({ color: scene.parcelHot, roughness: 0.7 }),
+      mantissa: new MeshStandardMaterial({ color: scene.coolant, roughness: 0.7 }),
+    }),
+    [],
+  );
+  const rowGap = 0.13;
+  return (
+    <>
+      {strips.map((st, row) => {
+        const total = st[0] + st[1] + st[2];
+        const perRow = Math.min(total, 16);
+        const lines = Math.ceil(total / perRow);
+        const cell = width / perRow;
+        const z0 = ((row - (strips.length - 1) / 2) * (lines + 0.4) * rowGap);
+        return Array.from({ length: total }, (_, i) => {
+          const kind = i < st[0] ? 'sign' : i < st[0] + st[1] ? 'exponent' : 'mantissa';
+          const line = Math.floor(i / perRow);
+          const col = i % perRow;
+          return (
+            <mesh key={`${row}-${i}`} material={mats[kind]} position={[-width / 2 + cell * (col + 0.5), y, z0 + line * rowGap]} castShadow>
+              <boxGeometry args={[cell * 0.82, 0.04, rowGap * 0.8]} />
+            </mesh>
+          );
+        });
+      })}
+    </>
+  );
+}
+
+const formatId = (f: string) => (f === 'bf16' ? 'bf16-fp16' : f);
+const cargoSize = (bytes: number) => 0.34 * Math.cbrt(bytes);
+
+/**
+ * Crates that leave the Transformer Engine, riding the output belt onto the truck bed. The load fills one crate per
+ * belt arrival; the 8 cells of bed space hold fewer, bigger crates the more bytes each number takes.
+ */
+function TruckCargo({ bytes, color, reducedMotion }: { bytes: number; color: SceneColor; reducedMotion: boolean }) {
   const n = TRUCK_CELLS / bytes;
-  const size = 0.34 * Math.sqrt(bytes);
-  const color = PACK_COLOR[format === 'bf16' ? 'bf16-fp16' : format] ?? 'hall';
+  const size = cargoSize(bytes);
+  const refs = useRef<(Group | null)[]>([]);
+  const t0 = useRef(0);
   const cols = Math.min(n, 4);
+  const sp = size * 1.12;
+  const place = (i: number): [number, number, number] => {
+    const rows = Math.ceil(n / cols);
+    return [-1.2 + (i % cols) * sp + size / 2, 0.45, (Math.floor(i / cols) - (rows - 1) / 2) * sp];
+  };
+  useFrame((_, dt) => {
+    t0.current += dt;
+    const loaded = reducedMotion ? n : Math.min(n, Math.floor(t0.current / LOAD_PERIOD) % (n + 3));
+    refs.current.forEach((g, i) => g && (g.visible = i < loaded));
+  });
   return (
     <>
       {Array.from({ length: n }, (_, i) => (
-        <Box key={i} size={[size, size, size]} position={[-0.9 + (i % cols) * 0.5, 0.78, (Math.floor(i / cols) - 0.5) * 0.5]} color={color} round={0.15} />
+        <group key={i} ref={(g) => { refs.current[i] = g; }} position={place(i)}>
+          <Box size={[size, size * 0.8, size]} color={color} round={0.15} />
+        </group>
       ))}
     </>
   );
 }
 
-/** District 2: the Packing Dock yard. Crates by number format, the Transformer Engine machine and the delivery truck. */
+const WHEELS: [number, number][] = [[-1.0, 0.7], [-1.0, -0.7], [0.3, 0.7], [0.3, -0.7], [1.0, 0.7], [1.0, -0.7]];
+
+/** Flatbed truck facing +x: dark chassis, bed with low rails, cab with windows and lights, six wheels. */
+function Truck({ children }: { children: React.ReactNode }) {
+  return (
+    <>
+      <Box size={[2.9, 0.1, 1.1]} position={[0, 0.2, 0]} hex={derived.darkTrim} round={0.3} />
+      <Box size={[2.0, 0.15, 1.45]} position={[-0.4, 0.3, 0]} color="wall" round={0.2} />
+      {[-1, 1].map((s) => (
+        <Box key={s} size={[2.0, 0.12, 0.06]} position={[-0.4, 0.45, s * 0.7]} color="path" round={0.3} />
+      ))}
+      <Box size={[0.06, 0.2, 1.45]} position={[-1.37, 0.45, 0]} color="path" round={0.3} />
+      <Box size={[0.8, 0.75, 1.4]} position={[1.0, 0.3, 0]} color="parcel" round={0.12} />
+      <Box size={[0.72, 0.05, 1.46]} position={[1.0, 1.05, 0]} color="roof" round={0.3} />
+      <Box size={[0.04, 0.32, 1.1]} position={[1.4, 0.68, 0]} color="coolant" round={0.2} shadow={false} />
+      {[-1, 1].map((s) => (
+        <Box key={s} size={[0.42, 0.3, 0.04]} position={[1.0, 0.68, s * 0.7]} color="coolant" round={0.2} shadow={false} />
+      ))}
+      {[-1, 1].map((s) => (
+        <Box key={s} size={[0.04, 0.1, 0.2]} position={[1.4, 0.38, s * 0.45]} hex={derived.lampGlow} round={0.3} shadow={false} />
+      ))}
+      <Box size={[0.1, 0.1, 1.5]} position={[1.4, 0.18, 0]} color="roof" round={0.3} />
+      {WHEELS.map(([x, z]) => (
+        <group key={`${x}${z}`} position={[x, 0.22, z]} rotation={[Math.PI / 2, 0, 0]}>
+          <mesh castShadow>
+            <cylinderGeometry args={[0.22, 0.22, 0.16, 16]} />
+            <Matte color="roof" />
+          </mesh>
+          <mesh position={[0, z > 0 ? 0.085 : -0.085, 0]}>
+            <cylinderGeometry args={[0.1, 0.1, 0.02, 12]} />
+            <Matte color="wall" />
+          </mesh>
+        </group>
+      ))}
+      {children}
+    </>
+  );
+}
+
+/** District 2: the Packing Dock yard. Crates by number format (with their bits drawn on the lid), the Transformer Engine and the truck it loads. */
 function PackingDock({ active }: { active: boolean }) {
   const { onSelect, reducedMotion } = useSceneInteraction();
   const format = useFactoryStore((s) => s.packSim.format);
   const bytes = packSimulate({ format, model: '7b' }).bytesPerParam;
+  const color = PACK_COLOR[formatId(format)];
+  const tint = scene[color];
   const truck = useRef<Group>(null);
   const engine = useRef<Group>(null);
   // Idle motion: the truck idles with a small bounce and the Transformer Engine's stack pulses.
   useFrame(({ clock }) => {
     if (reducedMotion) return;
     const t = clock.elapsedTime;
-    if (truck.current) truck.current.position.y = Math.abs(Math.sin(t * 3)) * 0.025;
+    if (truck.current) truck.current.position.y = Math.abs(Math.sin(t * 3)) * 0.02;
     if (engine.current) engine.current.scale.y = 1 + Math.sin(t * 2.4) * 0.06;
   });
   const objects = useMemo(() => itemsInZone('packing-station').filter((i) => i.kind === 'object'), []);
+  const outLen = BELT_OUT.to[0] - BELT_OUT.from[0];
+  const outCount = 2;
   return (
     <>
       {PACK_CRATES.map((c) => (
         <Selectable key={c.id} id={c.id} position={[c.at[0], 0, c.at[1]]}>
           <Box size={[c.size, c.size * 0.8, c.size]} color={PACK_COLOR[c.id]} round={0.12} />
           <Box size={[c.size * 1.06, 0.08, c.size * 1.06]} position={[0, c.size * 0.8, 0]} color="roof" round={0.3} />
+          <BitStrips strips={c.strips} width={c.size * 0.9} y={c.size * 0.8 + 0.1} />
         </Selectable>
       ))}
       <Selectable id="transformer-engine" position={[16.8, 0, -5.6]}>
@@ -180,20 +280,15 @@ function PackingDock({ active }: { active: boolean }) {
         <group ref={engine}>
           <Box size={[0.3, 0.9, 0.3]} position={[0.5, 1.2, 0]} color="roof" round={0.3} />
         </group>
-        {/* Belt feeding crates into the engine; smaller formats move faster. */}
-        <Conveyor from={[-3.4, 0]} to={[-1.0, 0]} speed={reducedMotion ? 0 : 0.5 * bytes ** -0.5 * 2} hot={false} parcels={Math.min(6, Math.round(8 / bytes))} />
+        {/* In: big FP32 crates from the packing building. Out: crates in the chosen format, onto the truck. */}
+        <Conveyor key={`in-${format}`} from={[-3.4, 0]} to={[-0.9, 0]} speed={reducedMotion ? 0 : 0.7} hot={false} parcels={4} size={cargoSize(4)} tint={scene.storage} />
+        <Conveyor key={`out-${format}`} from={[...BELT_OUT.from]} to={[...BELT_OUT.to]} speed={reducedMotion ? 0 : outLen / (outCount * LOAD_PERIOD)} hot={false} parcels={outCount} size={cargoSize(bytes)} tint={tint} />
       </Selectable>
       <Selectable id="delivery-truck" position={[20.0, 0, -5.6]}>
         <group ref={truck}>
-        <Box size={[3.0, 0.2, 1.4]} position={[0, 0.25, 0]} color="wall" round={0.2} />
-        <Box size={[0.9, 0.9, 1.4]} position={[1.55, 0.25, 0]} color="parcel" round={0.15} />
-        {[-1.0, 1.4].map((x) => [-0.7, 0.7].map((z) => (
-          <mesh key={`${x}${z}`} position={[x, 0.22, z]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-            <cylinderGeometry args={[0.22, 0.22, 0.16, 14]} />
-            <Matte color="roof" />
-          </mesh>
-        )))}
-        <TruckCargo />
+          <Truck>
+            <TruckCargo key={format} bytes={bytes} color={color} reducedMotion={reducedMotion} />
+          </Truck>
         </group>
       </Selectable>
       {active && objects.map((o) => <Hotspot key={o.id} itemId={o.id} number={o.number ?? 0} anchor={packAnchors[o.anchorId ?? o.id]} onSelect={onSelect} />)}

@@ -65,6 +65,12 @@ export const packText = {
     fits: 'Fits on one 80 GB GPU',
     fitsYes: 'Fits',
     fitsNo: 'Does not fit',
+    legendTitle: 'Bits on each crate lid',
+    legend: [
+      { key: 'roof', label: 'Sign' },
+      { key: 'parcelHot', label: 'Exponent (range)' },
+      { key: 'coolant', label: 'Mantissa or value (detail)' },
+    ],
     illustrative: 'Illustrative, not measured. Weights only: no activations or cache.',
     formatOptions: [
       { value: 'fp32', label: 'FP32' },

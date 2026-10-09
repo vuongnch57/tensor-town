@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useFactoryStore } from '@/state/useFactoryStore';
 import { simulate } from '@/three/zones/packing-station/sim';
+import { scene } from '@/three/core/palette';
 import { packText } from '@/content/ui-text';
 import { SegmentedControl } from './SegmentedControl';
 import { StatCard } from './StatCard';
@@ -16,6 +17,14 @@ export function PackSimulateBar() {
       <span className="text-xs font-semibold uppercase tracking-[0.06em] text-accent">{t.title}</span>
       <SegmentedControl label={t.format} value={sim.format} onChange={(format) => setSim({ format })} options={t.formatOptions} />
       <SegmentedControl label={t.model} value={sim.model} onChange={(model) => setSim({ model })} options={t.modelOptions} />
+      <div className="flex items-center gap-2.5 text-xs text-muted" aria-label={t.legendTitle}>
+        {t.legend.map((l) => (
+          <span key={l.key} className="inline-flex items-center gap-1">
+            <span className="inline-block h-2.5 w-2.5 rounded-[3px]" style={{ background: scene[l.key as keyof typeof scene] }} aria-hidden="true" />
+            {l.label}
+          </span>
+        ))}
+      </div>
       <div className="flex flex-col gap-0.5 sm:ml-auto sm:items-end">
         <StatCard label={t.weights} value={t.gb(r.weightGB)} pill={r.fitsOneGpu ? { text: t.fitsYes, tone: 'ok' } : { text: t.fitsNo, tone: 'warn' }} />
         <span className="text-xs text-muted">{t.illustrative}</span>

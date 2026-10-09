@@ -10,12 +10,14 @@ type Props = {
   speed: number;
   hot: boolean;
   parcels?: number;
+  size?: number;
+  tint?: string;
 };
 
 const BELT_Y = 0.42;
 
 /** Belt on legs with rails, carrying parcels from `from` to `to`. Belt speed is the memory bandwidth. */
-export function Conveyor({ from, to, speed, hot, parcels = 6 }: Props) {
+export function Conveyor({ from, to, speed, hot, parcels = 6, size = 0.36, tint }: Props) {
   const len = Math.hypot(to[0] - from[0], to[1] - from[1]);
   const mx = (from[0] + to[0]) / 2;
   const mz = (from[1] + to[1]) / 2;
@@ -32,7 +34,7 @@ export function Conveyor({ from, to, speed, hot, parcels = 6 }: Props) {
           [-1, 1].map((s) => <Box key={`${e}${s}`} size={[0.08, BELT_Y - 0.14, 0.08]} position={[s * 0.34, 0, e * (len / 2 - 0.2)]} color="path" round={0.3} />),
         )}
       </group>
-      <Parcels path={path} count={parcels} speed={speed} y={BELT_Y + 0.02} size={0.36} hot={hot} />
+      <Parcels path={path} count={parcels} speed={speed} y={BELT_Y + 0.02} size={size} hot={hot} tint={tint} />
     </group>
   );
 }
