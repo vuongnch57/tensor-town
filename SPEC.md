@@ -1,7 +1,9 @@
 # AI Factory — Explorable 3D Reference Site
 
 **Specification for implementation by Claude Code**
-Owner: Glenn · Version 2.0 · October 2026
+Owner: Glenn · Version 3.0 (DRAFT, awaiting owner approval) · October 2026
+
+> **v3.0 changes the concept.** v2.0 treated each zone as a separate diorama on its own page. v3.0 replaces that with **one town**: the home page is a single panorama of the whole town, every part of the AI factory is a district of that town, and the districts are physically connected by roads, rail, a river, conveyors and sensor lines. Navigation is a small hamburger button that opens a modal. Layout, connections and menu are specified in §3.4 to §3.6 and drawn in `design/mockup-town.html`. **No implementation starts until the owner approves this spec and the mockup.**
 
 ---
 
@@ -19,7 +21,7 @@ Owner: Glenn · Version 2.0 · October 2026
 ## 1. Product overview
 
 ### 1.1 What it is
-A static website that visualizes AI data-center infrastructure (the topics of the NVIDIA AI Infrastructure and Operations / NCA-AIIO syllabus) as one **explorable isometric 3D factory**. Data is cargo, GPUs are production halls, memory and storage are warehouses, networks are roads and rails, operations is a control room.
+A static website that visualizes AI data-center infrastructure (the topics of the NVIDIA AI Infrastructure and Operations / NCA-AIIO syllabus) as one **explorable isometric 3D town**. The whole AI factory is the town: data is cargo, GPUs are production halls, memory and storage are warehouses, networks are the roads and rails that tie the town together, operations is the control tower on the hill, and power and cooling are the power station and the river. The home page shows the entire town at once; users zoom into a district to learn about it.
 
 It is a **reference, not a course**. There are no steps, no lessons, no quizzes and no progress tracking. Users open any zone and click any object, in any order, to see:
 - **what it is** (concept and factory metaphor),
@@ -29,7 +31,8 @@ It is a **reference, not a course**. There are no steps, no lessons, no quizzes 
 
 ### 1.2 Goals
 1. Make abstract infrastructure concepts visible: where data flows, where the bottleneck is, which technology fixes it.
-2. Make everything discoverable: users must always know what is clickable (numbered hotspots, a per-zone index, a site-wide Index page).
+2. Make everything discoverable: users must always know what is clickable (numbered district markers, numbered hotspots inside a district, a per-zone index, a site-wide Index page).
+2b. Show that the parts are one system: roads, rail, river, conveyors and sensor lines visibly connect the districts, and data parcels travel between them on the home page.
 3. Make comparisons first-class: every concept links to a side-by-side comparison.
 4. Be a portfolio piece showing React + 3D skills.
 
@@ -85,16 +88,37 @@ Every scene uses this mapping consistently.
 
 ---
 
+### 2.1 Town mapping (v3.0)
+
+Each zone is a **district** of one town. The metaphor table above still applies inside a district; this table adds where the district sits and what the town calls it.
+
+| Zone | District | Town role | Connected to (and by what) |
+|---|---|---|---|
+| 1 GPU Hall | **Factory Quarter** (town centre) | The big production halls with the HBM warehouse beside them | Packing Dock (belt), Harbour Depot (conveyor and rail), Tower Block (sky-bridge), Gatehouse (main road), Power Station (coolant pipe) |
+| 2 Packing Station | **Packing Dock** | Where crates are resized before entering the factory | Factory Quarter (belt), Assembly Row (tray lane) |
+| 3 DGX Building | **Tower Block** | Tall buildings with sky-bridges between rooms and a central sorting hub | Factory Quarter (sky-bridge), Gatehouse (rail spur), Power Station (coolant pipe and cable) |
+| 4 Transport Network | **Rail and Road Network** (not a block: the town's roads, the private freight rail and the gatehouse at the town gate) | The connective tissue between every other district | All districts; the gatehouse sits at the town gate |
+| 5 Storage Yard | **Harbour Depot** | Warehouses, cache sheds and the remote depot at the port | Factory Quarter (conveyor and rail), Gatehouse (road and rail), Assembly Row and New Development (road) |
+| 6 Production Line | **Assembly Row** | The line where models are built and shipped | Packing Dock (tray lane), Factory Quarter and Harbour Depot (road), Control Tower (sensor line) |
+| 7 Control Room | **Control Tower** (on the hill) | Sees and schedules the whole town | Every district (thin sensor lines) |
+| 8 Power and Cooling | **Power Station and River** | Substation, chillers; the river carries coolant through the town | Factory Quarter and Tower Block (coolant pipes), Tower Block and New Development (cable) |
+| 9 Campus Expansion | **New Development** (town edge) | Empty plots and repeating blocks where the town grows | Power Station (cable), Harbour Depot (road) |
+
+Rules: a district keeps its colour family everywhere (halls orange, storage blue, network lilac). Connections are real geometry in the scene, not decoration; each connection is also listed as a `related` link between the items it joins.
+
+---
+
 ## 3. Site structure
 
 ### 3.1 Pages
-- `/` **Map.** Isometric overview with 9 zone markers, a search box that highlights matching zones, zone cards (with counts of clickable items), and "Popular comparisons".
-- `/zone/:slug` **Zone page.** Zone index (left), 3D scene with numbered hotspots and a "Simulate" bar (centre), detail panel (right). Selecting an item updates the URL: `/zone/:slug/:itemId`, so every item is linkable.
+There is **no top navigation bar**. Every page shows only the small wordmark and the hamburger button (§3.6). All navigation, search and links live in the hamburger modal.
+- `/` **Town.** Full-screen panorama of the whole town with 9 numbered district markers and the connections between them. Each marker has a name label beside it on desktop (numbers only on mobile; the label appears on tap). Activating a marker flies the camera into that district. Parcels travel along the roads, rail and conveyors. No cards, no tables, no side panels at rest.
+- `/zone/:slug` **District view.** The same 3D scene, camera eased into the district (no page reload, no separate scene). Zone index (left), numbered hotspots in the scene, "Simulate" bar (bottom centre), detail panel (right). The neighbouring districts stay visible at the edges, and the connections leading out of the district are labelled ("Conveyor to HBM warehouse, from Harbour Depot"); activating one flies to the other end. Selecting an item updates the URL: `/zone/:slug/:itemId`, so every item is linkable.
 - `/index` **Index.** Every clickable item on the site (objects and concepts), grouped by zone or A–Z, filterable by type and category, searchable.
 - `/compare/:compareId` **Compare.** List of comparisons on the left, CompareTable on the right, "Why people mix them up" note. Concepts can be added or removed (2–3 columns).
 - `/about` **About.** What the site is, how to use it, disclaimer, credits.
 
-### 3.2 Zones
+### 3.2 Zones (districts)
 
 | # | Slug | Title | Objects (numbered hotspots) | Concepts (no pin) |
 |---|---|---|---|---|
@@ -112,6 +136,44 @@ Totals: 54 objects, 34 concept entries (one, Training vs inference, appears in t
 
 ### 3.3 Comparisons (15)
 CPU vs GPU · HBM vs GDDR · Training vs inference · FP32 / BF16 / FP8 / INT8 · NVLink vs NVSwitch vs PCIe · DGX vs HGX vs MGX · InfiniBand vs Ethernet vs Spectrum-X · GPUDirect RDMA vs GPUDirect Storage · Storage tiers (NVMe / parallel FS / object) · Triton vs NIM · Slurm vs Kubernetes · MIG vs time-slicing vs vGPU · Air vs liquid cooling · BasePOD vs SuperPOD · On-prem vs cloud vs hybrid.
+
+### 3.4 Town layout
+
+One ground plane about 3 × 2 blocks, viewed from the default isometric angle. Orientation (screen position at the default camera):
+
+```
+              [7 Control Tower on the hill]
+   [8 Power Station]      |  sensor lines to every district
+        ~~ river ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   [3 Tower Block] ==sky-bridge== [1 Factory Quarter] ==belt== [2 Packing Dock]
+         |  rail                        |  conveyor                    |  tray lane
+   [4 Gatehouse / town gate] ---- main road ---- [5 Harbour Depot]  [6 Assembly Row]
+                                                      |
+                                              [9 New Development]
+```
+
+The exact placement is drawn in `design/mockup-town.html`; that file is the layout reference, and anchors in code follow it. The Factory Quarter is the visual centre and the largest group of buildings.
+
+### 3.5 Connections
+
+| Connection | Looks like | Joins | Carries |
+|---|---|---|---|
+| Main road | Paved road with traffic | Gatehouse, Factory Quarter, Harbour Depot, Assembly Row | Parcels on trucks; this is also the Ethernet-for-AI road |
+| Private freight rail | Track on its own right of way | Gatehouse, Tower Block (spur), Harbour Depot, Factory Quarter | Parcels that never fall off (InfiniBand) |
+| Sky-bridge | Enclosed bridge | Tower Block rooms, Factory Quarter | Fast exchange between GPU rooms (NVLink) |
+| Conveyor and belts | Belt | Harbour Depot to Factory Quarter; Packing Dock to Factory Quarter and to Assembly Row (tray lane) | Data into the hall; resized crates |
+| River | Water channel with pipes | Power Station, Factory Quarter, Tower Block | Coolant (liquid cooling) |
+| Power cable | Poles and cable | Power Station to Tower Block, and along the south edge to New Development | Electricity |
+| Sensor lines | Thin light lines from the tower | Control Tower to every district | Telemetry (DCGM) |
+
+On the Town page a few slow parcels move along every connection so the town reads as one running system. Connection types can be switched on and off from the hamburger modal (roads, freight rail, belts and bridges, river and pipes, power cables, sensor lines).
+
+### 3.6 Navigation: hamburger modal
+
+- A single small icon button (about 40 px) in the top-left corner on every page; the wordmark "AI Factory" sits beside it in `small` type. Nothing else is permanently visible in the header.
+- Activating it opens a **modal** (dialog) centred on desktop, full-screen sheet on mobile, over a dimmed scene. Focus is trapped, Esc and the close button close it, focus returns to the button.
+- Modal content, in order: search field (`/` also opens the modal with search focused); **Districts** (9 rows with number, name and the item count); **Pages** (Town, Index, Compare, About); **Show connections** toggles (§3.5); theme toggle.
+- Search results replace the Districts list while typing; Enter opens the first result and closes the modal.
 
 ---
 
@@ -132,12 +194,13 @@ CPU vs GPU · HBM vs GDDR · Training vs inference · FP32 / BF16 / FP8 / INT8 �
 ```
 src/
   app/                 # router, layout, providers
-  pages/               # MapPage, ZonePage, IndexPage, ComparePage, AboutPage
+  pages/               # TownPage, ZonePage (same scene, focused), IndexPage, ComparePage, AboutPage
   three/
     core/              # IsoCamera, Lighting, Ground, palette, materials
     primitives/        # Parcel, Worker, Building, Conveyor, Path, Hotspot
-    zones/<slug>/      # Scene.tsx, sim.ts, sim.test.ts, anchors.ts
-  ui/                  # ZoneIndex, DetailPanel, CompareTable, SimulateBar, Search, ZoneMarker, Fallback2D
+    town/              # TownScene.tsx (ground, river, roads, rail), connections.ts (paths between districts), districtAnchors.ts
+    zones/<slug>/      # District.tsx, sim.ts, sim.test.ts, anchors.ts
+  ui/                  # ZoneIndex, DetailPanel, CompareTable, SimulateBar, Search, ZoneMarker, HamburgerButton, MenuModal, Fallback2D
   content/
     zones.ts           # zone list
     items/<slug>.ts    # objects and concepts per zone
@@ -147,7 +210,8 @@ src/
 ```
 
 ### 4.4 Scene conventions
-- **Camera:** orthographic isometric (elevation ≈ 35°, azimuth 45°). Selecting an item eases the camera toward that object (≈0.4 s); a "Reset view" button returns to the zone overview. No free orbit in v1.
+- **Camera:** orthographic isometric (elevation ≈ 35°, azimuth 45°). Three levels: **town** (everything in view), **district** (eased to the district, ≈0.8 s), **object** (eased to the object, ≈0.4 s). A small "Back to town" control returns to the top level. No free orbit in v1.
+- **One scene:** the town is a single R3F scene. Districts are components inside it. Districts not in focus render at reduced detail (no internal workers, fewer props); the focused district renders full detail. The simulation scenes of v2.0 run inside the focused district.
 - **Geometry:** built procedurally from primitives (`RoundedBox`, cylinders). No external models needed in v1; CC0 low-poly assets may replace primitives later behind the same component interfaces.
 - **Instancing** for parcels and workers; a zone scene stays under ~150 draw calls.
 - **Lighting:** hemisphere + one directional light with soft shadows; `ContactShadows`. Shadows off on low-power devices.
@@ -191,8 +255,8 @@ type Item = {
 
 ### 4.8 Search and Index
 - One search index built from items and comparisons (name, category, aliases, summary).
-- Header search on every page: results grouped as Items and Comparisons; Enter opens the first result. `/` focuses search.
-- Map page: typing highlights zones with matches and lists matched items on their markers.
+- Search lives in the hamburger modal (§3.6): results grouped as Items and Comparisons; Enter opens the first result. `/` opens the modal with search focused.
+- Town page: while the modal search has text, matching districts' markers pulse on the town behind the dimmed overlay.
 - Index page: group by zone or A–Z; filters for type (objects / concepts) and category; each row links to `/zone/:slug/:itemId`.
 
 ### 4.9 Simulation ("Simulate" bar)
@@ -216,14 +280,18 @@ Zone 1 toy model (illustrative): `dataSupply = bandwidthTBs / bytesPerValue`; `s
 - Hotspots are real buttons with `aria-pressed`; the zone index provides the same targets without the scene.
 - Detail panel is `aria-live="polite"`.
 - `prefers-reduced-motion`: no camera fly-throughs (cut), parcels slow or static.
-- No WebGL: render `Fallback2D` (the zone's static isometric image with the same numbered pins) plus the full index and detail panel.
+- No WebGL: render `Fallback2D` (a static isometric image of the town with the same numbered pins; in a district, the district crop) plus the full index and detail panel. The hamburger modal works the same.
+- The modal is a real dialog: focus trap, Esc to close, `aria-modal`, focus restored; the button has an accessible name ("Menu").
 
 ### 4.11 Performance
 - 60 fps desktop, 30 fps mid-range phone. DPR clamped to [1, 2]; `PerformanceMonitor` reduces parcels and disables shadows when needed.
 - Code-split per zone with `React.lazy`; initial JS (gzipped) under 400 KB excluding the zone chunk.
-- Mobile: scene on top, "Index · N" button opens the zone index sheet, detail panel as a bottom sheet with previous / next item buttons.
+- Mobile: the scene is full-screen; the hamburger is top-left; "Index · N" opens the zone index sheet; the detail panel is a bottom sheet with previous / next item buttons. The town scene shows markers only (labels on tap).
+- Town page: initial load shows the town immediately with low-detail districts; detail loads when a district is entered (`React.lazy` per district).
 
 ### 4.12 Design references
+
+> **v3.0 note:** the linked screens below show the v2.0 concept (top navigation, separate Map page, per-zone dioramas). Where they conflict with §3.1, §3.4 to §3.6 and §5, **v3.0 wins**. Their tokens, typography, components, detail panel, zone index and Simulate bar designs are still valid. The Town page and menu modal are defined by `design/mockup-town.html`.
 - **Design system** (tokens, typography, components Hotspot, ZoneIndex, DetailPanel, CompareTable, SegmentedControl, StatCard, Button, ZoneMarker): https://claude.ai/artifact/1mLG1TwmBVDMjhQpryNLen
 - **Screens**: https://claude.ai/artifact/CYc8fWCYNAWcEyn3LmhH7p
   - Page "Shared pages": Map, Compare, Index, About.
@@ -250,7 +318,7 @@ Use them for **style and level of finish only**. Do not copy their brand names, 
 3. **Shadows and depth:** soft shadows (`AccumulativeShadows` or `SoftShadows` for static scenes, `ContactShadows` under objects) and ambient occlusion (N8AO via `@react-three/postprocessing`). Objects must look grounded, never floating.
 4. **Materials:** matte `MeshStandardMaterial` (roughness 0.6–0.9, metalness ≈ 0) in the `scene-*` palette; at most a slight gradient or emissive tint for highlights. Colours stay consistent per building type across all zones.
 5. **Life:** every zone has gentle ambient motion: parcels moving along paths, workers bobbing when busy, a slow vehicle or crane, trees swaying slightly. Motion is calm (no fast or flashing animation) and respects `prefers-reduced-motion`.
-6. **Composition:** each zone sits on its own rounded "diorama" base (like ref-1) with a clear focal object, enough empty ground to breathe, and a few decorative props (trees, lamps, fences, crates). Nothing important hidden behind other objects at the default camera angle.
+6. **Composition:** the whole town sits on one rounded "island" base (like ref-1) with a river, hills and a clear focal area (the Factory Quarter). Each district has a clear focal object, enough empty ground to breathe, and a few decorative props (trees, lamps, fences, crates). Nothing important hidden behind other objects at the default camera angle. Connections are continuous: a road or rail must visibly arrive at both of the districts it joins.
 7. **Selection:** the selected object gets a soft outline or emissive rim plus a gentle lift or pulse; others dim by ~15%. Hover shows a lighter version of the same effect.
 8. **Performance still holds:** the §4.11 budgets apply; use `PerformanceMonitor` to drop AO and accumulated shadows on weak devices before dropping anything else.
 
@@ -266,13 +334,32 @@ Use them for **style and level of finish only**. Do not copy their brand names, 
 
 ---
 
-## 5. Zone page layout (desktop)
+## 5. Page layouts (desktop)
+
+### 5.1 Town page
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ AI Factory / Zone 1 · GPU Hall          [ Search… ]   Map Index Compare  │
+│ [≡] AI Factory                                                           │
+│                                                                          │
+│        ⑦ Control Tower                                                   │
+│  ⑧ Power Station      ~ river ~~~~~~~~~~~~~~~                            │
+│   ③ Tower Block ══ ① Factory Quarter ══ ② Packing Dock                   │
+│   ④ Gatehouse ── main road ── ⑤ Harbour Depot    ⑥ Assembly Row         │
+│                                       ⑨ New Development                  │
+│                                                                          │
+│ Personal project, not affiliated with NVIDIA…                            │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+The scene fills the viewport. Footer text (§9) is a single small line at the bottom.
+
+### 5.2 District view (desktop)
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│ [≡] AI Factory / Factory Quarter · Zone 1           ‹ Back to town       │
 ├──────────────┬──────────────────────────────────────┬────────────────────┤
-│ ZONE 1 INDEX │ GPU Hall                [Click any…] │ MEMORY·ZONE 1·#7   │
+│ ZONE 1 INDEX │ Factory Quarter         [Click any…] │ MEMORY·ZONE 1·#7   │
 │ 8 objects·3  │                                      │ HBM                │
 │ ① Data       │        3D scene with numbered        │ In the factory: …  │
 │ ② CPU        │        hotspots ①…⑧                  │ Summary…           │
@@ -365,26 +452,28 @@ Any other number requires `TODO(fact)`.
 
 ## 10. Implementation phases and acceptance criteria
 
-### Phase 0 — Scaffold
-Vite + React + TS + Tailwind + R3F + drei + postprocessing + zustand + router + vitest; the shared lighting rig and materials from §4.13 in `three/core/`; download the chosen CC0 prop packs into `public/models/` with a licence note; routes `/`, `/zone/:slug(/:itemId)`, `/index`, `/compare/:id`, `/about` with placeholders; tokens wired to Tailwind; IsoCamera, Lighting, Ground; item types; content-check test.
-**Done when:** dev, build and test all pass; a placeholder isometric ground renders; deploy config exists.
+### Phase 0 — Scaffold (done, merged in PR #1)
+Vite, React, TS, Tailwind, R3F, zustand, router, vitest, shared rig, content model, content checks. Reused unchanged by v3.0 except the page placeholders (see Phase 1).
 
-### Phase 1 — Zone 1 end to end
-Scene, 8 hotspots with anchors, ZoneIndex, DetailPanel, all 11 Zone 1 items, compact comparisons, Simulate bar with tested sim, URL per item, reduced motion, 2D fallback, mobile layout (bottom sheet, index sheet).
-**Done when:** every item is reachable from the scene, the index and the URL; content checks pass; the scene meets every point of the visual quality bar (§4.13) and screenshots at 1440 px and 390 px are attached to the phase summary; Lighthouse performance ≥ 80 desktop; works at 375 px.
+### Phase 1 — Town shell
+Replace the v2.0 header navigation and Map placeholder with: `TownScene` (island, river, roads, rail, low-detail placeholder buildings for the 9 districts at the positions in `design/mockup-town.html`), the 7 connection types with moving parcels, 9 district markers, camera levels (town / district), `HamburgerButton` and `MenuModal` (§3.6), URL `/zone/:slug` focusing the district, reduced motion, 2D fallback, mobile layout.
+**Done when:** the Town page matches the approved mockup in layout and connections; every district is reachable from the markers, the modal and the URL; no persistent nav bar exists; modal passes keyboard and focus checks; works at 375 px; Lighthouse performance ≥ 80 desktop (checked on the Vercel preview, since cloud WebGL is software-only).
 
-### Phase 2 — Map, Index, Compare, Search, About
-Map with 9 markers and search highlighting; Index page with grouping, filters and search; Compare page with all comparisons that have content so far; header search; About.
-**Done when:** search finds every Zone 1 item and comparison; Index lists every item with correct links.
+### Phase 2 — Factory Quarter (Zone 1) end to end
+Full-detail district meeting the §4.13 bar, 8 hotspots, ZoneIndex, DetailPanel, all 11 Zone 1 items, compact comparisons, Simulate bar with tested sim, URL per item, screenshots at 1440 px and 390 px. The existing branch `phase-1-gpu-hall` (PR #2) is built on the v2.0 diorama concept; its scene code is reworked into a district of the town, its content and sim code are kept.
+**Done when:** every item reachable from the scene, index and URL; content checks pass; visual bar met; screenshots attached.
 
-### Phase 3 — Zones 2–5
-One zone at a time (scene, anchors, items, comparisons, sim). Stop for review after each zone.
+### Phase 3 — Index, Compare, Search, About
+Index page, Compare page, search inside the hamburger modal, About. **Done when:** search finds every Zone 1 item and comparison.
 
-### Phase 4 — Zones 6–9
-Same as Phase 3. At the end, all 54 objects, 34 concept entries and 15 comparisons exist and pass content checks.
+### Phase 4 — Districts 2 to 5
+One district at a time (scene, anchors, items, comparisons, sim). Stop for review after each.
 
-### Phase 5 — Polish
-Optional CC0 assets, share images per zone and per comparison, sound toggle (off by default).
+### Phase 5 — Districts 6 to 9
+Same as Phase 4. At the end, all 54 objects, 34 concept entries and 15 comparisons exist and pass content checks.
+
+### Phase 6 — Polish
+Optional CC0 assets, share images per district and per comparison, sound toggle (off by default).
 
 ---
 

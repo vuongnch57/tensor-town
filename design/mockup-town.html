@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Factory Town</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: one full-screen isometric town; a hamburger top-left opens a modal; a district card slides in when a marker is chosen. Tokens come from design/tokens.json. */
+:root{
+  --surface-100:#f7f6f1; --surface-200:#ffffff; --surface-300:#eef1ec; --line:#dde2da;
+  --ink:#1c2430; --muted:#5b6675; --accent:#2f6b5a; --accent-ink:#ffffff; --accent-soft:#e2eee9;
+  --warn:#b4532f; --marker:#f2a65a; --marker-ink:#1c2430;
+  --shadow-panel:0 8px 24px rgba(28,36,48,0.08); --shadow-marker:0 2px 6px rgba(28,36,48,0.18);
+  --scene-ground:#e9efe3; --scene-path:#f6f1e7; --scene-coolant:#8ec9d6; --scene-hall:#f2a65a;
+  --scene-storage:#8fb3d9; --scene-network:#b9a3d6; --scene-wall:#f5f2ec; --scene-roof:#5e7a8c;
+  --scene-parcel:#e6b980; --scene-parcel-hot:#e07a5f; --scene-idle:#b8bec6;
+  --font:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --surface-100:#14181d; --surface-200:#1c2229; --surface-300:#252c35; --line:#2e3640;
+  --ink:#e7ebf0; --muted:#9aa5b4; --accent:#7cc4a9; --accent-ink:#0f1a16; --accent-soft:#1e332c;
+  --warn:#f0997b; --shadow-panel:0 8px 24px rgba(0,0,0,0.35); --shadow-marker:0 2px 6px rgba(0,0,0,0.5); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --surface-100:#14181d; --surface-200:#1c2229; --surface-300:#252c35; --line:#2e3640;
+  --ink:#e7ebf0; --muted:#9aa5b4; --accent:#7cc4a9; --accent-ink:#0f1a16; --accent-soft:#1e332c;
+  --warn:#f0997b; --shadow-panel:0 8px 24px rgba(0,0,0,0.35); --shadow-marker:0 2px 6px rgba(0,0,0,0.5); color-scheme:dark}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--surface-100);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.6;overflow:hidden}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+
+.app{position:relative;height:100%;overflow:hidden}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+.bar{position:absolute;top:0;left:0;right:0;z-index:5;display:flex;align-items:center;gap:12px;
+  padding:calc(12px + env(safe-area-inset-top,0px)) 16px 0;pointer-events:none}
+.bar>*{pointer-events:auto}
+.burger{width:40px;height:40px;border-radius:14px;border:1px solid var(--line);background:var(--surface-200);
+  box-shadow:var(--shadow-panel);display:grid;place-content:center;gap:4px;cursor:pointer}
+.burger i{display:block;width:18px;height:2px;border-radius:2px;background:var(--ink)}
+.brand{font-size:14px;line-height:20px;font-weight:600;color:var(--ink)}
+.brand span{color:var(--muted);font-weight:400}
+.note{margin-left:auto;font-size:12px;line-height:16px;color:var(--muted);text-align:right;max-width:240px}
+.back{display:none;border:1px solid var(--line);background:var(--surface-200);border-radius:14px;padding:6px 12px;
+  font-size:14px;font-weight:600;cursor:pointer;box-shadow:var(--shadow-panel)}
+.back.on{display:block}
+
+.hint{position:absolute;left:50%;bottom:calc(44px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  z-index:2;font-size:14px;line-height:20px;color:var(--muted);background:var(--surface-200);border:1px solid var(--line);
+  border-radius:999px;padding:6px 16px;box-shadow:var(--shadow-panel);white-space:nowrap}
+.foot{position:absolute;left:16px;right:16px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:2;
+  font-size:12px;line-height:16px;color:var(--muted);text-align:center}
+
+/* district card */
+.card{position:absolute;left:16px;bottom:calc(40px + env(safe-area-inset-bottom,0px));z-index:4;width:min(380px,calc(100% - 32px));
+  background:var(--surface-200);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow-panel);padding:20px;
+  transform:translateY(16px);opacity:0;pointer-events:none;transition:transform .25s ease,opacity .25s ease}
+.card.on{transform:none;opacity:1;pointer-events:auto}
+.label{font-size:12px;line-height:16px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.card h2{margin:4px 0 4px;font-size:20px;line-height:28px;font-weight:600;text-wrap:balance}
+.card p{margin:0 0 12px;font-size:14px;line-height:20px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+.chip{border:1px solid var(--line);background:var(--surface-300);border-radius:8px;padding:4px 10px;font-size:14px;line-height:20px;cursor:pointer}
+.chip small{color:var(--muted);font-size:12px}
+.chip:hover{border-color:var(--accent)}
+.cta{font-size:12px;line-height:16px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px;margin:0}
+
+/* modal */
+.scrim{position:fixed;inset:0;z-index:10;background:rgba(20,24,29,.5);display:none;align-items:center;justify-content:center;padding:16px}
+.scrim.on{display:flex}
+.modal{width:min(560px,100%);max-height:min(720px,100%);overflow:auto;background:var(--surface-200);border:1px solid var(--line);
+  border-radius:24px;box-shadow:var(--shadow-panel);padding:24px;display:flex;flex-direction:column;gap:20px}
+.mhead{display:flex;align-items:center;gap:12px}
+.mhead .brand{font-size:16px}
+.close{margin-left:auto;width:36px;height:36px;border-radius:12px;border:1px solid var(--line);background:var(--surface-300);cursor:pointer;font-size:18px;line-height:1}
+.search{width:100%;border:1px solid var(--line);background:var(--surface-100);border-radius:14px;padding:10px 14px;font:inherit;color:var(--ink)}
+.search::placeholder{color:var(--muted)}
+.list{display:flex;flex-direction:column;gap:4px;margin:8px 0 0;padding:0;list-style:none}
+.row{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:transparent;border-radius:14px;padding:8px 10px;cursor:pointer}
+.row:hover,.row:focus-visible{background:var(--accent-soft)}
+.num{flex:none;width:26px;height:26px;border-radius:999px;background:var(--marker);color:var(--marker-ink);display:grid;place-items:center;
+  font-size:13px;font-weight:700;box-shadow:var(--shadow-marker)}
+.row b{font-weight:600}
+.row small{margin-left:auto;color:var(--muted);font-size:12px}
+.pages{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.pages button{border:1px solid var(--line);background:var(--surface-300);border-radius:14px;padding:8px 16px;font-weight:600;cursor:pointer}
+.pages button[aria-current="page"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.toggles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-top:8px}
+.tg{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:14px;padding:8px 12px;cursor:pointer;background:var(--surface-100);font-size:14px;line-height:20px}
+.tg input{accent-color:var(--accent);width:16px;height:16px}
+.sw{flex:none;width:22px;height:0;border-top:4px solid var(--c);border-top-style:var(--s,solid);border-radius:2px}
+.theme{align-self:flex-start;border:1px solid var(--line);background:var(--surface-300);border-radius:14px;padding:8px 16px;font-weight:600;cursor:pointer}
+
+/* scene text */
+.mk{cursor:pointer}
+.mk .dot{fill:var(--marker);stroke:var(--surface-200);stroke-width:3}
+.mk text.n{fill:var(--marker-ink);font:700 15px var(--font);text-anchor:middle;dominant-baseline:central}
+.mk .tag rect{fill:var(--surface-200);stroke:var(--line)}
+.mk .tag text{fill:var(--ink);font:600 14px var(--font);dominant-baseline:central}
+.mk:hover .dot,.mk:focus-visible .dot,.mk.sel .dot{fill:var(--accent)}
+.mk:hover text.n,.mk:focus-visible text.n,.mk.sel text.n{fill:var(--accent-ink)}
+.mk:focus-visible{outline:none}
+.mk:focus-visible .dot{stroke:var(--ink)}
+.dim{opacity:.35}
+g.off{display:none}
+
+@media (max-width:640px){
+  .note{display:none}
+  .hint{white-space:normal;text-align:center;width:calc(100% - 32px);border-radius:14px}
+  .card{bottom:calc(36px + env(safe-area-inset-bottom,0px));padding:16px}
+  .mk .tag{display:none}
+  .mk.sel .tag{display:inline}
+}
+@media (prefers-reduced-motion:reduce){.card{transition:none}}
+</style>
+
+<div class="app">
+  <svg id="scene" viewBox="0 0 1220 740" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Isometric overview of the AI Factory town with nine numbered districts"></svg>
+
+  <div class="bar">
+    <button class="burger" id="burger" aria-label="Menu" aria-haspopup="dialog"><i></i><i></i><i></i></button>
+    <div class="brand">AI Factory <span id="crumb"></span></div>
+    <button class="back" id="back">‹ Back to town</button>
+    <div class="note">Design mockup. A flat drawing of the layout; the real scene is 3D.</div>
+  </div>
+
+  <div class="hint" id="hint">Choose a numbered marker to fly into a district</div>
+
+  <section class="card" id="card" aria-live="polite">
+    <div class="label" id="cLabel"></div>
+    <h2 id="cName"></h2>
+    <p id="cText"></p>
+    <div class="label">Connected to</div>
+    <div class="chips" id="cLinks"></div>
+    <p class="cta">In the app the camera flies here, the numbered hotspots appear, and the zone index, detail panel and Simulate bar open.</p>
+  </section>
+
+  <div class="foot">Personal project, not affiliated with NVIDIA. Simulated numbers are illustrative.</div>
+</div>
+
+<div class="scrim" id="scrim">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle" id="modal">
+    <div class="mhead">
+      <div class="brand" id="mTitle">AI Factory</div>
+      <button class="close" id="close" aria-label="Close menu">×</button>
+    </div>
+    <input class="search" id="q" type="search" placeholder="Search a district, object or comparison" aria-label="Search">
+    <div>
+      <div class="label">Districts</div>
+      <ul class="list" id="dlist"></ul>
+    </div>
+    <div>
+      <div class="label">Pages</div>
+      <div class="pages"><button aria-current="page" data-page="town">Town</button><button>Index</button><button>Compare</button><button>About</button></div>
+    </div>
+    <div>
+      <div class="label">Show connections</div>
+      <div class="toggles" id="tgs"></div>
+    </div>
+    <button class="theme" id="theme">Switch light / dark</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  var NS='http://www.w3.org/2000/svg';
+  var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var cs=getComputedStyle(document.documentElement);
+  function tok(n){return cs.getPropertyValue(n).trim();}
+  function hex(h){h=h.replace('#','');return [0,2,4].map(function(i){return parseInt(h.substr(i,2),16);});}
+  function toHex(a){return '#'+a.map(function(v){v=Math.max(0,Math.min(255,Math.round(v)));return (v<16?'0':'')+v.toString(16);}).join('');}
+  function shade(h,f){return toHex(hex(h).map(function(v){return v*f;}));}
+  function mix(a,b,t){var x=hex(a),y=hex(b);return toHex([0,1,2].map(function(i){return x[i]*(1-t)+y[i]*t;}));}
+  // Scene colours always use the daylight tokens, in both UI themes.
+  var C={ground:'#e9efe3',path:'#f6f1e7',water:'#8ec9d6',hall:'#f2a65a',store:'#8fb3d9',net:'#b9a3d6',wall:'#f5f2ec',roof:'#5e7a8c',parcel:'#e6b980',hot:'#e07a5f',accent:'#2f6b5a'};
+  C.tree=mix(C.ground,C.accent,.55); C.tree2=mix(C.ground,C.accent,.4); C.hill=mix(C.ground,C.accent,.18);
+  C.rock=mix(C.ground,C.roof,.25); C.edge=mix(C.ground,C.roof,.35);
+
+  var OX=540,OY=150,TW=34,TH=17,ZH=26;
+  function P(x,y,z){return [OX+(x-y)*TW, OY+(x+y)*TH-(z||0)*ZH];}
+  function pts(a){return a.map(function(p){return p[0].toFixed(1)+','+p[1].toFixed(1);}).join(' ');}
+  function el(tag,attrs,parent){var e=document.createElementNS(NS,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+  function pathD(list,z){return 'M'+list.map(function(p){var q=P(p[0],p[1],z||0);return q[0].toFixed(1)+' '+q[1].toFixed(1);}).join(' L');}
+
+  var svg=document.getElementById('scene');
+  var defs=el('defs',{},svg);
+
+  var DIST=[
+    {id:'factory',n:1,name:'Factory Quarter',zone:'GPU Hall',at:[10,7.5],m:[10.6,6.6,3.2],txt:'The big production halls, with the HBM warehouse beside them. Everything else in the town exists to keep these halls fed, connected and cool.'},
+    {id:'packing',n:2,name:'Packing Dock',zone:'Packing Station',at:[15,2.8],m:[15.2,2.6,2],txt:'Crates are resized here before they enter the factory. Smaller crates mean more fit on each truck.'},
+    {id:'tower',n:3,name:'Tower Block',zone:'DGX Building',at:[5.7,9.6],m:[5.8,9.2,5],txt:'Tall buildings with GPU rooms joined by sky-bridges and a central sorting hub.'},
+    {id:'gate',n:4,name:'Gatehouse and Rail Yard',zone:'Transport Network',at:[2,12.8],m:[2.1,12.5,2.4],txt:'The town gate and mailroom. The roads and the private freight rail that tie every district together start here.'},
+    {id:'harbour',n:5,name:'Harbour Depot',zone:'Storage Yard',at:[12,12],m:[12.2,11.8,2.4],txt:'Warehouses, a cache shed next to the factory and a remote depot at the port.'},
+    {id:'assembly',n:6,name:'Assembly Row',zone:'Production Line',at:[16.2,7.2],m:[16.2,6.6,2.4],txt:'The line where models are built, packed and shipped to customers around the clock.'},
+    {id:'control',n:7,name:'Control Tower',zone:'Control Room',at:[4,3],m:[4,3,5.8],txt:'On the hill, with a view of the whole town. Sensors report from every district and the dispatcher schedules the work.'},
+    {id:'power',n:8,name:'Power Station and River',zone:'Power and Cooling',at:[2.1,8],m:[1.6,7.6,3.4],txt:'The substation and chillers. The river carries coolant through the town.'},
+    {id:'newdev',n:9,name:'New Development',zone:'Campus Expansion',at:[16.2,12],m:[16.2,11.9,2],txt:'Empty plots and repeating blocks at the edge of town, where the campus grows.'}
+  ];
+  var BY={};DIST.forEach(function(d){BY[d.id]=d;});
+
+  var CONN=[
+    {g:'roads',kind:'Main road',joins:['gate','harbour'],pts:[[1,12.5],[10.8,12.5]],par:1},
+    {g:'roads',kind:'Road',joins:['gate','factory'],pts:[[7.6,12.5],[7.6,7.2],[8,7.2]],par:1},
+    {g:'roads',kind:'Road',joins:['factory','assembly'],pts:[[13.7,7.4],[15,7.4]],par:1},
+    {g:'roads',kind:'Road',joins:['harbour','assembly'],pts:[[13.3,11.4],[14.5,11.4],[14.5,9],[15,9]],par:1},
+    {g:'roads',kind:'Road',joins:['harbour','newdev'],pts:[[14.5,11.4],[14.5,12.3],[14.8,12.3]]},
+    {g:'rail',kind:'Private freight rail',joins:['gate','harbour'],pts:[[1,13.2],[10.8,13.2]],par:1},
+    {g:'rail',kind:'Private freight rail',joins:['tower','gate'],pts:[[5.5,11.2],[5.5,13.2]]},
+    {g:'rail',kind:'Private freight rail',joins:['harbour','factory'],pts:[[11.8,10.8],[11.8,8.5]],par:1},
+    {g:'belts',kind:'Conveyor',joins:['harbour','factory'],pts:[[10.8,11.5],[9.2,11.5],[9.2,9.9]],par:1},
+    {g:'belts',kind:'Belt',joins:['packing','factory'],pts:[[13.5,3],[12.6,3],[12.6,5.5]],par:1},
+    {g:'belts',kind:'Tray lane',joins:['packing','assembly'],pts:[[16,4.2],[16,5.5]]},
+    {g:'belts',kind:'Sky-bridge',joins:['tower','factory'],pts:[[6.7,8.4],[6.7,6.6],[8,6.6]],z:2.6,bridge:1,par:1},
+    {g:'river',kind:'Coolant pipe',joins:['power','factory'],pts:[[6.6,4.6],[8,5.8]],pipe:1},
+    {g:'river',kind:'Coolant pipe',joins:['power','tower'],pts:[[5.5,5.9],[5.5,8.2]],pipe:1},
+    {g:'power',kind:'Power cable',joins:['power','tower'],pts:[[3.4,8.2],[4.2,8.5]],cable:1},
+    {g:'power',kind:'Power cable',joins:['power','newdev'],pts:[[2.1,9.1],[2.1,13.8],[15.6,13.8],[15.6,13.4]],cable:1},
+    {g:'sensors',kind:'Sensor line',joins:['control','factory']},{g:'sensors',kind:'Sensor line',joins:['control','packing']},
+    {g:'sensors',kind:'Sensor line',joins:['control','tower']},{g:'sensors',kind:'Sensor line',joins:['control','gate']},
+    {g:'sensors',kind:'Sensor line',joins:['control','harbour']},{g:'sensors',kind:'Sensor line',joins:['control','assembly']},
+    {g:'sensors',kind:'Sensor line',joins:['control','power']},{g:'sensors',kind:'Sensor line',joins:['control','newdev']}
+  ];
+  var GROUPS=[
+    {id:'roads',name:'Roads',c:C.edge},{id:'rail',name:'Freight rail',c:C.net},{id:'belts',name:'Belts and bridges',c:C.hall},
+    {id:'river',name:'River and pipes',c:C.water},{id:'power',name:'Power cables',c:C.roof},{id:'sensors',name:'Sensor lines',c:C.accent,s:'dashed'}
+  ];
+
+  /* ---------- island ---------- */
+  var W=18,D=14,th=.9;
+  var g0=el('g',{},svg);
+  var A=P(-.5,-.5,0),B=P(W+.5,-.5,0),Cc=P(W+.5,D+.5,0),Dd=P(-.5,D+.5,0);
+  function down(p,t){return [p[0],p[1]+t*ZH];}
+  el('polygon',{points:pts([Dd,Cc,down(Cc,th),down(Dd,th)]),fill:shade(C.ground,.78)},g0);
+  el('polygon',{points:pts([Cc,B,down(B,th),down(Cc,th)]),fill:shade(C.ground,.64)},g0);
+  el('polygon',{points:pts([A,B,Cc,Dd]),fill:C.ground,stroke:C.ground,'stroke-width':14,'stroke-linejoin':'round'},g0);
+  el('polygon',{points:pts([P(-.5,-.5),P(W+.5,-.5),P(W+.5,D+.5),P(-.5,D+.5)]),fill:C.ground},g0);
+  // soft lawn patches
+  [[8,8.2,1.4,.9],[1.6,2.4,2,1.2],[12,1,2.2,1],[8.5,12.2,1,.6]].forEach(function(p){
+    var c=P(p[0],p[1]);el('ellipse',{cx:c[0],cy:c[1],rx:p[2]*TW,ry:p[3]*TW*.5,fill:mix(C.ground,'#ffffff',.35)},g0);});
+
+  /* ---------- ground-level connections ---------- */
+  var gConn={};
+  GROUPS.forEach(function(gr){gConn[gr.id]=el('g',{'data-g':gr.id},svg);});
+  function ground(group){return gConn[group];}
+
+  // river (main channel)
+  var riverPts=[[10,-.5],[8,2.5],[6.5,4.5],[4.5,5.7],[0,6.3],[-.5,6.35]];
+  var rv=ground('river');
+  el('path',{d:pathD(riverPts),fill:'none',stroke:shade(C.water,.8),'stroke-width':30,'stroke-linecap':'round','stroke-linejoin':'round'},rv);
+  el('path',{d:pathD(riverPts),fill:'none',stroke:C.water,'stroke-width':24,'stroke-linecap':'round','stroke-linejoin':'round'},rv);
+  el('path',{d:pathD(riverPts),fill:'none',stroke:'#ffffff','stroke-opacity':.4,'stroke-width':2,'stroke-dasharray':'2 14','stroke-linecap':'round'},rv);
+
+  CONN.forEach(function(c,i){
+    if(!c.pts)return;
+    c.id='cn'+i;
+    var gr=ground(c.g),z=c.z||0,d=pathD(c.pts,z);
+    if(c.g==='roads'){
+      el('path',{d:d,fill:'none',stroke:C.edge,'stroke-width':15,'stroke-linejoin':'round','stroke-linecap':'butt'},gr);
+      el('path',{d:d,fill:'none',stroke:C.path,'stroke-width':12,'stroke-linejoin':'round'},gr);
+      el('path',{d:d,fill:'none',stroke:shade(C.path,.82),'stroke-width':1.5,'stroke-dasharray':'8 8','stroke-linejoin':'round'},gr);
+    }else if(c.g==='rail'){
+      el('path',{d:d,fill:'none',stroke:shade(C.net,.7),'stroke-width':9,'stroke-linejoin':'round'},gr);
+      el('path',{d:d,fill:'none',stroke:C.wall,'stroke-width':6,'stroke-linejoin':'round'},gr);
+      el('path',{d:d,fill:'none',stroke:shade(C.net,.7),'stroke-width':6,'stroke-dasharray':'2 7'},gr);
+      el('path',{d:d,fill:'none',stroke:C.net,'stroke-width':1.6},gr);
+    }else if(c.g==='belts'&&!c.bridge){
+      el('path',{d:d,fill:'none',stroke:shade(C.roof,.9),'stroke-width':9,'stroke-linejoin':'round'},gr);
+      el('path',{d:d,fill:'none',stroke:C.wall,'stroke-width':6,'stroke-linejoin':'round'},gr);
+      el('path',{d:d,fill:'none',stroke:C.hall,'stroke-width':3,'stroke-dasharray':'6 6','stroke-linejoin':'round'},gr);
+    }else if(c.pipe){
+      el('path',{d:d,fill:'none',stroke:shade(C.water,.75),'stroke-width':8,'stroke-linejoin':'round'},gr);
+      el('path',{d:d,fill:'none',stroke:C.water,'stroke-width':5,'stroke-linejoin':'round'},gr);
+    }else if(c.cable){
+      el('path',{d:d,fill:'none',stroke:C.roof,'stroke-width':1.6,'stroke-dasharray':'5 4','stroke-linejoin':'round'},gr);
+      c.pts.forEach(function(p){var q=P(p[0],p[1]);el('rect',{x:q[0]-2.5,y:q[1]-9,width:5,height:11,rx:1.5,fill:C.roof},gr);});
+    }
+  });
+
+  /* ---------- solid objects, depth sorted ---------- */
+  var solids=[];
+  function box(x,y,w,d,h,col,o){o=o||{};solids.push({k:(x+w/2)+(y+d/2)+(o.z0||0)*.01,draw:function(gr){
+    var z0=o.z0||0,top=o.top||col,wall=o.wall||C.wall;
+    var a=P(x,y,z0+h),b=P(x+w,y,z0+h),c=P(x+w,y+d,z0+h),e=P(x,y+d,z0+h);
+    var c1=P(x,y+d,z0),c2=P(x+w,y+d,z0),c3=P(x+w,y,z0);
+    el('polygon',{points:pts([e,c,c2,c1]),fill:shade(o.side||wall,.88)},gr);
+    el('polygon',{points:pts([c,b,c3,c2]),fill:shade(o.side||wall,.74)},gr);
+    // roof with slight overhang
+    var ov=o.flat?0:.12;
+    var r=[P(x-ov,y-ov,z0+h),P(x+w+ov,y-ov,z0+h),P(x+w+ov,y+d+ov,z0+h),P(x-ov,y+d+ov,z0+h)];
+    el('polygon',{points:pts(r),fill:top,stroke:shade(top,.8),'stroke-width':.8,'stroke-linejoin':'round'},gr);
+    if(o.win){ // windows on the left face
+      var n=Math.max(1,Math.floor(w*1.4));
+      for(var i=0;i<n;i++){var u=(i+.5)/n;
+        var p0=P(x+w*u-.12,y+d,z0+h*.55),p1=P(x+w*u+.12,y+d,z0+h*.55),p2=P(x+w*u+.12,y+d,z0+h*.3),p3=P(x+w*u-.12,y+d,z0+h*.3);
+        el('polygon',{points:pts([p0,p1,p2,p3]),fill:shade(C.water,.9),opacity:.85},gr);}
+    }
+    if(o.door){var q0=P(x+w*.5-.2,y+d,z0),q1=P(x+w*.5+.2,y+d,z0),q2=P(x+w*.5+.2,y+d,z0+h*.4),q3=P(x+w*.5-.2,y+d,z0+h*.4);
+      el('polygon',{points:pts([q0,q1,q2,q3]),fill:shade(wall,.5)},gr);}
+  }});}
+  function tree(x,y,s){s=s||1;solids.push({k:x+y,draw:function(gr){
+    var b=P(x,y,0);
+    el('ellipse',{cx:b[0],cy:b[1]+2,rx:9*s,ry:4*s,fill:'#000',opacity:.1},gr);
+    el('rect',{x:b[0]-1.5,y:b[1]-9*s,width:3,height:9*s,fill:shade(C.parcel,.6)},gr);
+    el('ellipse',{cx:b[0],cy:b[1]-18*s,rx:10*s,ry:12*s,fill:C.tree},gr);
+    el('ellipse',{cx:b[0]-3*s,cy:b[1]-22*s,rx:5*s,ry:6*s,fill:C.tree2},gr);}});}
+  function cyl(x,y,r,h,col,z0){solids.push({k:x+y+.02,draw:function(gr){
+    var b=P(x,y,z0||0),t=P(x,y,(z0||0)+h);
+    el('rect',{x:b[0]-r*TW,y:t[1],width:r*TW*2,height:b[1]-t[1],fill:shade(col,.85)},gr);
+    el('ellipse',{cx:b[0],cy:b[1],rx:r*TW,ry:r*TH,fill:shade(col,.85)},gr);
+    el('ellipse',{cx:t[0],cy:t[1],rx:r*TW,ry:r*TH,fill:col},gr);}});}
+  function crate(x,y,col,s){box(x,y,s||.5,s||.5,.4*(s?s/.5:1),col,{wall:col,flat:1});}
+
+  // Control Tower on its hill
+  box(2.2,1.2,3.6,3.6,.7,C.hill,{wall:C.hill,top:mix(C.hill,'#ffffff',.2),flat:1});
+  box(3.3,2.3,1.4,1.4,3.6,C.roof,{z0:.7,wall:C.wall,top:C.roof,win:1});
+  box(3.0,2.0,2.0,2.0,.5,C.roof,{z0:4.3,wall:C.roof,top:mix(C.roof,'#ffffff',.2)});
+  cyl(4,3,.07,1,C.roof,4.8);
+  box(2.4,4.1,.9,.8,.9,C.wall,{z0:.7,top:C.roof,door:1});
+  // Power Station
+  box(.8,7.2,2.6,1.8,1.1,C.roof,{wall:C.wall,top:C.roof,win:1,door:1});
+  cyl(1.2,9.5,.45,.9,C.water);cyl(2.2,9.7,.45,.9,C.water);cyl(3.1,9.6,.4,.8,C.water);
+  box(3.1,7.3,.5,.5,2.0,C.roof,{wall:C.roof,top:C.roof,flat:1});
+  // Tower Block: three towers + short sky-bridges between them
+  box(4.2,8.2,1.5,1.5,3.8,C.net,{wall:C.wall,top:C.net,win:1});
+  box(6.0,8.2,1.2,1.5,3.1,C.net,{wall:C.wall,top:C.net,win:1});
+  box(4.9,10.0,1.6,1.2,2.4,C.net,{wall:C.wall,top:C.net,win:1,door:1});
+  box(5.7,8.7,.3,.4,.3,C.wall,{z0:2.2,wall:C.wall,top:C.wall,flat:1});
+  // Factory Quarter: halls with a sawtooth look, office, HBM warehouse
+  box(8,5,3,2.2,1.5,C.hall,{wall:C.wall,top:C.hall,win:1});
+  box(11.5,5.2,2.2,3.3,1.5,C.hall,{wall:C.wall,top:C.hall,win:1});
+  box(8.2,5.3,.8,.7,.5,shade(C.hall,.85),{z0:1.5,wall:C.hall,top:shade(C.hall,.85),flat:1});
+  box(9.4,5.3,.8,.7,.5,shade(C.hall,.85),{z0:1.5,wall:C.hall,top:shade(C.hall,.85),flat:1});
+  box(11.8,5.5,.7,.9,.5,shade(C.hall,.85),{z0:1.5,wall:C.hall,top:shade(C.hall,.85),flat:1});
+  box(8,8.3,2.6,1.6,1.1,C.store,{wall:C.wall,top:C.store,door:1});
+  box(7.9,7.5,.8,.6,.8,C.roof,{wall:C.wall,top:C.roof,win:1});
+  // Packing Dock
+  box(13.6,1.2,2.2,1.8,.9,C.parcel,{wall:C.wall,top:C.parcel,door:1});
+  crate(16.0,1.6,C.parcel,.5);crate(16.0,2.2,C.hot,.5);crate(16.6,2.0,C.parcel,.5);crate(14.2,3.6,C.parcel,.4);crate(14.8,3.7,C.store,.4);
+  box(16.2,3.1,.9,.5,.5,C.net,{wall:C.net,top:C.wall,flat:1});
+  // Assembly Row
+  box(15.1,5.6,1.5,3.5,1.0,C.hall,{wall:C.wall,top:C.hall,win:1});
+  box(16.7,5.6,1.0,3.5,.8,C.store,{wall:C.wall,top:C.store,win:1});
+  cyl(15.5,5.9,.2,1.3,C.roof,1.0);
+  // Harbour Depot
+  box(10.8,10.8,2.5,1.4,1.0,C.store,{wall:C.wall,top:C.store,door:1});
+  box(13.5,10.9,.9,.8,.6,C.store,{wall:C.wall,top:shade(C.store,.9),door:1});
+  box(8.4,10.4,.7,.6,.5,C.parcel,{wall:C.wall,top:C.parcel});
+  crate(11,13.0,C.parcel,.4);
+  // Gatehouse
+  box(.8,11.4,1.0,.9,1.2,C.net,{wall:C.wall,top:C.net,door:1});
+  box(.8,12.7,1.0,.6,1.2,C.net,{wall:C.wall,top:C.net});
+  box(.8,11.4,1.0,1.9,.3,C.net,{z0:1.2,wall:C.net,top:C.net,flat:1});
+  box(3.6,13.4,1.0,.5,.45,C.wall,{wall:C.wall,top:C.net,flat:1});
+  // New Development: ghost plots + two repeating blocks
+  box(15.0,10.8,1.4,1.1,.8,C.store,{wall:C.wall,top:C.store});
+  box(16.6,10.8,1.0,1.1,.8,C.store,{wall:C.wall,top:C.store});
+  [[15.0,12.2],[16.6,12.2]].forEach(function(p){
+    solids.push({k:p[0]+p[1]-.5,draw:function(gr){
+      var q=[P(p[0],p[1]),P(p[0]+1.2,p[1]),P(p[0]+1.2,p[1]+1),P(p[0],p[1]+1)];
+      el('polygon',{points:pts(q),fill:'none',stroke:C.edge,'stroke-width':1.6,'stroke-dasharray':'5 4'},gr);}});});
+  // trees
+  [[7,1.2],[8,1.6],[9.5,.9],[11.8,.8],[1,1.6],[1.4,4.2],[6.2,2.5],[16.9,.9],[17.3,4.5],[13,3.7],[2.2,10.6],[3.2,11.6],[4,12.0],[7.9,13.1],[9.6,13.3],[17.4,13.2],[12.2,9.6],[14.2,9.9],[16.5,9.9],[7.0,12.9]].forEach(function(t){tree(t[0],t[1],.8+((t[0]*7+t[1]*3)%5)/12);});
+
+  solids.sort(function(a,b){return a.k-b.k;});
+  var gSolid=el('g',{},svg);
+  solids.forEach(function(s){s.draw(gSolid);});
+
+  /* ---------- elevated sky-bridge (drawn above buildings) ---------- */
+  var sky=CONN.filter(function(c){return c.bridge;})[0];
+  var gb=el('g',{'data-g':'belts'},svg);
+  gb.setAttribute('class','skyg');
+  (function(){
+    var d=pathD(sky.pts,sky.z);
+    sky.pts.forEach(function(p){var a=P(p[0],p[1]),b=P(p[0],p[1],sky.z);el('line',{x1:a[0],y1:a[1],x2:b[0],y2:b[1],stroke:shade(C.wall,.7),'stroke-width':3},gb);});
+    el('path',{d:d,fill:'none',stroke:shade(C.net,.65),'stroke-width':12,'stroke-linejoin':'round'},gb);
+    el('path',{d:d,fill:'none',stroke:C.wall,'stroke-width':8,'stroke-linejoin':'round'},gb);
+    el('path',{d:d,fill:'none',stroke:C.net,'stroke-width':2,'stroke-dasharray':'3 5','stroke-linejoin':'round'},gb);
+  })();
+
+  /* ---------- sensor lines ---------- */
+  var gs=gConn.sensors;
+  var top=P(4,3,6.1);
+  CONN.filter(function(c){return c.g==='sensors';}).forEach(function(c,i){
+    var t=BY[c.joins[1]],m=P(t.m[0],t.m[1],t.m[2]-.3);
+    var mx=(top[0]+m[0])/2,my=Math.min(top[1],m[1])-40;
+    c.id='sn'+i;
+    el('path',{id:c.id,d:'M'+top[0]+' '+top[1]+' Q'+mx+' '+my+' '+m[0]+' '+m[1],fill:'none',stroke:C.accent,'stroke-width':1.6,'stroke-dasharray':'4 6','stroke-opacity':.75},gs);
+  });
+  svg.appendChild(gs);
+
+  /* ---------- parcels moving along connections ---------- */
+  var gp=el('g',{'data-g':'parcels'},svg);
+  function mkPath(c){var id=c.id+'m';var p=el('path',{id:id,d:pathD(c.pts,c.z||0),fill:'none'},defs);return id;}
+  var parcels=[];
+  if(!reduce){
+    CONN.forEach(function(c,i){
+      if(!c.par||!c.pts)return;
+      var id=mkPath(c),dur=7+(i%4)*2;
+      for(var k=0;k<2;k++){
+        var col=(c.kind==='Private freight rail')?C.net:C.parcel;
+        var gg=el('g',{'data-g':c.g},gp);
+        var r=el('rect',{x:-4,y:-9,width:8,height:8,rx:2,fill:col,stroke:shade(col,.7),'stroke-width':1,visibility:'hidden'},gg);
+        el('set',{attributeName:'visibility',to:'visible',begin:(k*dur/2)+'s'},r);
+        var am=el('animateMotion',{dur:dur+'s',repeatCount:'indefinite',begin:(k*dur/2)+'s',keyPoints:'0;1',keyTimes:'0;1',calcMode:'linear'},r);
+        el('mpath',{href:'#'+id},am);
+      }
+    });
+    CONN.filter(function(c){return c.g==='sensors';}).forEach(function(c,i){
+      var gg=el('g',{'data-g':'sensors'},gp);
+      var dot=el('circle',{r:3,fill:C.accent,visibility:'hidden'},gg);
+      el('set',{attributeName:'visibility',to:'visible',begin:(i*.7)+'s'},dot);
+      var am=el('animateMotion',{dur:(5+i%3)+'s',repeatCount:'indefinite',begin:(i*.7)+'s'},dot);
+      el('mpath',{href:'#'+c.id},am);
+    });
+  }
+
+  /* ---------- markers ---------- */
+  var gm=el('g',{},svg),markers={};
+  DIST.forEach(function(d){
+    var p=P(d.m[0],d.m[1],d.m[2]);
+    var g=el('g',{'class':'mk',tabindex:0,role:'button','aria-label':'District '+d.n+', '+d.name,transform:'translate('+p[0]+' '+p[1]+')'},gm);
+    el('line',{x1:0,y1:0,x2:0,y2:16,stroke:C.roof,'stroke-width':1.5,'stroke-opacity':.5},g);
+    el('circle',{'class':'dot',r:15,cx:0,cy:0},g);
+    var n=el('text',{'class':'n'},g);n.textContent=d.n;
+    var tag=el('g',{'class':'tag'},g);
+    var w=d.name.length*7.6+20;
+    var left=(d.id==='assembly'||d.id==='packing'||d.id==='power');
+    el('rect',{x:left?-w-22:22,y:-13,width:w,height:26,rx:8},tag);
+    var tx=el('text',{x:left?-w-12:32,y:0},tag);tx.textContent=d.name;
+    g._p=p;
+    g.addEventListener('click',function(){focus(d.id);});
+    g.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();focus(d.id);}});
+    markers[d.id]=g;
+  });
+
+  /* ---------- camera (animated viewBox) ---------- */
+  var TOWN=[0,0,1220,740],cur=TOWN.slice(),raf=0,sel=null;
+  function setVB(v){svg.setAttribute('viewBox',v.map(function(n){return n.toFixed(1);}).join(' '));
+    var k=v[2]/1220; // keep markers a constant size while the scene zooms
+    for(var id in markers){var m=markers[id];m.setAttribute('transform','translate('+m._p[0]+' '+m._p[1]+') scale('+k.toFixed(3)+')');}}
+  function fly(to){
+    cancelAnimationFrame(raf);
+    if(reduce){cur=to.slice();setVB(cur);return;}
+    var from=cur.slice(),t0=performance.now(),dur=800;
+    (function step(now){
+      var t=Math.min(1,(now-t0)/dur),e=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+      cur=from.map(function(v,i){return v+(to[i]-v)*e;});setVB(cur);
+      if(t<1)raf=requestAnimationFrame(step);
+    })(t0);
+  }
+  var card=document.getElementById('card'),back=document.getElementById('back'),hint=document.getElementById('hint'),crumb=document.getElementById('crumb');
+  function focus(id){
+    var d=BY[id];sel=id;
+    var c=P(d.at[0],d.at[1],1),w=560,h=w*740/1220;
+    // keep the district clear of the card on wide screens
+    var off=window.innerWidth>900?-w*.14:0;
+    fly([c[0]-w/2+off,c[1]-h/2-10,w,h]);
+    document.getElementById('cLabel').textContent='Zone '+d.n+' · '+d.zone;
+    document.getElementById('cName').textContent=d.name;
+    document.getElementById('cText').textContent=d.txt;
+    var links=document.getElementById('cLinks');links.innerHTML='';
+    var seen={};
+    CONN.forEach(function(cn){
+      var i=cn.joins.indexOf(id);if(i<0)return;
+      var o=cn.joins[1-i],key=o+cn.kind;if(seen[key])return;seen[key]=1;
+      var b=document.createElement('button');b.className='chip';
+      b.innerHTML=BY[o].name+' <small>· '+cn.kind.toLowerCase()+'</small>';
+      b.addEventListener('click',function(){focus(o);});links.appendChild(b);
+    });
+    card.classList.add('on');back.classList.add('on');hint.hidden=true;crumb.textContent='/ '+d.name;
+    DIST.forEach(function(x){markers[x.id].classList.toggle('sel',x.id===id);markers[x.id].classList.toggle('dim',x.id!==id);});
+  }
+  function town(){
+    sel=null;fly(TOWN);card.classList.remove('on');back.classList.remove('on');hint.hidden=false;crumb.textContent='';
+    DIST.forEach(function(x){markers[x.id].classList.remove('sel','dim');});
+  }
+  back.addEventListener('click',town);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!scrim.classList.contains('on')&&sel)town();});
+
+  /* ---------- modal ---------- */
+  var scrim=document.getElementById('scrim'),burger=document.getElementById('burger'),q=document.getElementById('q'),dl=document.getElementById('dlist');
+  function renderList(f){
+    dl.innerHTML='';f=(f||'').toLowerCase();
+    var n=0;
+    DIST.forEach(function(d){
+      if(f&&(d.name+' '+d.zone+' '+d.txt).toLowerCase().indexOf(f)<0)return;
+      n++;
+      var li=document.createElement('li'),b=document.createElement('button');b.className='row';
+      b.innerHTML='<span class="num">'+d.n+'</span><span><b>'+d.name+'</b><br><small style="margin:0">Zone '+d.n+' · '+d.zone+'</small></span>';
+      b.addEventListener('click',function(){closeM();focus(d.id);});
+      li.appendChild(b);dl.appendChild(li);
+    });
+    if(!n){var li=document.createElement('li');li.style.cssText='color:var(--muted);font-size:14px;padding:8px 10px';li.textContent='Nothing matches. Item and comparison search arrives in Phase 3.';dl.appendChild(li);}
+  }
+  function openM(){scrim.classList.add('on');renderList('');q.value='';q.focus();}
+  function closeM(){scrim.classList.remove('on');burger.focus();}
+  burger.addEventListener('click',openM);
+  document.getElementById('close').addEventListener('click',closeM);
+  scrim.addEventListener('click',function(e){if(e.target===scrim)closeM();});
+  q.addEventListener('input',function(){renderList(q.value);});
+  document.querySelector('[data-page="town"]').addEventListener('click',function(){closeM();town();});
+  document.addEventListener('keydown',function(e){
+    if(e.key==='/'&&!scrim.classList.contains('on')&&document.activeElement.tagName!=='INPUT'){e.preventDefault();openM();}
+    if(!scrim.classList.contains('on'))return;
+    if(e.key==='Escape')closeM();
+    if(e.key==='Tab'){ // simple focus trap
+      var f=[].slice.call(document.getElementById('modal').querySelectorAll('button,input'));
+      var first=f[0],last=f[f.length-1];
+      if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+      else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+    }
+  });
+  var tgs=document.getElementById('tgs');
+  GROUPS.forEach(function(gr){
+    var l=document.createElement('label');l.className='tg';
+    l.innerHTML='<input type="checkbox" checked><span class="sw" style="--c:'+gr.c+';--s:'+(gr.s||'solid')+'"></span><span>'+gr.name+'</span>';
+    l.querySelector('input').addEventListener('change',function(e){
+      document.querySelectorAll('[data-g="'+gr.id+'"]').forEach(function(n){n.classList.toggle('off',!e.target.checked);});
+    });
+    tgs.appendChild(l);
+  });
+  document.getElementById('theme').addEventListener('click',function(){
+    var r=document.documentElement,dark=r.getAttribute('data-theme')==='dark'||(!r.getAttribute('data-theme')&&matchMedia('(prefers-color-scheme: dark)').matches);
+    r.setAttribute('data-theme',dark?'light':'dark');
+  });
+  renderList('');
+})();
+</script>
+
+</html>
