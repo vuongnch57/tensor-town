@@ -4,12 +4,18 @@ import { derived } from '../core/derived';
 import { Box } from '../primitives/Box';
 import { Conveyor } from '../primitives/Conveyor';
 import { Matte } from '../primitives/Matte';
+import { itemsInZone } from '@/content/registry';
+import { useFactoryStore } from '@/state/useFactoryStore';
+import { Hotspot } from '../primitives/Hotspot';
+import { Selectable, useSceneInteraction } from '../primitives/Selectable';
+import { simulate } from '../zones/gpu-hall/sim';
 import { Crates, Fence, Lamps, Trees } from '../primitives/Props';
 import { Workers } from '../primitives/Workers';
 import { CpuOffice } from '../zones/gpu-hall/CpuOffice';
 import { HallShell, SmCells, StampingPress, WORKER_SPOTS } from '../zones/gpu-hall/GpuHall';
 import { HbmWarehouse } from '../zones/gpu-hall/HbmWarehouse';
 import { buildings, crates, cylinders, FACTORY_ORIGIN, fences, hill, lamps, trees, type Building } from './layout';
+import { DATA_SIGN, factoryAnchors } from './factory';
 import { buildDetails } from './model';
 
 const hexOf = (b: Building) => (b.roofHex ? derived.storageRoof : undefined);
@@ -64,31 +70,63 @@ function Details() {
   return <instancedMesh ref={ref} args={[geo, mat, items.length]} frustumCulled={false} />;
 }
 
-/** District 1: the full Zone 1 scene (hall, SM cells, workers, press, CPU office, HBM warehouse and its conveyor), placed in the town. */
-function FactoryQuarter({ reducedMotion }: { reducedMotion: boolean }) {
+const CRATES_DEPOT = [[0.2, -1.2], [0.7, -0.9], [-1.1, -1.0]] as const;
+const CRATES_WAREHOUSE = [[10.0, -2.8, 1], [9.5, -3.2, 0.9]] as const;
+
+/**
+ * District 1: the full Zone 1 scene (data sign, CPU office, hall, SM cells, workers, press, HBM warehouse, conveyor),
+ * placed in the town. Every object is selectable and numbered when the camera is inside the district.
+ */
+function FactoryQuarter({ active }: { active: boolean }) {
+  const sim = useFactoryStore((s) => s.sim);
+  const result = useMemo(() => simulate(sim), [sim]);
+  const { onSelect, reducedMotion } = useSceneInteraction();
+  const objects = useMemo(() => itemsInZone('gpu-hall').filter((i) => i.kind === 'object'), []);
+  const hot = result.bottleneck === 'memory';
+  const beltSpeed = reducedMotion ? 0 : 0.9 * result.beltSpeed;
   return (
-    <group position={[FACTORY_ORIGIN[0], 0, FACTORY_ORIGIN[1]]}>
-      <group position={[-5, 0, -5.2]}>
-        <CpuOffice />
+    <>
+      <group position={[FACTORY_ORIGIN[0], 0, FACTORY_ORIGIN[1]]}>
+        <Crates spots={CRATES_WAREHOUSE} stack={2} />
+        <Selectable id="data" position={[DATA_SIGN[0], 0, DATA_SIGN[1]]}>
+          <Box size={[0.1, 1.2, 0.1]} position={[-0.7, 0, 0]} hex={derived.wood} round={0.3} />
+          <Box size={[0.1, 1.2, 0.1]} position={[0.7, 0, 0]} hex={derived.wood} round={0.3} />
+          <Box size={[1.7, 0.55, 0.1]} position={[0, 0.75, 0]} color="hall" round={0.2} />
+          <Crates spots={CRATES_DEPOT} stack={2} />
+        </Selectable>
+        <Selectable id="cpu" position={[-5, 0, -5.2]}>
+          <CpuOffice />
+        </Selectable>
+        <Selectable id="gpu">
+          <HallShell />
+        </Selectable>
+        <Selectable id="sm">
+          <SmCells />
+        </Selectable>
+        <Selectable id="cuda-core">
+          <Workers spots={WORKER_SPOTS} busy={result.smBusy} y={0.12} />
+        </Selectable>
+        <Selectable id="tensor-core">
+          <StampingPress smBusy={result.smBusy} />
+        </Selectable>
+        <Selectable id="hbm" position={[8.0, 0, 1.2]}>
+          <HbmWarehouse />
+        </Selectable>
+        <Selectable id="memory-bandwidth">
+          <Conveyor from={[6.2, 2.2]} to={[2.5, 2.2]} speed={beltSpeed} hot={hot} parcels={6} />
+        </Selectable>
       </group>
-      <HallShell />
-      <SmCells />
-      <Workers spots={WORKER_SPOTS} busy={0.8} y={0.12} />
-      <StampingPress smBusy={0.8} />
-      <group position={[8.0, 0, 1.2]}>
-        <HbmWarehouse />
-      </group>
-      <Conveyor from={[6.2, 2.2]} to={[2.5, 2.2]} speed={reducedMotion ? 0 : 0.7} hot={false} parcels={6} />
-    </group>
+      {active && objects.map((o) => <Hotspot key={o.id} itemId={o.id} number={o.number ?? 0} anchor={factoryAnchors[o.anchorId ?? o.id]} onSelect={onSelect} />)}
+    </>
   );
 }
 
 /** All nine districts, the control hill and the props, in the airy diorama style of the Zone 1 scene. */
-export function Buildings({ reducedMotion }: { reducedMotion: boolean }) {
+export function Buildings({ factoryActive }: { factoryActive: boolean }) {
   return (
     <group>
       <Hill />
-      <FactoryQuarter reducedMotion={reducedMotion} />
+      <FactoryQuarter active={factoryActive} />
       {buildings.map((b, i) => (
         <Block key={i} b={b} />
       ))}
