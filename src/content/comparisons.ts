@@ -1,6 +1,6 @@
 import type { Comparison } from './types';
 
-// Zone 1 to Zone 6 comparisons. The remaining comparisons arrive with their zones.
+// Zone 1 to Zone 7 comparisons. The remaining comparisons arrive with their zones.
 export const comparisons: Comparison[] = [
   {
     id: 'cpu-vs-gpu',
@@ -142,5 +142,33 @@ export const comparisons: Comparison[] = [
     ],
     whyConfused:
       'Both are ways to serve a model to requests, and both can run inside the same stack, so they look like rivals. Triton is a server you configure; NIM is a finished package, and a NIM can even use Triton inside it.',
+  },
+  {
+    id: 'slurm-vs-kubernetes',
+    title: 'Slurm vs Kubernetes',
+    zones: ['control-room'],
+    columns: ['Slurm', 'Kubernetes'],
+    rows: [
+      { label: 'In the factory', values: ['Dispatcher desk with tickets', 'Container yard with cranes'] },
+      { label: 'Unit of work', values: ['A batch job that ends', 'A container that can run for ever'] },
+      { label: 'Best for', values: ['Training runs queued for a block of GPUs', 'Always-on services and many small workloads'] },
+      { label: 'Familiar to', values: ['HPC and research teams', 'Cloud and platform teams'] },
+    ],
+    whyConfused:
+      'Both decide which machines run which work and both can hand out GPUs, so they look like two brands of the same thing. Slurm queues finite jobs and gives them machines until they finish; Kubernetes keeps services running and moves containers around. Many sites run both.',
+  },
+  {
+    id: 'gpu-sharing',
+    title: 'MIG vs time-slicing vs vGPU',
+    zones: ['control-room'],
+    columns: ['MIG', 'Time-slicing', 'vGPU'],
+    rows: [
+      { label: 'In the factory', values: ['Hall split by walls', 'Shift schedule', 'Rented booths'] },
+      { label: 'Split by', values: ['Hardware slices with their own SMs and memory', 'Time: jobs take turns', 'The hypervisor, per virtual machine'] },
+      { label: 'Jobs run', values: ['At the same time', 'One after another', 'Taking turns, per virtual GPU'] },
+      { label: 'Isolation', values: ['Strong, in hardware', 'None', 'Strong, between virtual machines'], best: 0 },
+    ],
+    whyConfused:
+      'All three let more than one job use a single GPU, and nvidia-smi can show a busy GPU in every case. They share it differently: walls give each job its own part of the GPU, a schedule gives each job all of it for a moment, and a booth gives each virtual machine a fixed share.',
   },
 ];
