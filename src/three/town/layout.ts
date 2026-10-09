@@ -43,10 +43,7 @@ export const buildings: Building[] = [
   { x: -13.1, z: 1.9, w: 5, d: 3.4, h: 2, roof: 'roof', win: [3, 1], door: true },
   { x: -10.2, z: 5.4, w: 1, d: 1, h: 3.6, wall: 'roof', roof: 'roof', flat: true },
   { x: -16.6, z: 4.6, w: 1.6, d: 1.4, h: 1, roof: 'network', door: true },
-  // Tower Block
-  { x: -7.8, z: 3.8, w: 2.2, d: 2.2, h: 6, roof: 'network', win: [2, 5] },
-  { x: -4.9, z: 3.8, w: 2, d: 2, h: 4.8, roof: 'network', win: [2, 4] },
-  { x: -6.3, z: 7.2, w: 2.8, d: 2.2, h: 3.4, roof: 'network', win: [3, 3], door: true },
+  // Tower Block: the DGX building is its own scene (see zones/dgx-building)
   // Gatehouse and Rail Yard
   { x: -14.3, z: 10.0, w: 1.6, d: 1.6, h: 2.6, roof: 'network', door: true },
   { x: -14.3, z: 15.2, w: 1.6, d: 1.6, h: 2.6, roof: 'network' },
@@ -89,12 +86,12 @@ export const FACTORY_BLOCKS: Building[] = [
   { x: 9.9, z: 2.2, w: 3.6, d: 3.4, h: 1.9, roof: 'storage' },
 ];
 
-type District = { slug: ZoneSlug; focus: Pt; marker: [number, number, number] };
+type District = { slug: ZoneSlug; focus: Pt; marker: [number, number, number]; /** Camera zoom when the district is focused (default 2.6). */ zoom?: number };
 
 export const districtLayout: District[] = [
   { slug: 'gpu-hall', focus: [4, 1], marker: [1.9, 3.1, 1] },
   { slug: 'packing-station', focus: [15.5, -8], marker: [11.4, 3.5, -8.5] },
-  { slug: 'dgx-building', focus: [-6.3, 5], marker: [-6.3, 7.4, 3.9] },
+  { slug: 'dgx-building', focus: [-6.4, 4.8], marker: [-9.3, 3.2, 1.7], zoom: 3.5 },
   { slug: 'transport-network', focus: [-12, 12], marker: [-14.3, 3.7, 12.6] },
   { slug: 'storage-yard', focus: [6.5, 10.5], marker: [5.7, 3.6, 10.8] },
   { slug: 'production-line', focus: [16, 0.4], marker: [16.4, 3.4, 0.4] },
@@ -109,6 +106,7 @@ const find = (slug: ZoneSlug): District => {
   return d;
 };
 export const markerWorld = (slug: ZoneSlug): [number, number, number] => [...find(slug).marker];
+export const districtZoom = (slug: ZoneSlug): number => find(slug).zoom ?? 2.6;
 export const districtCenter = (slug: ZoneSlug): [number, number, number] => [find(slug).focus[0], 0, find(slug).focus[1]];
 /** Where sensor lines leave the control tower. */
 export const sensorStart = (): [number, number, number] => [-14, 6.4, -9];
@@ -125,15 +123,15 @@ export const connectionGeometry: Record<string, ConnGeometry> = {
   'road-harbour-assembly': { pts: [[12.8, 11.4], [12.8, 5], [14.6, 5], [14.6, 3.8]], parcels: true },
   'road-harbour-newdev': { pts: [[12.8, 11.4], [15.4, 11.4]] },
   'rail-gate-harbour': { pts: [[-12.5, 14.7], [10.6, 14.7], [10.6, 12.7]], parcels: true },
-  'rail-tower-gate': { pts: [[-6.3, 8.4], [-6.3, 14.7]] },
+  'rail-tower-gate': { pts: [[-6.4, 8.1], [-6.4, 14.7]] },
   'rail-harbour-factory': { pts: [[11.6, 10.2], [11.6, 4.0]], parcels: true },
   'belt-harbour-factory': { pts: [[8.4, 9.3], [8.4, 6.0], [9.9, 6.0], [9.9, 4.0]], parcels: true },
   'belt-packing-factory': { pts: [[9.6, -6.9], [9.6, -3.4], [1.9, -3.4], [1.9, -2.3]], parcels: true },
   'belt-packing-assembly': { pts: [[13.6, -6.9], [13.6, -4.6], [14.6, -4.6], [14.6, -2.9]] },
-  'bridge-tower-factory': { pts: [[-3.9, 3.8], [-1.2, 3.8]], z: 3.1, bridge: true, parcels: true },
+  'bridge-tower-factory': { pts: [[-3.6, 3.8], [-1.2, 3.8]], z: 2.0, bridge: true, parcels: true },
   'pipe-power-factory': { pts: [[0.5, -9.2], [0.5, -2.4]], pipe: true },
-  'pipe-power-tower': { pts: [[-7.8, -1.6], [-7.8, 2.6]], pipe: true },
-  'cable-power-tower': { pts: [[-10.6, 2.0], [-9.6, 2.0], [-9.6, 3.8], [-8.95, 3.8]], cable: true },
+  'pipe-power-tower': { pts: [[-7.8, -1.6], [-7.8, 1.3]], pipe: true },
+  'cable-power-tower': { pts: [[-10.6, 2.0], [-9.6, 2.0], [-9.6, 3.8], [-9.55, 3.8]], cable: true },
   'cable-power-newdev': { pts: [[-13, 3.7], [-13, 16.2], [18.6, 16.2], [18.6, 13.8]], cable: true },
 };
 
@@ -178,6 +176,7 @@ export function footprints(): [number, number, number, number][] {
     [hill.x, hill.z, hill.w / 2, hill.d / 2],
     [FACTORY_ORIGIN[0] + 1, FACTORY_ORIGIN[1] + 0.5, 9, 7],
     [17.9, -9.1, 4, 4.3],
+    [-6.4, 4.6, 3.8, 4.9],
   ];
 }
 

@@ -1,6 +1,6 @@
 import type { Comparison } from './types';
 
-// Zone 1 and Zone 2 comparisons. The remaining comparisons arrive with their zones.
+// Zone 1 to Zone 3 comparisons. The remaining comparisons arrive with their zones.
 export const comparisons: Comparison[] = [
   {
     id: 'cpu-vs-gpu',
@@ -58,5 +58,33 @@ export const comparisons: Comparison[] = [
     ],
     whyConfused:
       'They all store numbers, and model cards quote them side by side, so they look like four sizes of one thing. They are really different layouts: some spend their bits on range, some on precision, and INT8 holds only whole numbers, so which one suits a job depends on what the numbers must survive.',
+  },
+  {
+    id: 'nvlink-nvswitch-pcie',
+    title: 'NVLink vs NVSwitch vs PCIe',
+    zones: ['dgx-building'],
+    columns: ['NVLink', 'NVSwitch', 'PCIe'],
+    rows: [
+      { label: 'In the factory', values: ['A sky-bridge between rooms', 'The central sorting hub', 'The shared service corridor'] },
+      { label: 'What it is', values: ['A GPU-to-GPU link', 'A switch chip joining every GPU', 'The general server connection'] },
+      { label: 'Bandwidth', values: ['900 GB/s per H100', '900 GB/s per H100, to every peer', '~128 GB/s (Gen5 x16)'], best: 1 },
+      { label: 'Reach', values: ['The two ends only', 'Every GPU to every GPU', 'CPU, cards and drives'] },
+    ],
+    whyConfused:
+      'NVLink and NVSwitch share a name and a speed, so they sound like two versions of one thing. NVLink is the link itself; NVSwitch is the chip that lets every GPU use its full NVLink speed to reach every other. PCIe is the older, shared route that all of them are measured against.',
+  },
+  {
+    id: 'dgx-hgx-mgx',
+    title: 'DGX vs HGX vs MGX',
+    zones: ['dgx-building'],
+    columns: ['DGX', 'HGX', 'MGX'],
+    rows: [
+      { label: 'In the factory', values: ['The complete building', 'The eight-room core', 'A kit of standard parts'] },
+      { label: 'Sold as', values: ['A finished system', 'A board for builders', 'A modular blueprint'] },
+      { label: 'Built by', values: ['NVIDIA', 'Server makers, around the core', 'Server makers, in their own layouts'] },
+      { label: 'Detail', values: ['8× H100 GPUs · 4 NVSwitch chips', '8 GPUs joined by NVLink', 'TODO(fact): add verified MGX specifics'] },
+    ],
+    whyConfused:
+      'All three appear in server brochures with the same GPUs inside, so they read like three product tiers. They differ in how much NVIDIA builds and how much the buyer does: the whole machine, the GPU core only, or a set of parts to arrange.',
   },
 ];

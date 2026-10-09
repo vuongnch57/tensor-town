@@ -1,4 +1,4 @@
-import type { GpuModel, ModelSize, NumberFormat, PackFormat, Workload } from './types';
+import type { FabricInterconnect, GpuModel, ModelSize, NumberFormat, PackFormat, Workload } from './types';
 
 /** User-facing text for the zone page UI. */
 export const zoneText = {
@@ -84,5 +84,24 @@ export const packText = {
       { value: '70b', label: '70B' },
     ] as { value: ModelSize; label: string }[],
     gb: (n: number) => `${n} GB`,
+  },
+};
+
+export const fabricText = {
+  simulate: {
+    title: 'Simulate',
+    interconnect: 'Interconnect',
+    run: 'Run all-to-all',
+    running: 'Running…',
+    exchange: 'Exchange time',
+    illustrative: 'Illustrative, not measured. All 8 GPUs send to all 7 others.',
+    reference: 'PCIe only = 1.00×',
+    interconnectOptions: [
+      { value: 'pcie', label: 'PCIe only' },
+      { value: 'nvlink', label: 'NVLink' },
+      { value: 'nvswitch', label: 'NVLink + NVSwitch' },
+    ] as { value: FabricInterconnect; label: string }[],
+    time: (n: number) => `${n.toFixed(2)}×`,
+    faster: (n: number) => (n > 1.05 ? `${n.toFixed(1)}× faster` : 'About the same'),
   },
 };

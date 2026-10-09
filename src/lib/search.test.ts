@@ -51,3 +51,15 @@ describe('search: Zone 2', () => {
     expect(search('quantization').items.map((i) => i.id)).toContain('quantization');
   });
 });
+
+describe('search: Zone 3', () => {
+  it('finds the interconnects, boards and systems', () => {
+    expect(search('nvswitch').items[0].id).toBe('nvswitch-hub');
+    expect(search('nvlink').items.map((i) => i.id)).toContain('nvlink-bridge');
+    expect(search('hgx').items.map((i) => i.id)).toContain('hgx-board');
+    expect(search('gh200').items.map((i) => i.id)).toContain('grace-hopper');
+  });
+  it('finds the Zone 3 comparisons', () => {
+    expect(search('nvswitch').comparisons.map((c) => c.id)).toContain('nvlink-nvswitch-pcie');
+  });
+});

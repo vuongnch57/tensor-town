@@ -11,6 +11,7 @@ import { Hotspot } from '../primitives/Hotspot';
 import { Selectable, useSceneInteraction } from '../primitives/Selectable';
 import { simulate } from '../zones/gpu-hall/sim';
 import { simulate as packSimulate } from '../zones/packing-station/sim';
+import { DgxBuilding } from '../zones/dgx-building/DgxBuilding';
 import { anchors as packAnchors } from '../zones/packing-station/anchors';
 import { scene, type SceneColor } from '../core/palette';
 import { Crates, Fence, Lamps, Trees } from '../primitives/Props';
@@ -371,12 +372,13 @@ function PackingDock({ active }: { active: boolean }) {
 }
 
 /** All nine districts, the control hill and the props, in the airy diorama style of the Zone 1 scene. */
-export function Buildings({ factoryActive, packingActive }: { factoryActive: boolean; packingActive: boolean }) {
+export function Buildings({ factoryActive, packingActive, dgxActive }: { factoryActive: boolean; packingActive: boolean; dgxActive: boolean }) {
   return (
     <group>
       <Hill />
       <FactoryQuarter active={factoryActive} />
       <PackingDock active={packingActive} />
+      <DgxBuilding active={dgxActive} />
       {buildings.map((b, i) => (
         <Block key={i} b={b} />
       ))}

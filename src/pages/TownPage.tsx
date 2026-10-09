@@ -45,6 +45,7 @@ export default function TownPage() {
   const item = selectedId ? itemsById[selectedId] ?? null : null;
   const anchor = item?.kind === 'object' ? (item.zone === 'gpu-hall' ? factoryAnchors : anchorsBySlug[item.zone])?.[item.anchorId ?? item.id] : undefined;
   const itemFocus = anchor ? anchor.focus ?? anchor.position : null;
+  const itemView = anchor?.view ?? null;
 
   // Entering a district ends the tour.
   useEffect(() => {
@@ -55,7 +56,7 @@ export default function TownPage() {
 
   return (
     <div className="relative min-h-0 flex-1 overflow-hidden">
-      {webgl ? <TownScene focus={focus} itemFocus={itemFocus} reducedMotion={reduced} onSelect={(s) => navigate(zonePath(s))} onSelectItem={goTo} onMiss={() => selectedId && goTo(null)} /> : <TownFallback />}
+      {webgl ? <TownScene focus={focus} itemFocus={itemFocus} itemView={itemView} reducedMotion={reduced} onSelect={(s) => navigate(zonePath(s))} onSelectItem={goTo} onMiss={() => selectedId && goTo(null)} /> : <TownFallback />}
       {focus && !(built && selectedId) && <DistrictCard slug={focus} />}
       {focus && zone && built && selectedId && <ZonePanels zone={zone} items={items} selectedId={selectedId} onSelect={goTo} />}
       {!focus && tourStep === null && (

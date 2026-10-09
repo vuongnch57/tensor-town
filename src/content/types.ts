@@ -46,6 +46,10 @@ export type PackFormat = 'fp32' | 'bf16' | 'fp8' | 'int8';
 export type ModelSize = '7b' | '13b' | '70b';
 export type PackSimParams = { format: PackFormat; model: ModelSize };
 
+/** Simulation state for Zone 3 (the DGX building). */
+export type FabricInterconnect = 'pcie' | 'nvlink' | 'nvswitch';
+export type FabricSimParams = { interconnect: FabricInterconnect };
+
 export type Item = {
   id: string; // unique across the site, e.g. 'hbm'
   zone: ZoneSlug;
@@ -70,6 +74,8 @@ export type Item = {
   sim?: Partial<SimParams>;
   /** Zone 2: simulation state to apply on select. */
   packSim?: Partial<PackSimParams>;
+  /** Zone 3: simulation state to apply on select. */
+  fabricSim?: Partial<FabricSimParams>;
 };
 
 export type Comparison = {
@@ -94,4 +100,6 @@ export type Anchor = {
   label: string;
   /** Where the camera looks when this object is selected (defaults to the hotspot position). */
   focus?: [number, number, number];
+  /** Closer or turned camera for small objects: zoom multiplier and the viewing angles in degrees (default 45° azimuth, 35° elevation). */
+  view?: { zoom?: number; azimuth?: number; elevation?: number };
 };
