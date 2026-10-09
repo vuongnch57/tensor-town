@@ -1,6 +1,6 @@
 import type { Comparison } from './types';
 
-// Zone 1 to Zone 3 comparisons. The remaining comparisons arrive with their zones.
+// Zone 1 to Zone 4 comparisons. The remaining comparisons arrive with their zones.
 export const comparisons: Comparison[] = [
   {
     id: 'cpu-vs-gpu',
@@ -86,5 +86,19 @@ export const comparisons: Comparison[] = [
     ],
     whyConfused:
       'All three appear in server brochures with the same GPUs inside, so they read like three product tiers. They differ in how much NVIDIA builds and how much the buyer does: the whole machine, the GPU core only, or a set of parts to arrange.',
+  },
+  {
+    id: 'infiniband-ethernet-spectrumx',
+    title: 'InfiniBand vs Ethernet vs Spectrum-X',
+    zones: ['transport-network'],
+    columns: ['InfiniBand', 'Ethernet', 'Spectrum-X'],
+    rows: [
+      { label: 'In the factory', values: ['Private freight rail', 'Public road', 'Road with smart traffic control'] },
+      { label: 'When crowded', values: ['Waits, never drops', 'Drops parcels and re-sends', 'Steers round the jam'], best: 0 },
+      { label: 'Built for', values: ['Clusters', 'Everything', 'AI on Ethernet'] },
+      { label: 'Needs', values: ['A dedicated fabric', 'Careful tuning of bandwidth, latency and congestion for AI', 'Matching switches and network cards'] },
+    ],
+    whyConfused:
+      'All three move data between machines and all three can reach the same speeds on paper, so it is easy to treat them as the same road with different paint. They differ in what happens when traffic piles up: one waits, one drops and re-sends, and one routes around the jam.',
   },
 ];

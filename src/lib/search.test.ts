@@ -63,3 +63,17 @@ describe('search: Zone 3', () => {
     expect(search('nvswitch').comparisons.map((c) => c.id)).toContain('nvlink-nvswitch-pcie');
   });
 });
+
+describe('search: Zone 4', () => {
+  it('finds the networks, the gatehouse and the concepts', () => {
+    expect(search('infiniband').items[0].id).toBe('infiniband');
+    expect(search('ethernet').items.map((i) => i.id)).toContain('ethernet-road');
+    expect(search('spectrum').items.map((i) => i.id)).toContain('spectrum-x-control');
+    expect(search('dpu').items.map((i) => i.id)).toContain('dpu-gatehouse');
+    expect(search('packet loss').items.map((i) => i.id)).toContain('dropped-parcels');
+    expect(search('rdma').items.map((i) => i.id)).toContain('rdma');
+  });
+  it('finds the Zone 4 comparison', () => {
+    expect(search('infiniband').comparisons.map((c) => c.id)).toContain('infiniband-ethernet-spectrumx');
+  });
+});

@@ -1,6 +1,7 @@
 import type { ZoneSlug } from '@/content/types';
 import { connections } from '@/content/town';
 import type { SceneColor } from '../core/palette';
+import { YARD_FOOTPRINT } from '../zones/transport-network/layout';
 import { makePath, type Path, type Pt } from './path';
 
 /**
@@ -92,7 +93,7 @@ export const districtLayout: District[] = [
   { slug: 'gpu-hall', focus: [4, 1], marker: [1.9, 3.1, 1] },
   { slug: 'packing-station', focus: [15.5, -8], marker: [11.4, 3.5, -8.5] },
   { slug: 'dgx-building', focus: [-6.4, 4.8], marker: [-9.3, 3.2, 1.7], zoom: 3.5 },
-  { slug: 'transport-network', focus: [-12, 12], marker: [-14.3, 3.7, 12.6] },
+  { slug: 'transport-network', focus: [-7.4, 10.4], marker: [-14.3, 3.7, 12.6], zoom: 3.0 },
   { slug: 'storage-yard', focus: [6.5, 10.5], marker: [5.7, 3.6, 10.8] },
   { slug: 'production-line', focus: [16, 0.4], marker: [16.4, 3.4, 0.4] },
   { slug: 'control-room', focus: [-14, -9], marker: [-14, 7.6, -9] },
@@ -177,6 +178,7 @@ export function footprints(): [number, number, number, number][] {
     [FACTORY_ORIGIN[0] + 1, FACTORY_ORIGIN[1] + 0.5, 9, 7],
     [17.9, -9.1, 4, 4.3],
     [-6.4, 4.6, 3.8, 4.9],
+    YARD_FOOTPRINT,
   ];
 }
 

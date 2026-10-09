@@ -1,4 +1,4 @@
-import type { FabricInterconnect, GpuModel, ModelSize, NumberFormat, PackFormat, Workload } from './types';
+import type { NetworkKind, FabricInterconnect, GpuModel, ModelSize, NumberFormat, PackFormat, Workload } from './types';
 
 /** User-facing text for the zone page UI. */
 export const zoneText = {
@@ -103,5 +103,23 @@ export const fabricText = {
     ] as { value: FabricInterconnect; label: string }[],
     time: (n: number) => `${n.toFixed(2)}×`,
     faster: (n: number) => (n > 1.05 ? `${n.toFixed(1)}× faster` : 'About the same'),
+  },
+};
+
+export const netText = {
+  simulate: {
+    title: 'Simulate',
+    network: 'Network',
+    congestion: 'Congestion',
+    throughput: 'Effective throughput',
+    dropped: 'Dropped parcels',
+    illustrative: 'Illustrative, not measured. Shares of the ideal, for one pair of nodes.',
+    networkOptions: [
+      { value: 'infiniband', label: 'InfiniBand' },
+      { value: 'ethernet', label: 'Ethernet' },
+      { value: 'spectrumx', label: 'Spectrum-X' },
+    ] as { value: NetworkKind; label: string }[],
+    percent: (n: number) => `${Math.round(n * 100)}%`,
+    droppedPill: (n: number) => (n <= 0 ? 'None dropped' : n < 0.1 ? 'A few dropped' : 'Many dropped and re-sent'),
   },
 };
