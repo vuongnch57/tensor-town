@@ -1,6 +1,6 @@
 import type { Comparison } from './types';
 
-// Zone 1 to Zone 4 comparisons. The remaining comparisons arrive with their zones.
+// Zone 1 to Zone 5 comparisons. The remaining comparisons arrive with their zones.
 export const comparisons: Comparison[] = [
   {
     id: 'cpu-vs-gpu',
@@ -100,5 +100,33 @@ export const comparisons: Comparison[] = [
     ],
     whyConfused:
       'All three move data between machines and all three can reach the same speeds on paper, so it is easy to treat them as the same road with different paint. They differ in what happens when traffic piles up: one waits, one drops and re-sends, and one routes around the jam.',
+  },
+  {
+    id: 'storage-tiers',
+    title: 'NVMe cache vs parallel FS vs object storage',
+    zones: ['storage-yard'],
+    columns: ['Local NVMe cache', 'Parallel file system', 'Object storage'],
+    rows: [
+      { label: 'In the factory', values: ['Shed next to the building', 'Big warehouse', 'Remote depot at the port'] },
+      { label: 'Speed', values: ['Fastest', 'Fast', 'Slowest'], best: 0 },
+      { label: 'Capacity', values: ['Smallest', 'Large', 'Largest'], best: 2 },
+      { label: 'Reached over', values: ['Local drives beside the GPUs', 'The storage network', 'The network, from far away'] },
+    ],
+    whyConfused:
+      'All three simply "store the data", and a dataset can live in all of them at once. They sit at different distances from the GPUs, which is the whole difference: the closer the tier, the faster and smaller it is.',
+  },
+  {
+    id: 'gpudirect-rdma-vs-storage',
+    title: 'GPUDirect RDMA vs GPUDirect Storage',
+    zones: ['transport-network', 'storage-yard'],
+    columns: ['GPUDirect RDMA', 'GPUDirect Storage'],
+    rows: [
+      { label: 'In the factory', values: ['Courier from another town into the hall', 'Courier from the warehouse into the hall'] },
+      { label: 'Moves data between', values: ['Network card and GPU memory', 'Storage and GPU memory'] },
+      { label: 'Skips', values: ['Staging in CPU memory', 'Staging in CPU memory'] },
+      { label: 'Lives in', values: ['The transport network', 'The storage yard'] },
+    ],
+    whyConfused:
+      'Both are "GPUDirect": both open a direct lane into GPU memory so parcels skip the CPU\'s office. They differ only in where the parcel comes from, another machine across the network or a storage system.',
   },
 ];
