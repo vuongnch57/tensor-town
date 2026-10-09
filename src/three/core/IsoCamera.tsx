@@ -7,7 +7,7 @@ import { MathUtils, Vector3, type OrthographicCamera as Ortho } from 'three';
 const ELEVATION = MathUtils.degToRad(35);
 const AZIMUTH = MathUtils.degToRad(45);
 const DISTANCE = 40;
-/** Eases in ≈0.4 s (SPEC §4.4). */
+/** Default ease time: ≈0.4 s (SPEC §4.4). */
 const SMOOTH = 0.12;
 
 export type IsoCameraProps = {
@@ -20,13 +20,15 @@ export type IsoCameraProps = {
   /** Zoom multiplier while focused on an object. */
   focusZoom?: number;
   reducedMotion?: boolean;
+  /** Ease time constant; larger is slower. 0.2 gives the ≈0.8 s district fly-in. */
+  smoothTime?: number;
 };
 
 /**
  * Orthographic isometric camera (elevation ≈35°, azimuth 45°, no free orbit).
  * Eases toward `focus`; with reduced motion it cuts instead.
  */
-export function IsoCamera({ focus, home = [0, 0, 0], fitWidth = 26, fitHeight = 18, focusZoom = 1.35, reducedMotion = false }: IsoCameraProps) {
+export function IsoCamera({ focus, home = [0, 0, 0], fitWidth = 26, fitHeight = 18, focusZoom = 1.35, reducedMotion = false, smoothTime = SMOOTH }: IsoCameraProps) {
   const ref = useRef<Ortho>(null);
   const size = useThree((s) => s.size);
   const offset = useMemo(() => new Vector3(Math.cos(ELEVATION) * Math.sin(AZIMUTH), Math.sin(ELEVATION), Math.cos(ELEVATION) * Math.cos(AZIMUTH)).multiplyScalar(DISTANCE), []);
@@ -58,8 +60,8 @@ export function IsoCamera({ focus, home = [0, 0, 0], fitWidth = 26, fitHeight = 
       target.current.copy(goal);
       cam.zoom = goalZoom;
     } else {
-      damp3(target.current, goal, SMOOTH, dt);
-      damp(cam, 'zoom', goalZoom, SMOOTH, dt);
+      damp3(target.current, goal, smoothTime, dt);
+      damp(cam, 'zoom', goalZoom, smoothTime, dt);
     }
     pos.copy(target.current).add(offset);
     cam.position.copy(pos);

@@ -3,7 +3,7 @@ import { DEFAULT_SIM, useFactoryStore } from './useFactoryStore';
 import { zonePath } from '@/lib/urls';
 
 describe('store and urls', () => {
-  beforeEach(() => useFactoryStore.setState({ selectedId: null, sim: DEFAULT_SIM }));
+  beforeEach(() => useFactoryStore.setState({ selectedId: null, sim: DEFAULT_SIM, menuOpen: false, hiddenGroups: [], tourStep: null }));
   it('select() sets and clears the selection', () => {
     useFactoryStore.getState().select('hbm');
     expect(useFactoryStore.getState().selectedId).toBe('hbm');
@@ -17,5 +17,21 @@ describe('store and urls', () => {
   it('builds item urls', () => {
     expect(zonePath('gpu-hall')).toBe('/zone/gpu-hall');
     expect(zonePath('gpu-hall', 'hbm')).toBe('/zone/gpu-hall/hbm');
+  });
+  it('toggles connection groups and the menu', () => {
+    const st = useFactoryStore.getState();
+    st.toggleGroup('rail');
+    st.toggleGroup('river');
+    expect(useFactoryStore.getState().hiddenGroups).toEqual(['rail', 'river']);
+    useFactoryStore.getState().toggleGroup('rail');
+    expect(useFactoryStore.getState().hiddenGroups).toEqual(['river']);
+    useFactoryStore.getState().setMenuOpen(true);
+    expect(useFactoryStore.getState().menuOpen).toBe(true);
+  });
+  it('tracks the tour step', () => {
+    useFactoryStore.getState().setTourStep(2);
+    expect(useFactoryStore.getState().tourStep).toBe(2);
+    useFactoryStore.getState().setTourStep(null);
+    expect(useFactoryStore.getState().tourStep).toBeNull();
   });
 });
