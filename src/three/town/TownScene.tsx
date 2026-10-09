@@ -42,28 +42,36 @@ function TourLabels({ ids }: { ids: Set<string> }) {
   );
 }
 
-type Props = { focus: ZoneSlug | null; reducedMotion: boolean; onSelect: (slug: ZoneSlug) => void };
+type Props = {
+  focus: ZoneSlug | null;
+  /** Camera target when an object inside the focused district is selected. */
+  itemFocus?: [number, number, number] | null;
+  reducedMotion: boolean;
+  onSelect: (slug: ZoneSlug) => void;
+  onSelectItem: (id: string) => void;
+  onMiss: () => void;
+};
 
 /** The whole town in one scene. `focus` flies the camera into a district; the tour dims everything but the connections it highlights. */
-export function TownScene({ focus, reducedMotion, onSelect }: Props) {
+export function TownScene({ focus, itemFocus = null, reducedMotion, onSelect, onSelectItem, onMiss }: Props) {
   const hiddenGroups = useFactoryStore((s) => s.hiddenGroups);
   const tourStep = useFactoryStore((s) => s.tourStep);
   const step = tourStep === null ? null : tourSteps[tourStep];
   const highlighted = useMemo(() => (step ? stepConnectionIds(step) : new Set<string>()), [step]);
   const dimmed = useCallback((id: string) => isDimmed(id, step !== null, highlighted), [step, highlighted]);
   const sensorsHidden = hiddenGroups.includes('sensors');
-  const interaction = useMemo(() => ({ onSelect: () => {}, reducedMotion }), [reducedMotion]);
+  const interaction = useMemo(() => ({ onSelect: onSelectItem, reducedMotion }), [onSelectItem, reducedMotion]);
   return (
     <SceneInteractionContext.Provider value={interaction}>
-    <SceneCanvas label="Isometric town: nine districts joined by roads, rail, belts, a river, cables and sensor lines">
-      <IsoCamera focus={focus ? districtCenter(focus) : null} home={[0, 0.6, 0]} fitWidth={59} fitHeight={42} focusZoom={2.6} smoothTime={0.2} reducedMotion={reducedMotion} />
+    <SceneCanvas onMiss={onMiss} label="Isometric town: nine districts joined by roads, rail, belts, a river, cables and sensor lines">
+      <IsoCamera focus={itemFocus ?? (focus ? districtCenter(focus) : null)} home={[0, 0.6, 0]} fitWidth={59} fitHeight={42} focusZoom={itemFocus ? 5 : 2.6} smoothTime={0.2} reducedMotion={reducedMotion} />
       <Ground width={TOWN_W} depth={TOWN_D} radius={3} thickness={1.6} />
-      <Buildings reducedMotion={reducedMotion} />
+      <Buildings factoryActive={focus === 'gpu-hall'} />
       <Ribbons hiddenGroups={hiddenGroups} isDimmed={dimmed} />
       <Parcels hiddenGroups={hiddenGroups} isDimmed={dimmed} reducedMotion={reducedMotion} />
       <Sensors hidden={sensorsHidden} isDimmed={dimmed} reducedMotion={reducedMotion} />
       {step && <TourLabels ids={highlighted} />}
-      <Markers focus={focus} dimExcept={step ? step.districts : null} onSelect={onSelect} />
+      <Markers focus={focus} hideFocused={itemFocus !== null} dimExcept={step ? step.districts : null} onSelect={onSelect} />
     </SceneCanvas>
     </SceneInteractionContext.Provider>
   );

@@ -2,15 +2,17 @@ import { createContext, useContext, useLayoutEffect, useMemo, useRef, type React
 import { useFrame } from '@react-three/fiber';
 import { Color, Group, Mesh, MeshStandardMaterial } from 'three';
 import { useFactoryStore } from '@/state/useFactoryStore';
-import { scene } from '../core/palette';
+import { pin, scene } from '../core/palette';
 
 export type SceneInteraction = { onSelect: (id: string) => void; reducedMotion: boolean };
 export const SceneInteractionContext = createContext<SceneInteraction>({ onSelect: () => {}, reducedMotion: false });
 export const useSceneInteraction = () => useContext(SceneInteractionContext);
 
-const GLOW = new Color(scene.parcel).offsetHSL(0, 0.15, 0.1);
+// Selected objects turn a vivid, lit version of the UI accent; the rest fade toward the ground colour.
+const TINT = new Color(pin.accent).offsetHSL(0, 0.15, 0.16);
+const GLOW = new Color(pin.accent).offsetHSL(0, 0.2, 0.3);
 const DIM = new Color(scene.ground);
-const DIM_AMOUNT = 0.18; // others fade ~15–20% toward the ground colour
+const DIM_AMOUNT = 0.6; // others fade most of the way toward the ground colour so the selection stands out
 const EASE = 12;
 
 type Props = { id: string; position?: [number, number, number]; lift?: number; children: ReactNode };
@@ -54,10 +56,10 @@ export function Selectable({ id, position = [0, 0, 0], lift = 0.14, children }: 
     st.lift = nextLift;
     if (settled && !selected) return;
     if (inner.current) inner.current.position.y = st.lift + pulse * 0.03;
-    const intensity = st.glow * (0.3 + 0.15 * pulse);
+    const intensity = st.glow * (0.5 + 0.2 * pulse);
     for (const { m, base } of mats.current) {
-      m.color.copy(base).lerp(DIM, st.dim * DIM_AMOUNT);
-      m.emissive.copy(base).lerp(GLOW, 0.25); // brighten the object's own colour, with a warm touch
+      m.color.copy(base).lerp(DIM, st.dim * DIM_AMOUNT).lerp(TINT, st.glow * 0.65);
+      m.emissive.copy(GLOW);
       m.emissiveIntensity = intensity;
     }
   });

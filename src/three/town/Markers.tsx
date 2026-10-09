@@ -3,14 +3,15 @@ import { districts } from '@/content/town';
 import type { ZoneSlug } from '@/content/types';
 import { markerWorld } from './layout';
 
-type Props = { focus: ZoneSlug | null; dimExcept: ZoneSlug[] | null; onSelect: (slug: ZoneSlug) => void };
+type Props = { focus: ZoneSlug | null; dimExcept: ZoneSlug[] | null; hideFocused?: boolean; onSelect: (slug: ZoneSlug) => void };
 
 /** Numbered district markers (real buttons). Name labels sit beside them on wide screens; on phones only the selected one shows. */
-export function Markers({ focus, dimExcept, onSelect }: Props) {
+export function Markers({ focus, dimExcept, hideFocused = false, onSelect }: Props) {
   return (
     <>
       {districts.map((d) => {
         const selected = focus === d.slug;
+        if (selected && hideFocused) return null;
         const dim = (focus !== null && !selected) || (dimExcept !== null && !dimExcept.includes(d.slug));
         return (
           <Html key={d.slug} position={markerWorld(d.slug)} center zIndexRange={[20, 0]} style={{ pointerEvents: 'none' }}>
