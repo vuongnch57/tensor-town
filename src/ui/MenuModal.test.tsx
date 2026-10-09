@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { MenuModal, matchDistricts } from './MenuModal';
 import { HamburgerButton } from './HamburgerButton';
 import { useFactoryStore } from '@/state/useFactoryStore';
 
 afterEach(() => {
   cleanup();
-  useFactoryStore.setState({ menuOpen: false, hiddenGroups: [], tourStep: null });
+  useFactoryStore.setState({ menuOpen: false, hiddenGroups: [], tourStep: null, searchQuery: '' });
 });
 
 describe('district search', () => {
@@ -17,6 +17,39 @@ describe('district search', () => {
     expect(matchDistricts('gpu hall').map((d) => d.slug)).toEqual(['gpu-hall']);
     expect(matchDistricts('coolant').map((d) => d.slug)).toContain('power-cooling');
     expect(matchDistricts('zzzz')).toEqual([]);
+  });
+});
+
+describe('menu search', () => {
+  const Where = () => <span data-testid="where">{useLocation().pathname}</span>;
+  const setup = () => {
+    useFactoryStore.setState({ menuOpen: true });
+    return render(
+      <MemoryRouter>
+        <MenuModal />
+        <Where />
+      </MemoryRouter>,
+    );
+  };
+  it('groups results as Items and Comparisons and hides the other sections', () => {
+    setup();
+    fireEvent.change(screen.getByLabelText('Search'), { target: { value: 'hbm' } });
+    expect(screen.getByRole('heading', { name: 'Items' })).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Comparisons' })).toBeTruthy();
+    expect(screen.queryByRole('heading', { name: 'Pages' })).toBeNull();
+  });
+  it('opens the first result on Enter and closes the menu', () => {
+    setup();
+    const input = screen.getByLabelText('Search');
+    fireEvent.change(input, { target: { value: 'hbm' } });
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(screen.getByTestId('where').textContent).toBe('/zone/gpu-hall/hbm');
+    expect(useFactoryStore.getState().menuOpen).toBe(false);
+  });
+  it('says so when nothing matches', () => {
+    setup();
+    fireEvent.change(screen.getByLabelText('Search'), { target: { value: 'zzzz' } });
+    expect(screen.getByText('Nothing matches.')).toBeTruthy();
   });
 });
 

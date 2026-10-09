@@ -3,6 +3,7 @@ import { Html } from '@react-three/drei';
 import { connections, stepConnectionIds, tourSteps } from '@/content/town';
 import type { ZoneSlug } from '@/content/types';
 import { useFactoryStore } from '@/state/useFactoryStore';
+import { searchDistricts } from '@/lib/search';
 import { Ground } from '../core/Ground';
 import { IsoCamera } from '../core/IsoCamera';
 import { SceneCanvas } from '../core/SceneCanvas';
@@ -59,6 +60,8 @@ export function TownScene({ focus, itemFocus = null, reducedMotion, onSelect, on
   const step = tourStep === null ? null : tourSteps[tourStep];
   const highlighted = useMemo(() => (step ? stepConnectionIds(step) : new Set<string>()), [step]);
   const dimmed = useCallback((id: string) => isDimmed(id, step !== null, highlighted), [step, highlighted]);
+  const searchQuery = useFactoryStore((s) => s.searchQuery);
+  const pulse = useMemo(() => searchDistricts(searchQuery), [searchQuery]);
   const sensorsHidden = hiddenGroups.includes('sensors');
   const interaction = useMemo(() => ({ onSelect: onSelectItem, reducedMotion }), [onSelectItem, reducedMotion]);
   return (
@@ -71,7 +74,7 @@ export function TownScene({ focus, itemFocus = null, reducedMotion, onSelect, on
       <Parcels hiddenGroups={hiddenGroups} isDimmed={dimmed} reducedMotion={reducedMotion} />
       <Sensors hidden={sensorsHidden} isDimmed={dimmed} reducedMotion={reducedMotion} />
       {step && <TourLabels ids={highlighted} />}
-      <Markers focus={focus} hideFocused={itemFocus !== null} dimExcept={step ? step.districts : null} onSelect={onSelect} />
+      <Markers pulse={pulse} focus={focus} hideFocused={itemFocus !== null} dimExcept={step ? step.districts : null} onSelect={onSelect} />
     </SceneCanvas>
     </SceneInteractionContext.Provider>
   );
