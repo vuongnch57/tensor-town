@@ -1,4 +1,4 @@
-import type { NetworkKind, FabricInterconnect, GpuModel, ModelSize, NumberFormat, PackFormat, Workload } from './types';
+import type { StoragePath, NetworkKind, FabricInterconnect, GpuModel, ModelSize, NumberFormat, PackFormat, Workload } from './types';
 
 /** User-facing text for the zone page UI. */
 export const zoneText = {
@@ -121,5 +121,30 @@ export const netText = {
     ] as { value: NetworkKind; label: string }[],
     percent: (n: number) => `${Math.round(n * 100)}%`,
     droppedPill: (n: number) => (n <= 0 ? 'None dropped' : n < 0.1 ? 'A few dropped' : 'Many dropped and re-sent'),
+  },
+};
+
+export const storageText = {
+  simulate: {
+    title: 'Simulate',
+    cache: 'NVMe cache',
+    path: 'Path',
+    epoch: (n: number) => `Epoch ${n}`,
+    next: 'Next epoch ›',
+    restart: 'Restart ↺',
+    fetch: 'Fetch time per epoch',
+    fromCache: 'Read from cache',
+    illustrative: 'Illustrative, not measured. Epoch 1 through the CPU with no cache = 1.00×.',
+    cacheOptions: [
+      { value: 'on', label: 'On' },
+      { value: 'off', label: 'Off' },
+    ] as { value: 'on' | 'off'; label: string }[],
+    pathOptions: [
+      { value: 'cpu', label: 'Via CPU' },
+      { value: 'gpudirect', label: 'GPUDirect' },
+    ] as { value: StoragePath; label: string }[],
+    time: (n: number) => `${n.toFixed(2)}×`,
+    percent: (n: number) => `${Math.round(n * 100)}%`,
+    faster: (n: number) => (n < 0.95 ? `${(1 / n).toFixed(1)}× faster` : 'Reference speed'),
   },
 };

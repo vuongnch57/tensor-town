@@ -54,6 +54,10 @@ export type FabricSimParams = { interconnect: FabricInterconnect };
 export type NetworkKind = 'infiniband' | 'ethernet' | 'spectrumx';
 export type NetSimParams = { network: NetworkKind; congestion: number };
 
+/** Simulation state for Zone 5 (the storage yard). `epoch` counts passes over the data, starting at 1. */
+export type StoragePath = 'cpu' | 'gpudirect';
+export type StorageSimParams = { cache: boolean; path: StoragePath; epoch: number };
+
 export type Item = {
   id: string; // unique across the site, e.g. 'hbm'
   zone: ZoneSlug;
@@ -82,6 +86,8 @@ export type Item = {
   fabricSim?: Partial<FabricSimParams>;
   /** Zone 4: simulation state to apply on select. */
   netSim?: Partial<NetSimParams>;
+  /** Zone 5: simulation state to apply on select. */
+  storageSim?: Partial<StorageSimParams>;
 };
 
 export type Comparison = {

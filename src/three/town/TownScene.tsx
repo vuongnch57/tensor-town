@@ -9,7 +9,7 @@ import { IsoCamera } from '../core/IsoCamera';
 import { SceneCanvas } from '../core/SceneCanvas';
 import { SceneInteractionContext } from '../primitives/Selectable';
 import { Buildings } from './Buildings';
-import { connectionPaths, districtCenter, districtZoom, TOWN_D, TOWN_W } from './layout';
+import { connectionPaths, districtCenter, districtView, districtZoom, TOWN_D, TOWN_W } from './layout';
 import { Markers } from './Markers';
 import { isDimmed } from './model';
 import { Parcels } from './Parcels';
@@ -69,9 +69,9 @@ export function TownScene({ focus, itemFocus = null, itemView = null, reducedMot
   return (
     <SceneInteractionContext.Provider value={interaction}>
     <SceneCanvas onMiss={onMiss} label="Isometric town: nine districts joined by roads, rail, belts, a river, cables and sensor lines">
-      <IsoCamera focus={itemFocus ?? (focus ? districtCenter(focus) : null)} home={[0, 0.6, 0]} fitWidth={59} fitHeight={42} focusZoom={itemFocus ? itemView?.zoom ?? 5 : focus ? districtZoom(focus) : 2.6} azimuth={itemFocus ? itemView?.azimuth : undefined} elevation={itemFocus ? itemView?.elevation : undefined} smoothTime={0.2} reducedMotion={reducedMotion} />
+      <IsoCamera focus={itemFocus ?? (focus ? districtCenter(focus) : null)} home={[0, 0.6, 0]} fitWidth={59} fitHeight={42} focusZoom={itemFocus ? itemView?.zoom ?? 5 : focus ? districtZoom(focus) : 2.6} azimuth={(itemFocus ? itemView?.azimuth : undefined) ?? (focus ? districtView(focus)?.azimuth : undefined)} elevation={(itemFocus ? itemView?.elevation : undefined) ?? (focus ? districtView(focus)?.elevation : undefined)} smoothTime={0.2} reducedMotion={reducedMotion} />
       <Ground width={TOWN_W} depth={TOWN_D} radius={3} thickness={1.6} />
-      <Buildings factoryActive={focus === 'gpu-hall'} packingActive={focus === 'packing-station'} dgxActive={focus === 'dgx-building'} transportActive={focus === 'transport-network'} />
+      <Buildings factoryActive={focus === 'gpu-hall'} packingActive={focus === 'packing-station'} dgxActive={focus === 'dgx-building'} transportActive={focus === 'transport-network'} storageActive={focus === 'storage-yard'} />
       <Ribbons hiddenGroups={hiddenGroups} isDimmed={dimmed} />
       <Parcels hiddenGroups={hiddenGroups} isDimmed={dimmed} reducedMotion={reducedMotion} />
       <Sensors hidden={sensorsHidden} isDimmed={dimmed} reducedMotion={reducedMotion} />

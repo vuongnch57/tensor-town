@@ -77,3 +77,18 @@ describe('search: Zone 4', () => {
     expect(search('infiniband').comparisons.map((c) => c.id)).toContain('infiniband-ethernet-spectrumx');
   });
 });
+
+describe('search: Zone 5', () => {
+  it('finds the storage tiers, the courier lane and the concepts', () => {
+    expect(search('gpudirect storage').items[0].id).toBe('gpudirect-storage');
+    expect(search('nvme').items.map((i) => i.id)).toContain('nvme-cache-shed');
+    expect(search('parallel').items.map((i) => i.id)).toContain('parallel-file-system');
+    expect(search('object storage').items.map((i) => i.id)).toContain('object-storage-depot');
+    expect(search('epoch').items.map((i) => i.id)).toContain('epoch');
+    expect(search('snapshot').items.map((i) => i.id)).toContain('checkpoint');
+  });
+  it('finds the Zone 5 comparisons', () => {
+    expect(search('nvme').comparisons.map((c) => c.id)).toContain('storage-tiers');
+    expect(search('gpudirect').comparisons.map((c) => c.id)).toContain('gpudirect-rdma-vs-storage');
+  });
+});

@@ -12,6 +12,7 @@ import { Selectable, useSceneInteraction } from '../primitives/Selectable';
 import { simulate } from '../zones/gpu-hall/sim';
 import { simulate as packSimulate } from '../zones/packing-station/sim';
 import { DgxBuilding } from '../zones/dgx-building/DgxBuilding';
+import { StorageYard } from '../zones/storage-yard/StorageYard';
 import { TransportNetwork } from '../zones/transport-network/TransportNetwork';
 import { anchors as packAnchors } from '../zones/packing-station/anchors';
 import { scene, type SceneColor } from '../core/palette';
@@ -373,7 +374,7 @@ function PackingDock({ active }: { active: boolean }) {
 }
 
 /** All nine districts, the control hill and the props, in the airy diorama style of the Zone 1 scene. */
-export function Buildings({ factoryActive, packingActive, dgxActive, transportActive }: { factoryActive: boolean; packingActive: boolean; dgxActive: boolean; transportActive: boolean }) {
+export function Buildings({ factoryActive, packingActive, dgxActive, transportActive, storageActive }: { factoryActive: boolean; packingActive: boolean; dgxActive: boolean; transportActive: boolean; storageActive: boolean }) {
   return (
     <group>
       <Hill />
@@ -381,6 +382,7 @@ export function Buildings({ factoryActive, packingActive, dgxActive, transportAc
       <PackingDock active={packingActive} />
       <DgxBuilding active={dgxActive} />
       <TransportNetwork active={transportActive} />
+      <StorageYard active={storageActive} />
       {buildings.map((b, i) => (
         <Block key={i} b={b} />
       ))}

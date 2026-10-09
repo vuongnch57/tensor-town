@@ -1,6 +1,7 @@
 import type { ZoneSlug } from '@/content/types';
 import { connections } from '@/content/town';
 import type { SceneColor } from '../core/palette';
+import { YARD_FOOTPRINT as STORAGE_FOOTPRINT } from '../zones/storage-yard/layout';
 import { YARD_FOOTPRINT } from '../zones/transport-network/layout';
 import { makePath, type Path, type Pt } from './path';
 
@@ -32,9 +33,6 @@ export type Building = {
 };
 export type Cylinder = { x: number; z: number; r: number; h: number; y0?: number; color: SceneColor };
 
-/** Storage roofs are the storage colour pushed toward the roof slate (same value as derived.storageRoof). */
-const STORAGE_ROOF = 'storage-roof';
-
 export const buildings: Building[] = [
   // Control Tower on its hill (hill base is drawn separately)
   { x: -14, z: -9, w: 2.2, d: 2.2, h: 5, y0: 0.6, roof: 'roof', win: [2, 4] },
@@ -50,10 +48,7 @@ export const buildings: Building[] = [
   { x: -14.3, z: 15.2, w: 1.6, d: 1.6, h: 2.6, roof: 'network' },
   { x: -14.3, z: 12.6, w: 1.8, d: 6.8, h: 0.5, y0: 2.6, wall: 'network', roof: 'network', flat: true },
   { x: -8.5, z: 16.4, w: 3.4, d: 1.8, h: 1.6, roof: 'network', win: [2, 1], door: true },
-  // Harbour Depot
-  { x: 5.7, z: 10.8, w: 5, d: 3, h: 2.2, roof: 'storage', roofHex: STORAGE_ROOF, door: true, win: [2, 1] },
-  { x: 11.2, z: 11.4, w: 3, d: 2.4, h: 1.6, roof: 'storage', roofHex: STORAGE_ROOF, door: true },
-  { x: 3.6, z: 6.9, w: 1.8, d: 1.5, h: 1.1, roof: 'roof', door: true },
+  // Harbour Depot: the storage yard is its own scene (see zones/storage-yard)
   // Packing Dock
   { x: 11.4, z: -8.5, w: 4.4, d: 3.2, h: 2, roof: 'parcel', door: true, win: [3, 1] },
   // Assembly Row
@@ -87,14 +82,14 @@ export const FACTORY_BLOCKS: Building[] = [
   { x: 9.9, z: 2.2, w: 3.6, d: 3.4, h: 1.9, roof: 'storage' },
 ];
 
-type District = { slug: ZoneSlug; focus: Pt; marker: [number, number, number]; /** Camera zoom when the district is focused (default 2.6). */ zoom?: number };
+type District = { slug: ZoneSlug; focus: Pt; marker: [number, number, number]; /** Camera zoom when the district is focused (default 2.6). */ zoom?: number; /** Camera angles in degrees for the district (default 45° azimuth, 35° elevation), for districts whose objects line up along the default view axis. */ view?: { azimuth?: number; elevation?: number } };
 
 export const districtLayout: District[] = [
   { slug: 'gpu-hall', focus: [4, 1], marker: [1.9, 3.1, 1] },
   { slug: 'packing-station', focus: [15.5, -8], marker: [11.4, 3.5, -8.5] },
   { slug: 'dgx-building', focus: [-6.4, 4.8], marker: [-9.3, 3.2, 1.7], zoom: 3.5 },
   { slug: 'transport-network', focus: [-7.4, 10.4], marker: [-14.3, 3.7, 12.6], zoom: 3.0 },
-  { slug: 'storage-yard', focus: [6.5, 10.5], marker: [5.7, 3.6, 10.8] },
+  { slug: 'storage-yard', focus: [6.6, 8.6], marker: [5.7, 4.2, 10.8], zoom: 3.2, view: { azimuth: 78, elevation: 42 } },
   { slug: 'production-line', focus: [16, 0.4], marker: [16.4, 3.4, 0.4] },
   { slug: 'control-room', focus: [-14, -9], marker: [-14, 7.6, -9] },
   { slug: 'power-cooling', focus: [-13, 2.5], marker: [-16.4, 3.6, 2.6] },
@@ -107,6 +102,7 @@ const find = (slug: ZoneSlug): District => {
   return d;
 };
 export const markerWorld = (slug: ZoneSlug): [number, number, number] => [...find(slug).marker];
+export const districtView = (slug: ZoneSlug) => find(slug).view;
 export const districtZoom = (slug: ZoneSlug): number => find(slug).zoom ?? 2.6;
 export const districtCenter = (slug: ZoneSlug): [number, number, number] => [find(slug).focus[0], 0, find(slug).focus[1]];
 /** Where sensor lines leave the control tower. */
@@ -126,7 +122,7 @@ export const connectionGeometry: Record<string, ConnGeometry> = {
   'rail-gate-harbour': { pts: [[-12.5, 14.7], [10.6, 14.7], [10.6, 12.7]], parcels: true },
   'rail-tower-gate': { pts: [[-6.4, 8.1], [-6.4, 14.7]] },
   'rail-harbour-factory': { pts: [[11.6, 10.2], [11.6, 4.0]], parcels: true },
-  'belt-harbour-factory': { pts: [[8.4, 9.3], [8.4, 6.0], [9.9, 6.0], [9.9, 4.0]], parcels: true },
+  'belt-harbour-factory': { pts: [[8.4, 10.4], [8.4, 6.0], [9.9, 6.0], [9.9, 4.0]], parcels: true },
   'belt-packing-factory': { pts: [[9.6, -6.9], [9.6, -3.4], [1.9, -3.4], [1.9, -2.3]], parcels: true },
   'belt-packing-assembly': { pts: [[13.6, -6.9], [13.6, -4.6], [14.6, -4.6], [14.6, -2.9]] },
   'bridge-tower-factory': { pts: [[-3.6, 3.8], [-1.2, 3.8]], z: 2.0, bridge: true, parcels: true },
@@ -179,6 +175,7 @@ export function footprints(): [number, number, number, number][] {
     [17.9, -9.1, 4, 4.3],
     [-6.4, 4.6, 3.8, 4.9],
     YARD_FOOTPRINT,
+    STORAGE_FOOTPRINT,
   ];
 }
 

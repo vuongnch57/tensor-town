@@ -1,5 +1,4 @@
 import { useMemo } from 'react';
-import { Color, MeshStandardMaterial } from 'three';
 import { useFactoryStore } from '@/state/useFactoryStore';
 import { itemsInZone } from '@/content/registry';
 import { derived } from '../../core/derived';
@@ -9,20 +8,9 @@ import { Hotspot } from '../../primitives/Hotspot';
 import { Parcels } from '../../primitives/Parcels';
 import { Selectable, useSceneInteraction } from '../../primitives/Selectable';
 import type { Pt } from '@/lib/path';
+import { mat, mix, Slab } from '../kit';
 import { simulate } from './sim';
 import { anchors, BIN, BIN_CRATES, DPU_X, GANTRY_X, LANE_X0, LANE_X1, NODE, NODE_A_X, NODE_B_X, NODE_Z, RAIL_Z, ROAD_Z } from './layout';
-
-const mix = (a: string, b: string, t: number) => `#${new Color(a).lerp(new Color(b), t).getHexString()}`;
-const mat = (color: string, roughness = 0.75) => new MeshStandardMaterial({ color, roughness, metalness: 0 });
-
-/** Plain box standing on its own base. Cheap, for small details. */
-function Slab({ size, position, m, rot = 0 }: { size: [number, number, number]; position: [number, number, number]; m: MeshStandardMaterial; rot?: number }) {
-  return (
-    <mesh material={m} position={[position[0], position[1] + size[1] / 2, position[2]]} rotation={[0, rot, 0]} receiveShadow>
-      <boxGeometry args={size} />
-    </mesh>
-  );
-}
 
 /** Every Selectable gets its own materials, so selecting one object never tints another. */
 const useMats = () =>

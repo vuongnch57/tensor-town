@@ -35,10 +35,10 @@ describe('DetailPanel', () => {
     expect([...order].sort((a, b) => a - b)).toEqual(order);
     expect(screen.getByText('Full comparison ›')).toBeTruthy();
   });
-  it('shows cross-zone related items as inert "coming soon" chips', () => {
+  it('shows cross-zone related items as chips that open them', () => {
     render(<MemoryRouter><DetailPanel zone={zone} item={itemsById.hbm} items={items} onSelect={() => {}} /></MemoryRouter>);
-    expect(screen.getByText(/GPUDirect Storage · Zone 5 · coming soon/)).toBeTruthy();
-    expect(screen.queryByRole('button', { name: /GPUDirect/ })).toBeNull();
+    expect(screen.getByRole('button', { name: /GPUDirect Storage/ })).toBeTruthy();
+    expect(screen.queryByText(/coming soon/)).toBeNull();
   });
   it('shows the empty state with no selection', () => {
     render(<MemoryRouter><DetailPanel zone={zone} item={null} items={items} onSelect={() => {}} /></MemoryRouter>);
