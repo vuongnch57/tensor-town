@@ -1,5 +1,6 @@
 import { useLayoutEffect, useMemo, useRef } from 'react';
-import { BoxGeometry, InstancedMesh, MeshStandardMaterial, Object3D } from 'three';
+import { useFrame } from '@react-three/fiber';
+import { BoxGeometry, type Group, InstancedMesh, MeshStandardMaterial, Object3D } from 'three';
 import { derived } from '../core/derived';
 import { Box } from '../primitives/Box';
 import { Conveyor } from '../primitives/Conveyor';
@@ -152,7 +153,18 @@ function TruckCargo() {
 
 /** District 2: the Packing Dock yard. Crates by number format, the Transformer Engine machine and the delivery truck. */
 function PackingDock({ active }: { active: boolean }) {
-  const { onSelect } = useSceneInteraction();
+  const { onSelect, reducedMotion } = useSceneInteraction();
+  const format = useFactoryStore((s) => s.packSim.format);
+  const bytes = packSimulate({ format, model: '7b' }).bytesPerParam;
+  const truck = useRef<Group>(null);
+  const engine = useRef<Group>(null);
+  // Idle motion: the truck idles with a small bounce and the Transformer Engine's stack pulses.
+  useFrame(({ clock }) => {
+    if (reducedMotion) return;
+    const t = clock.elapsedTime;
+    if (truck.current) truck.current.position.y = Math.abs(Math.sin(t * 3)) * 0.025;
+    if (engine.current) engine.current.scale.y = 1 + Math.sin(t * 2.4) * 0.06;
+  });
   const objects = useMemo(() => itemsInZone('packing-station').filter((i) => i.kind === 'object'), []);
   return (
     <>
@@ -165,9 +177,14 @@ function PackingDock({ active }: { active: boolean }) {
       <Selectable id="transformer-engine" position={[16.8, 0, -5.6]}>
         <Box size={[1.7, 0.7, 1.3]} color="network" round={0.1} />
         <Box size={[1.1, 0.5, 0.9]} position={[0, 0.7, 0]} color="wall" round={0.15} />
-        <Box size={[0.3, 0.9, 0.3]} position={[0.5, 1.2, 0]} color="roof" round={0.3} />
+        <group ref={engine}>
+          <Box size={[0.3, 0.9, 0.3]} position={[0.5, 1.2, 0]} color="roof" round={0.3} />
+        </group>
+        {/* Belt feeding crates into the engine; smaller formats move faster. */}
+        <Conveyor from={[-3.4, 0]} to={[-1.0, 0]} speed={reducedMotion ? 0 : 0.5 * bytes ** -0.5 * 2} hot={false} parcels={Math.min(6, Math.round(8 / bytes))} />
       </Selectable>
       <Selectable id="delivery-truck" position={[20.0, 0, -5.6]}>
+        <group ref={truck}>
         <Box size={[3.0, 0.2, 1.4]} position={[0, 0.25, 0]} color="wall" round={0.2} />
         <Box size={[0.9, 0.9, 1.4]} position={[1.55, 0.25, 0]} color="parcel" round={0.15} />
         {[-1.0, 1.4].map((x) => [-0.7, 0.7].map((z) => (
@@ -177,6 +194,7 @@ function PackingDock({ active }: { active: boolean }) {
           </mesh>
         )))}
         <TruckCargo />
+        </group>
       </Selectable>
       {active && objects.map((o) => <Hotspot key={o.id} itemId={o.id} number={o.number ?? 0} anchor={packAnchors[o.anchorId ?? o.id]} onSelect={onSelect} />)}
     </>
