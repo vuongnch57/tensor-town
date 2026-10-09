@@ -20,6 +20,7 @@ export const chrome = {
     connectedTo: 'Connected to',
     zone: 'Zone',
     soon: 'Objects, key facts and comparisons for this district arrive in a later phase.',
+    explore: (n: number) => `Explore the ${n} objects ›`,
   },
   tour: { start: 'Follow the data', label: 'Follow the data', previous: '‹ Previous', next: 'Next ›', finish: 'Finish', exit: 'Exit', count: (i: number, n: number) => `${i} of ${n}` },
   fallback: 'Your browser cannot show the 3D town. Use the menu to open any district.',

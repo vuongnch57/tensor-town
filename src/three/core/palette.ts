@@ -35,3 +35,12 @@ export const accentSolid: string = (() => {
   if (!v || typeof v === 'string') throw new Error('accent token missing');
   return v.light;
 })();
+
+const light = (name: string): string => {
+  const t = tokens.color.tokens.find((x) => x.name === name);
+  if (!t || typeof t.value === 'string') throw new Error(`ui token ${name} missing`);
+  return t.value.light;
+};
+
+/** Hotspots sit on the daylight scene, so they use the light-theme UI tokens in both themes. */
+export const pin = { ink: light('ink'), muted: light('muted'), accent: light('accent'), surface: light('surface-200') } as const;

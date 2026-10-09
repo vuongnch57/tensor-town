@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { chrome } from '@/content/chrome';
 import { connectionsOf, districtBySlug } from '@/content/town';
+import { itemsInZone } from '@/content/registry';
 import { zoneBySlug } from '@/content/zones';
 import type { ZoneSlug } from '@/content/types';
 import { zonePath } from '@/lib/urls';
@@ -11,6 +12,7 @@ export function DistrictCard({ slug }: { slug: ZoneSlug }) {
   const d = districtBySlug(slug);
   const zone = zoneBySlug(slug);
   if (!d || !zone) return null;
+  const objects = itemsInZone(slug).filter((i) => i.kind === 'object');
   return (
     <section aria-live="polite" className="absolute bottom-10 left-4 z-20 max-sm:bottom-9 w-[min(380px,calc(100%-32px))] rounded-lg border border-line bg-surface-200 p-5 shadow-panel max-sm:p-4">
       <div className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{chrome.district.zone} {d.number} · {zone.title}</div>
@@ -29,7 +31,13 @@ export function DistrictCard({ slug }: { slug: ZoneSlug }) {
           </button>
         ))}
       </div>
-      <p className="mt-3 border-t border-line pt-3 text-xs text-muted max-sm:hidden">{chrome.district.soon}</p>
+      {objects.length > 0 ? (
+        <button type="button" onClick={() => navigate(zonePath(slug, objects[0].id))} className="mt-3 w-full cursor-pointer rounded-md border border-accent bg-accent px-3 py-2 text-sm font-semibold text-accent-ink">
+          {chrome.district.explore(objects.length)}
+        </button>
+      ) : (
+        <p className="mt-3 border-t border-line pt-3 text-xs text-muted max-sm:hidden">{chrome.district.soon}</p>
+      )}
     </section>
   );
 }

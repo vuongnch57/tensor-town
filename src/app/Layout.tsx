@@ -16,7 +16,8 @@ export function Layout() {
   const navigate = useNavigate();
   const setMenuOpen = useFactoryStore((s) => s.setMenuOpen);
   const district = slug ? districtBySlug(slug) : undefined;
-  const isTown = pathname === '/' || pathname.startsWith('/zone/');
+  // The scene fills the viewport on '/' and on a district URL; a zone URL with an item is the zone page (normal scrolling layout).
+  const isTown = pathname === '/' || /^\/zone\/[^/]+\/?$/.test(pathname);
 
   // "/" opens the menu (search focused) unless the user is typing somewhere.
   useEffect(() => {
