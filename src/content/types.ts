@@ -58,6 +58,10 @@ export type NetSimParams = { network: NetworkKind; congestion: number };
 export type StoragePath = 'cpu' | 'gpudirect';
 export type StorageSimParams = { cache: boolean; path: StoragePath; epoch: number };
 
+/** Simulation state for Zone 6 (the production line): what the business needs decides which station lights up. */
+export type LineNeed = 'tools' | 'prepare' | 'train' | 'optimize' | 'serve-custom' | 'serve-ready';
+export type LineSimParams = { need: LineNeed };
+
 export type Item = {
   id: string; // unique across the site, e.g. 'hbm'
   zone: ZoneSlug;
@@ -88,6 +92,8 @@ export type Item = {
   netSim?: Partial<NetSimParams>;
   /** Zone 5: simulation state to apply on select. */
   storageSim?: Partial<StorageSimParams>;
+  /** Zone 6: simulation state to apply on select. */
+  lineSim?: Partial<LineSimParams>;
 };
 
 export type Comparison = {

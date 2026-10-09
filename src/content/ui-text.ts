@@ -1,4 +1,4 @@
-import type { StoragePath, NetworkKind, FabricInterconnect, GpuModel, ModelSize, NumberFormat, PackFormat, Workload } from './types';
+import type { LineNeed, StoragePath, NetworkKind, FabricInterconnect, GpuModel, ModelSize, NumberFormat, PackFormat, Workload } from './types';
 
 /** User-facing text for the zone page UI. */
 export const zoneText = {
@@ -146,5 +146,30 @@ export const storageText = {
     time: (n: number) => `${n.toFixed(2)}×`,
     percent: (n: number) => `${Math.round(n * 100)}%`,
     faster: (n: number) => (n < 0.95 ? `${(1 / n).toFixed(1)}× faster` : 'Reference speed'),
+  },
+};
+
+export const lineText = {
+  simulate: {
+    title: 'Pick a need',
+    need: 'Business need',
+    lights: 'Lights up',
+    illustrative: 'A rule of thumb, not a measurement.',
+    needOptions: [
+      { value: 'tools', label: 'Start from tested parts' },
+      { value: 'prepare', label: 'Prepare data faster' },
+      { value: 'train', label: 'Train a model' },
+      { value: 'optimize', label: 'Make a model faster to run' },
+      { value: 'serve-custom', label: 'Serve a custom mix of models' },
+      { value: 'serve-ready', label: 'Get a ready endpoint fast' },
+    ] as { value: LineNeed; label: string }[],
+    answers: {
+      tools: { station: 'NGC', why: 'A catalog of tested containers, models and tools.' },
+      prepare: { station: 'RAPIDS', why: 'Runs data preparation on the GPU.' },
+      train: { station: 'Training line', why: 'Many GPUs working together, with NCCL keeping them in step.' },
+      optimize: { station: 'TensorRT', why: 'Compiles a trained model into a leaner, faster one.' },
+      'serve-custom': { station: 'Shipping dock · Triton', why: 'The configurable bay: you choose the models and settings.' },
+      'serve-ready': { station: 'Shipping dock · NIM', why: 'The pre-packed box: an optimised model with an interface, ready to run.' },
+    } as Record<LineNeed, { station: string; why: string }>,
   },
 };

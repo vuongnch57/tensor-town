@@ -1,6 +1,6 @@
 import type { Comparison } from './types';
 
-// Zone 1 to Zone 5 comparisons. The remaining comparisons arrive with their zones.
+// Zone 1 to Zone 6 comparisons. The remaining comparisons arrive with their zones.
 export const comparisons: Comparison[] = [
   {
     id: 'cpu-vs-gpu',
@@ -128,5 +128,19 @@ export const comparisons: Comparison[] = [
     ],
     whyConfused:
       'Both are "GPUDirect": both open a direct lane into GPU memory so parcels skip the CPU\'s office. They differ only in where the parcel comes from, another machine across the network or a storage system.',
+  },
+  {
+    id: 'triton-vs-nim',
+    title: 'Triton vs NIM',
+    zones: ['production-line'],
+    columns: ['Triton', 'NIM'],
+    rows: [
+      { label: 'In the factory', values: ['Configurable shipping dock', 'Pre-packed box'] },
+      { label: 'You get', values: ['Control over models, frameworks and settings', 'A model already optimised, wrapped with an interface'] },
+      { label: 'Setup', values: ['You assemble and tune it', 'Pull it and run it'] },
+      { label: 'Best when', values: ['You need a custom mix of models', 'You want a ready endpoint fast'] },
+    ],
+    whyConfused:
+      'Both are ways to serve a model to requests, and both can run inside the same stack, so they look like rivals. Triton is a server you configure; NIM is a finished package, and a NIM can even use Triton inside it.',
   },
 ];

@@ -92,3 +92,17 @@ describe('search: Zone 5', () => {
     expect(search('gpudirect').comparisons.map((c) => c.id)).toContain('gpudirect-rdma-vs-storage');
   });
 });
+
+describe('search: Zone 6', () => {
+  it('finds the stations and the concepts', () => {
+    expect(search('rapids').items[0].id).toBe('rapids');
+    expect(search('triton').items.map((i) => i.id)).toContain('shipping-dock');
+    expect(search('nim').items.map((i) => i.id)).toContain('shipping-dock');
+    expect(search('tensorrt').items[0].id).toBe('tensorrt');
+    expect(search('nccl').items.map((i) => i.id)).toContain('nccl');
+    expect(search('latency').items.map((i) => i.id)).toContain('customer-queue');
+  });
+  it('finds the Triton vs NIM comparison', () => {
+    expect(search('triton').comparisons.map((c) => c.id)).toContain('triton-vs-nim');
+  });
+});
