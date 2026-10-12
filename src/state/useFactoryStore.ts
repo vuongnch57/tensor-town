@@ -1,3 +1,4 @@
+import { introSeen } from '@/lib/intro';
 import { create } from 'zustand';
 import { itemsById } from '@/content/registry';
 import type { ConnGroup } from '@/content/town';
@@ -29,6 +30,7 @@ type FactoryState = {
   hiddenGroups: ConnGroup[];
   /** Guided tour step index, or null when the tour is not running. */
   tourStep: number | null;
+  introOpen: boolean;
   /** The one entry point for selecting an item: scene, index, related chip, search and URL all call this. */
   select: (itemId: string | null) => void;
   hover: (itemId: string | null) => void;
@@ -44,6 +46,7 @@ type FactoryState = {
   setNetSim: (patch: Partial<NetSimParams>) => void;
   setFabricRunning: (running: boolean) => void;
   setMenuOpen: (open: boolean) => void;
+  setIntroOpen: (open: boolean) => void;
   toggleGroup: (group: ConnGroup) => void;
   setTourStep: (step: number | null) => void;
 };
@@ -75,6 +78,7 @@ export const useFactoryStore = create<FactoryState>((set) => ({
   menuOpen: false,
   hiddenGroups: [],
   tourStep: null,
+  introOpen: !introSeen(),
   select: (itemId) =>
     set((s) => {
       const item = itemId ? itemsById[itemId] : undefined;
@@ -104,6 +108,7 @@ export const useFactoryStore = create<FactoryState>((set) => ({
   setNetSim: (patch) => set((s) => ({ netSim: { ...s.netSim, ...patch } })),
   setFabricRunning: (fabricRunning) => set({ fabricRunning }),
   setMenuOpen: (menuOpen) => set({ menuOpen }),
+  setIntroOpen: (introOpen) => set({ introOpen }),
   toggleGroup: (group) => set((s) => ({ hiddenGroups: s.hiddenGroups.includes(group) ? s.hiddenGroups.filter((g) => g !== group) : [...s.hiddenGroups, group] })),
   setTourStep: (tourStep) => set({ tourStep }),
 }));
