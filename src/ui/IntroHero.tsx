@@ -15,7 +15,7 @@ export function IntroHero() {
   };
   const t = chrome.intro;
   return (
-    <section aria-labelledby="intro-title" className="absolute left-1/2 top-4 z-20 max-h-[calc(100%-32px)] w-[min(720px,calc(100%-32px))] -translate-x-1/2 overflow-auto rounded-lg border border-line bg-surface-200 px-6 py-5 shadow-panel max-sm:bottom-14 max-sm:top-auto max-sm:px-4 max-sm:py-4">
+    <section aria-labelledby="intro-title" className="absolute left-1/2 top-4 z-20 max-h-[calc(100%-32px)] w-[min(720px,calc(100%-32px))] -translate-x-1/2 overflow-auto rounded-lg border border-line bg-surface-200 px-6 py-5 shadow-panel max-sm:bottom-4 max-sm:top-auto max-sm:px-4 max-sm:py-4">
       <h1 id="intro-title" className="text-2xl font-semibold leading-8">{t.title}</h1>
       <p className="mb-4 mt-1.5 text-base leading-6 text-muted">{t.text}</p>
       <ul className="mb-4 grid gap-3 p-0 max-sm:hidden sm:grid-cols-3">

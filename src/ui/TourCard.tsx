@@ -11,7 +11,7 @@ export function TourCard() {
   const last = step === tourSteps.length - 1;
   const btn = 'cursor-pointer rounded-md border border-line bg-surface-300 px-3.5 py-1.5 font-semibold text-ink disabled:opacity-40';
   return (
-    <section aria-live="polite" className="absolute bottom-10 left-1/2 z-20 max-sm:bottom-14 w-[min(560px,calc(100%-32px))] -translate-x-1/2 rounded-lg border border-line bg-surface-200 px-5 py-4 shadow-panel">
+    <section aria-live="polite" className="absolute bottom-10 left-1/2 z-20 max-sm:bottom-4 w-[min(560px,calc(100%-32px))] -translate-x-1/2 rounded-lg border border-line bg-surface-200 px-5 py-4 shadow-panel">
       <div className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{chrome.tour.label}</div>
       <h2 className="mt-0.5 text-xl font-semibold leading-7">{s.title}</h2>
       <p className="mb-3 mt-1 text-sm leading-5 text-muted">{s.text}</p>

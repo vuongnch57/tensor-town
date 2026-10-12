@@ -62,7 +62,7 @@ export default function TownPage() {
       {focus && !(built && selectedId) && <DistrictCard slug={focus} />}
       {focus && zone && built && selectedId && <ZonePanels zone={zone} items={items} selectedId={selectedId} onSelect={goTo} />}
       {!focus && tourStep === null && !introOpen && (
-        <div className="absolute bottom-10 left-1/2 z-20 max-sm:bottom-14 flex max-w-[calc(100%-32px)] -translate-x-1/2 items-center gap-2 rounded-pill border border-line bg-surface-200 py-1.5 pl-4 pr-1.5 text-sm text-muted shadow-panel max-sm:flex-col max-sm:rounded-md max-sm:px-4 max-sm:py-3 max-sm:text-center">
+        <div className="absolute bottom-10 left-1/2 z-20 max-sm:bottom-4 flex max-w-[calc(100%-32px)] -translate-x-1/2 items-center gap-2 rounded-pill border border-line bg-surface-200 py-1.5 pl-4 pr-1.5 text-sm text-muted shadow-panel max-sm:flex-col max-sm:rounded-md max-sm:px-4 max-sm:py-3 max-sm:text-center">
           <span>{chrome.townHint}</span>
           <button type="button" onClick={() => setTour(0)} className="shrink-0 cursor-pointer rounded-pill border-0 bg-accent px-3 py-1 font-semibold text-accent-ink">
             {chrome.tour.start}
