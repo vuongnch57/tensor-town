@@ -57,6 +57,20 @@ export function HbmWarehouse() {
       ))}
       {/* loading bay opening on the -x face where the belt arrives */}
       <Box size={[0.06, 0.8, 1.0]} position={[-W / 2, 0, 1.0]} hex={derived.darkTrim} round={0.08} shadow={false} />
+      {/* wall lamps over the doors, sign board, roof vents and a loading ramp at the bay */}
+      {[-0.95, 0.95].map((x) => (
+        <Box key={`l${x}`} size={[0.12, 0.08, 0.1]} position={[x, 1.15, D / 2 + 0.05]} color="parcel" round={0.4} shadow={false} />
+      ))}
+      <Box size={[1.4, 0.26, 0.05]} position={[0, 1.2, D / 2 + 0.02]} color="wall" round={0.2} shadow={false} />
+      {[-0.9, 0, 0.9].map((z) => (
+        <Box key={`v${z}`} size={[0.22, 0.18, 0.22]} position={[0.5, WALL_H + 0.62, z]} color="wall" round={0.3} />
+      ))}
+      <Box size={[0.7, 0.12, 1.0]} position={[-W / 2 - 0.35, 0, 1.0]} color="path" round={0.2} />
+      {/* pallet stack by the bay and a hand pallet truck */}
+      {[0, 0.2].map((y) => (
+        <Box key={`p${y}`} size={[0.5, 0.16, 0.5]} position={[-W / 2 - 0.5, y + 0.12, -0.2]} color="parcel" round={0.12} />
+      ))}
+      <Box size={[0.5, 0.05, 0.5]} position={[-W / 2 - 0.5, 0, -0.2]} hex={derived.darkTrim} round={0.3} shadow={false} />
       {/* shelving unit and pallets outside, on the +z side */}
       <Shelving position={[2.6, 0, 2.1]} />
     </group>

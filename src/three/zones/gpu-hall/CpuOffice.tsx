@@ -16,7 +16,18 @@ export function CpuOffice() {
         <Box key={z} size={[0.06, 0.4, 0.55]} position={[1.4, 0.6, z]} color="coolant" round={0.15} shadow={false} />
       ))}
       <Box size={[0.55, 0.4, 0.06]} position={[0.7, 0.6, 1.12]} color="coolant" round={0.15} shadow={false} />
+      {/* steps, nameplate, wall lamp, air-con unit and a second window row */}
+      <Box size={[0.7, 0.1, 0.3]} position={[-0.6, 0, 1.3]} color="path" round={0.3} />
+      <Box size={[0.45, 0.12, 0.04]} position={[0.2, 0.95, 1.13]} color="hall" round={0.2} shadow={false} />
+      <Box size={[0.08, 0.12, 0.08]} position={[-1.05, 0.8, 1.14]} color="parcel" round={0.4} shadow={false} />
+      <Box size={[0.3, 0.3, 0.22]} position={[1.55, 0.2, -0.5]} color="path" round={0.15} />
+      <Box size={[0.2, 0.04, 0.2]} position={[1.55, 0.5, -0.5]} hex={derived.darkTrim} round={0.3} shadow={false} />
+      <Box size={[0.06, 0.4, 0.55]} position={[-1.4, 0.6, 0.4]} color="coolant" round={0.15} shadow={false} />
+      <Box size={[0.06, 0.4, 0.55]} position={[-1.4, 0.6, -0.5]} color="coolant" round={0.15} shadow={false} />
+      <Box size={[3.0, 0.1, 0.1]} position={[0, 1.6, 1.15]} color="hall" round={0.4} shadow={false} />
       {/* roof box + small antenna */}
+      <Box size={[0.2, 0.3, 0.2]} position={[-0.3, 1.58, 0.3]} color="path" round={0.2} />
+      <Box size={[0.5, 0.2, 0.4]} position={[0.3, 1.58, 0.5]} color="hall" round={0.2} />
       <Box size={[0.6, 0.35, 0.5]} position={[0.7, 1.62, -0.4]} color="wall" round={0.1} />
       <mesh position={[-0.9, 2.0, -0.5]} castShadow>
         <cylinderGeometry args={[0.025, 0.025, 0.8, 8]} />
