@@ -1,4 +1,4 @@
-import type { LineNeed, StoragePath, NetworkKind, FabricInterconnect, GpuModel, ModelSize, NumberFormat, PackFormat, Workload } from './types';
+import type { GpuSharing, LineNeed, StoragePath, NetworkKind, FabricInterconnect, GpuModel, ModelSize, NumberFormat, PackFormat, Workload } from './types';
 
 /** User-facing text for the zone page UI. */
 export const zoneText = {
@@ -171,5 +171,27 @@ export const lineText = {
       'serve-custom': { station: 'Shipping dock · Triton', why: 'The configurable bay: you choose the models and settings.' },
       'serve-ready': { station: 'Shipping dock · NIM', why: 'The pre-packed box: an optimised model with an interface, ready to run.' },
     } as Record<LineNeed, { station: string; why: string }>,
+  },
+};
+
+export const shareText = {
+  simulate: {
+    title: 'Share a GPU',
+    mode: 'Sharing mode',
+    utilization: 'GPU utilization',
+    sm: 'SM activity',
+    perJob: 'Speed per job',
+    isolation: 'Isolation',
+    isolated: 'Walled off',
+    notIsolated: 'None',
+    trap: (sm: number) => `Reads 100% busy, but only ${sm}% of the SMs are working.`,
+    fine: 'Both readings agree: the GPU is really in use.',
+    illustrative: 'Illustrative numbers for three small jobs, not a measurement.',
+    modeOptions: [
+      { value: 'one', label: 'One small job' },
+      { value: 'mig', label: 'MIG' },
+      { value: 'time-slicing', label: 'Time-slicing' },
+      { value: 'vgpu', label: 'vGPU' },
+    ] as { value: GpuSharing; label: string }[],
   },
 };

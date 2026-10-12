@@ -1,6 +1,7 @@
 import type { ZoneSlug } from '@/content/types';
 import { connections } from '@/content/town';
 import type { SceneColor } from '../core/palette';
+import { DISTRICT_FOOTPRINT as CONTROL_FOOTPRINT } from '../zones/control-room/layout';
 import { YARD_FOOTPRINT as LINE_FOOTPRINT } from '../zones/production-line/layout';
 import { YARD_FOOTPRINT as STORAGE_FOOTPRINT } from '../zones/storage-yard/layout';
 import { YARD_FOOTPRINT } from '../zones/transport-network/layout';
@@ -35,10 +36,7 @@ export type Building = {
 export type Cylinder = { x: number; z: number; r: number; h: number; y0?: number; color: SceneColor };
 
 export const buildings: Building[] = [
-  // Control Tower on its hill (hill base is drawn separately)
-  { x: -14, z: -9, w: 2.2, d: 2.2, h: 5, y0: 0.6, roof: 'roof', win: [2, 4] },
-  { x: -14, z: -9, w: 3.2, d: 3.2, h: 0.5, y0: 5.6, wall: 'roof', roof: 'roof', flat: true },
-  { x: -16.4, z: -6.8, w: 1.8, d: 1.5, h: 1.2, y0: 0.6, roof: 'roof', door: true, win: [1, 1] },
+  // Control Tower on its hill: the control room is its own scene (see zones/control-room); the hill base is drawn separately
   // Power Station
   { x: -13.1, z: 1.9, w: 5, d: 3.4, h: 2, roof: 'roof', win: [3, 1], door: true },
   { x: -10.2, z: 5.4, w: 1, d: 1, h: 3.6, wall: 'roof', roof: 'roof', flat: true },
@@ -65,7 +63,6 @@ export const cylinders: Cylinder[] = [
   { x: -12.0, z: 6.1, r: 0.9, h: 1.4, color: 'coolant' },
   { x: -17.2, z: 1.4, r: 0.6, h: 2.2, color: 'coolant' },
   { x: 13.3, z: -2.4, r: 0.4, h: 2.8, y0: 1.8, color: 'roof' },
-  { x: -14, z: -9, r: 0.07, h: 1.2, y0: 6.1, color: 'roof' },
   // Pond where the river begins (low and wide, so it reads as water)
   { x: 7.6, z: -15.4, r: 2.3, h: 0.07, color: 'coolant' },
 ];
@@ -90,7 +87,7 @@ export const districtLayout: District[] = [
   { slug: 'transport-network', focus: [-7.4, 10.4], marker: [-14.3, 3.7, 12.6], zoom: 3.0 },
   { slug: 'storage-yard', focus: [6.6, 8.6], marker: [5.7, 4.2, 10.8], zoom: 3.2, view: { azimuth: 78, elevation: 42 } },
   { slug: 'production-line', focus: [18.2, 0.6], marker: [13.6, 2.6, 5.8], zoom: 3.3, view: { azimuth: 12, elevation: 52 } },
-  { slug: 'control-room', focus: [-14, -9], marker: [-14, 7.6, -9] },
+  { slug: 'control-room', focus: [-18.2, -11.5], marker: [-14, 9.6, -9], zoom: 2.7, view: { azimuth: 45, elevation: 38 } },
   { slug: 'power-cooling', focus: [-13, 2.5], marker: [-16.4, 3.6, 2.6] },
   { slug: 'campus-expansion', focus: [18.4, 10.6], marker: [18.5, 2.8, 10.6] },
 ];
@@ -176,6 +173,7 @@ export function footprints(): [number, number, number, number][] {
     YARD_FOOTPRINT,
     STORAGE_FOOTPRINT,
     LINE_FOOTPRINT,
+    CONTROL_FOOTPRINT,
   ];
 }
 

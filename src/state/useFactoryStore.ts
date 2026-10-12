@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { itemsById } from '@/content/registry';
 import type { ConnGroup } from '@/content/town';
-import type { FabricSimParams, LineSimParams, NetSimParams, PackSimParams, SimParams, StorageSimParams } from '@/content/types';
+import type { FabricSimParams, LineSimParams, NetSimParams, PackSimParams, ShareSimParams, SimParams, StorageSimParams } from '@/content/types';
 
 type FactoryState = {
   selectedId: string | null;
@@ -18,6 +18,8 @@ type FactoryState = {
   storageSim: StorageSimParams;
   /** Zone 6 simulation (business need). */
   lineSim: LineSimParams;
+  /** Zone 7 simulation (how the GPU is shared). */
+  shareSim: ShareSimParams;
   fabricRunning: boolean;
   /** Hamburger modal (SPEC §3.6). */
   menuOpen: boolean;
@@ -32,6 +34,7 @@ type FactoryState = {
   setSim: (patch: Partial<SimParams>) => void;
   setPackSim: (patch: Partial<PackSimParams>) => void;
   setFabricSim: (patch: Partial<FabricSimParams>) => void;
+  setShareSim: (patch: Partial<ShareSimParams>) => void;
   setLineSim: (patch: Partial<LineSimParams>) => void;
   setStorageSim: (patch: Partial<StorageSimParams>) => void;
   setNetSim: (patch: Partial<NetSimParams>) => void;
@@ -46,6 +49,7 @@ export const DEFAULT_PACK_SIM: PackSimParams = { format: 'bf16', model: '70b' };
 export const DEFAULT_FABRIC_SIM: FabricSimParams = { interconnect: 'nvswitch' };
 export const DEFAULT_STORAGE_SIM: StorageSimParams = { cache: true, path: 'cpu', epoch: 2 };
 export const DEFAULT_LINE_SIM: LineSimParams = { need: 'train' };
+export const DEFAULT_SHARE_SIM: ShareSimParams = { sharing: 'one' };
 export const DEFAULT_NET_SIM: NetSimParams = { network: 'ethernet', congestion: 0.5 };
 
 export const useFactoryStore = create<FactoryState>((set) => ({
@@ -58,6 +62,7 @@ export const useFactoryStore = create<FactoryState>((set) => ({
   netSim: DEFAULT_NET_SIM,
   storageSim: DEFAULT_STORAGE_SIM,
   lineSim: DEFAULT_LINE_SIM,
+  shareSim: DEFAULT_SHARE_SIM,
   fabricRunning: false,
   menuOpen: false,
   hiddenGroups: [],
@@ -73,6 +78,7 @@ export const useFactoryStore = create<FactoryState>((set) => ({
         netSim: item?.netSim ? { ...s.netSim, ...item.netSim } : s.netSim,
         storageSim: item?.storageSim ? { ...s.storageSim, ...item.storageSim } : s.storageSim,
         lineSim: item?.lineSim ? { ...s.lineSim, ...item.lineSim } : s.lineSim,
+        shareSim: item?.shareSim ? { ...s.shareSim, ...item.shareSim } : s.shareSim,
       };
     }),
   hover: (hoveredId) => set({ hoveredId }),
@@ -80,6 +86,7 @@ export const useFactoryStore = create<FactoryState>((set) => ({
   setSim: (patch) => set((s) => ({ sim: { ...s.sim, ...patch } })),
   setPackSim: (patch) => set((s) => ({ packSim: { ...s.packSim, ...patch } })),
   setFabricSim: (patch) => set((s) => ({ fabricSim: { ...s.fabricSim, ...patch } })),
+  setShareSim: (patch) => set((s) => ({ shareSim: { ...s.shareSim, ...patch } })),
   setLineSim: (patch) => set((s) => ({ lineSim: { ...s.lineSim, ...patch } })),
   setStorageSim: (patch) => set((s) => ({ storageSim: { ...s.storageSim, ...patch } })),
   setNetSim: (patch) => set((s) => ({ netSim: { ...s.netSim, ...patch } })),

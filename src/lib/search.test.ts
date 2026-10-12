@@ -106,3 +106,21 @@ describe('search: Zone 6', () => {
     expect(search('triton').comparisons.map((c) => c.id)).toContain('triton-vs-nim');
   });
 });
+
+describe('search: Zone 7', () => {
+  it('finds the tools, the sharing modes and the concepts', () => {
+    expect(search('slurm').items.map((i) => i.id)).toContain('dispatcher-desk');
+    expect(search('kubernetes').items.map((i) => i.id)).toContain('container-yard');
+    expect(search('mig').items.map((i) => i.id)).toContain('partitioned-hall');
+    expect(search('time-slicing').items.map((i) => i.id)).toContain('shift-hall');
+    expect(search('dcgm').items.map((i) => i.id)).toContain('control-tower');
+    expect(search('vgpu').items[0].id).toBe('vgpu');
+    expect(search('nvidia-smi').items[0].id).toBe('nvidia-smi');
+    expect(search('utilization').items.map((i) => i.id)).toContain('utilization-trap');
+    expect(search('base command').items.map((i) => i.id)).toContain('cluster-manager');
+  });
+  it('finds the Zone 7 comparisons', () => {
+    expect(search('slurm').comparisons.map((c) => c.id)).toContain('slurm-vs-kubernetes');
+    expect(search('vgpu').comparisons.map((c) => c.id)).toContain('gpu-sharing');
+  });
+});
