@@ -17,6 +17,8 @@ export const VERIFIED_FACTS: { fact: string; value: string }[] = [
   { fact: 'NVLink on Blackwell', value: '1.8 TB/s per GPU' },
   { fact: 'DGX H100', value: '8× H100 GPUs, 4 NVSwitch chips' },
   { fact: 'DGX SuperPOD scalable unit (H100 generation)', value: '32 DGX systems' },
+  // Source: NVIDIA DGX BasePOD reference architecture, NDR400 compute-fabric design (docs.nvidia.com/dgx-basepod). Other BasePOD designs differ.
+  { fact: 'DGX BasePOD (NDR400 design)', value: '2 to 8 DGX systems' },
   { fact: 'GB200 NVL72', value: '72 Blackwell GPUs + 36 Grace CPUs in one NVLink domain' },
   { fact: 'ConnectX-7', value: 'up to 400 Gb/s' },
   { fact: 'Format sizes', value: 'FP32 4 B, FP16/BF16 2 B, FP8/INT8 1 B' },

@@ -12,7 +12,7 @@ describe('zone 9 campus model', () => {
   it('counts scale linearly with the unit count', () => {
     expect(simulate({ ...base, units: 4 }).dgx).toBe(2 * simulate({ ...base, units: 2 }).dgx!);
   });
-  it('a BasePOD has no DGX or GPU count: it is TODO(fact)', () => {
+  it('a BasePOD has no single DGX or GPU count: the size varies by design', () => {
     const r = simulate({ ...base, architecture: 'basepod' });
     expect(r.dgx).toBeNull();
     expect(r.gpus).toBeNull();

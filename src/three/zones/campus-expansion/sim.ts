@@ -4,7 +4,7 @@ import type { CampusSimParams } from '@/content/types';
  * Zone 9 toy model: how a campus grows by scalable units, and who owns them. ILLUSTRATIVE, NOT MEASURED.
  *
  *   SuperPOD   DGX count = DGX_PER_UNIT x units, GPU count = GPUS_PER_DGX x DGX count (SPEC §8: 32 DGX per scalable unit, 8 H100 per DGX H100).
- *   BasePOD    the DGX count of a BasePOD is not in SPEC §8, so DGX and GPU counts are null and the UI shows TODO(fact).
+ *   BasePOD    the DGX count of a BasePOD is not in SPEC §8, so DGX and GPU counts are null and the UI shows 'Varies by design'.
  *   ownership  on-prem owns every unit, cloud rents every unit, hybrid owns the first half (rounded up) and rents the rest.
  */
 export const DGX_PER_UNIT = 32;
@@ -14,9 +14,9 @@ export const MAX_UNITS = 4;
 export type Slot = 'owned' | 'rented' | 'empty';
 
 export type CampusResult = {
-  /** DGX systems in the campus; null for BasePOD (TODO(fact)). */
+  /** DGX systems in the campus; null for BasePOD (size varies by design). */
   dgx: number | null;
-  /** GPUs in the campus; null for BasePOD (TODO(fact)). */
+  /** GPUs in the campus; null for BasePOD (size varies by design). */
   gpus: number | null;
   owned: number;
   rented: number;

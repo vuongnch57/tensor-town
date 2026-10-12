@@ -56,7 +56,7 @@ export const aboutText = {
     title: 'Disclaimer',
     body: [
       'This is a personal learning project. It is not affiliated with, endorsed by or sponsored by NVIDIA. Product names appear only to say which hardware or software is meant.',
-      'Numbers in the Simulate bar are illustrative, not measurements. Any value marked TODO(fact) has not been verified yet.',
+      'Numbers in the Simulate bar are illustrative, not measurements. Wherever a figure depends on the design or the facility, the text says so instead of quoting one number.',
       'All text is original.',
     ],
   },
