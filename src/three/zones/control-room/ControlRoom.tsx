@@ -13,7 +13,7 @@ import { Workers } from '../../primitives/Workers';
 import { mat, mix, Slab } from '../kit';
 import type { GpuSharing } from '@/content/types';
 import { simulate } from './sim';
-import { anchors, DECK, DESK, HILL_Y, MANAGER, MIG_HALL, MIG_WORKERS, paths, SHIFT_HALL, SHIFT_WORKERS, TOWER, YARD } from './layout';
+import { anchors, BOX_DOOR_Z, DECK, DESK, HILL_Y, MANAGER, MIG_DOOR_Z, MIG_EAST, MIG_HALL, MIG_WORKERS, paths, RAMP, SHIFT_EAST, SHIFT_HALL, SHIFT_WORKERS, TERRACE, TICKET_DOOR_Z, TOWER, YARD } from './layout';
 
 /** Every Selectable gets its own materials, so selecting one object never tints another. */
 const useMats = () =>
@@ -31,12 +31,41 @@ const useMats = () =>
       hot: mat(scene.parcelHot, 0.5),
       steel: mat(mix(scene.roof, '#ffffff', 0.35), 0.5),
       floor: mat(mix(scene.path, scene.wall, 0.4)),
+      belt: mat(mix(scene.path, scene.roof, 0.45)),
       stripe: mat(mix(scene.hall, '#ffffff', 0.35)),
       cont: [mat(scene.hall), mat(scene.network), mat(scene.coolant), mat(scene.storage), mat(scene.parcel)],
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
+
+/** A belt laid under a lane: one flat slab per straight segment, with a thin rail on each side. Lanes are axis-aligned. */
+function Lane({ pts, y = 0, w = 0.34 }: { pts: readonly (readonly [number, number])[]; y?: number; w?: number }) {
+  const m = useMats();
+  return (
+    <>
+      {pts.slice(1).map(([bx, bz], i) => {
+        const [ax, az] = pts[i];
+        const alongX = Math.abs(bx - ax) > Math.abs(bz - az);
+        const len = (alongX ? Math.abs(bx - ax) : Math.abs(bz - az)) + w;
+        const cx = (ax + bx) / 2;
+        const cz = (az + bz) / 2;
+        const size: [number, number, number] = alongX ? [len, 0.05, w] : [w, 0.05, len];
+        const rail: [number, number, number] = alongX ? [len, 0.1, 0.03] : [0.03, 0.1, len];
+        const off = w / 2 + 0.015;
+        return (
+          <group key={i}>
+            <Slab size={size} position={[cx, y, cz]} m={m.belt} />
+            <Slab size={rail} position={[alongX ? cx : cx - off, y, alongX ? cz - off : cz]} m={m.steel} />
+            <Slab size={rail} position={[alongX ? cx : cx + off, y, alongX ? cz + off : cz]} m={m.steel} />
+          </group>
+        );
+      })}
+    </>
+  );
+}
+
+const RAMP_LEN = Math.hypot(HILL_Y, RAMP.zTo - RAMP.zFrom);
 
 /** The control tower: two screens on its faces. The left bar is "GPU utilization", the right bar is "SM activity", driven by the sharing mode. */
 function ControlTower({ sm }: { sm: number }) {
@@ -115,6 +144,11 @@ function DispatcherDesk() {
   const colors = [m.hall, m.network, m.glass, m.storage];
   return (
     <Selectable id="dispatcher-desk">
+      <Lane pts={paths.mig} y={HILL_Y} w={0.3} />
+      <Lane pts={paths.shift} y={HILL_Y} w={0.3} />
+      {/* an outbox on the back of the desk where both ticket lanes start */}
+      <Slab size={[0.4, 0.18, 0.3]} position={[x + 0.6, HILL_Y + 0.5, z - d / 2 + 0.1]} m={m.steel} />
+      <Slab size={[0.4, 0.04, 0.3]} position={[x - 0.9, HILL_Y + 0.5, z]} m={m.steel} />
       <Box size={[w, 0.5, d]} position={[x, HILL_Y, z]} color="wall" round={0.06} />
       <Box size={[w + 0.14, 0.08, d + 0.14]} position={[x, HILL_Y + 0.5, z]} color="roof" round={0.3} />
       {/* the ticket board behind the desk */}
@@ -151,8 +185,21 @@ function PartitionedHall({ on }: { on: boolean }) {
   const { x, z, w, d, h } = MIG_HALL;
   const f = z + d / 2;
   return (
-    <Selectable id="partitioned-hall">
+    <Selectable id="partitioned-hall" position={[0, HILL_Y, 0]}>
       <Box size={[w, 0.08, d]} position={[x, 0, z]} color="path" round={0.3} />
+      {/* intake window where the ticket lane arrives, with a tray outside */}
+      <Slab size={[0.04, 0.34, 0.5]} position={[MIG_EAST - 0.02, 0.12, MIG_DOOR_Z]} m={m.dark} />
+      <Slab size={[0.2, 0.05, 0.4]} position={[MIG_EAST + 0.1, 0.1, MIG_DOOR_Z]} m={m.steel} />
+      {/* one slice of GPU per room: a small machine with a row of lamps, brighter when the room is in use */}
+      {[-0.9, 0, 0.9].map((dx) => (
+        <group key={`g${dx}`}>
+          <Slab size={[0.52, 0.34, 0.3]} position={[x + dx, 0.08, z - d / 2 + 0.3]} m={m.dark} />
+          {[-0.15, 0, 0.15].map((lx) => (
+            <Slab key={lx} size={[0.06, 0.05, 0.02]} position={[x + dx + lx, 0.26, z - d / 2 + 0.46]} m={on ? m.hot : m.idle} />
+          ))}
+          <Slab size={[0.4, 0.02, 0.02]} position={[x + dx, 0.14, z - d / 2 + 0.46]} m={m.steel} />
+        </group>
+      ))}
       {/* outer walls (low), then the two inner walls that make three rooms */}
       <Slab size={[w, h, 0.08]} position={[x, 0.04, z - d / 2 + 0.04]} m={m.wall} />
       <Slab size={[w, h, 0.08]} position={[x, 0.04, f - 0.04]} m={m.wall} />
@@ -214,7 +261,7 @@ function ShiftHall({ mode }: { mode: GpuSharing }) {
   const f = z + d / 2;
   const slice = mode === 'time-slicing' || mode === 'vgpu';
   return (
-    <Selectable id="shift-hall">
+    <Selectable id="shift-hall" position={[0, HILL_Y, 0]}>
       <Box size={[w, h, d]} position={[x, 0, z]} color="wall" round={0.05} />
       <Box size={[w + 0.24, 0.12, d + 0.24]} position={[x, h, z]} color="hall" round={0.25} />
       {/* skylight and the clock above the doors */}
@@ -227,16 +274,28 @@ function ShiftHall({ mode }: { mode: GpuSharing }) {
       </mesh>
       <Slab size={[0.06, 0.14, 0.02]} position={[x, h + 0.5, f - 0.01]} m={m.dark} />
       <Slab size={[0.04, 0.3, 0.04]} position={[x, h + 0.12, f - 0.05]} m={m.steel} />
+      {/* roof vents */}
+      {[0.5, 0.85].map((vx) => (
+        <mesh key={vx} material={m.steel} position={[x + vx, h + 0.26, z + 0.7]} castShadow>
+          <cylinderGeometry args={[0.1, 0.1, 0.28, 12]} />
+        </mesh>
+      ))}
       {/* three doors, one per job */}
       <ShiftDoors rotate={slice} />
       <Slab size={[w - 0.2, 0.24, 0.02]} position={[x, h - 0.28, f + 0.004]} m={m.glass} />
       <Workers spots={SHIFT_WORKERS} busy={slice ? 0.5 : 0} y={0.04} />
-      {/* rented booths: lit and handed out in vGPU mode */}
-      {[0, 1, 2].map((k) => (
-        <group key={k} position={[x + w / 2 + 0.55, 0, z - 0.8 + k * 0.8]}>
-          <Box size={[0.5, 0.5, 0.5]} position={[0, 0, 0]} color="wall" round={0.1} />
-          <Box size={[0.6, 0.06, 0.6]} position={[0, 0.5, 0]} color={mode === 'vgpu' ? 'hall' : 'idle'} round={0.3} />
-          <Slab size={[0.3, 0.2, 0.02]} position={[0, 0.2, 0.26]} m={mode === 'vgpu' ? m.hot : m.glass} />
+      {/* the two east doors: tickets come in at one, containers at the other */}
+      <Slab size={[0.04, 0.6, 0.5]} position={[SHIFT_EAST + 0.005, 0, TICKET_DOOR_Z]} m={m.dark} />
+      <Slab size={[0.04, 0.6, 0.5]} position={[SHIFT_EAST + 0.005, 0, BOX_DOOR_Z]} m={m.dark} />
+      <Slab size={[0.06, 0.06, 0.56]} position={[SHIFT_EAST + 0.01, 0.6, TICKET_DOOR_Z]} m={m.network} />
+      <Slab size={[0.06, 0.06, 0.56]} position={[SHIFT_EAST + 0.01, 0.6, BOX_DOOR_Z]} m={m.storage} />
+      {/* rented booths between the halls: lit and handed out in vGPU mode */}
+      {[-0.8, 0, 0.8].map((dx, k) => (
+        <group key={k} position={[x + dx, 0, -8.5]}>
+          <Box size={[0.44, 0.46, 0.44]} position={[0, 0, 0]} color="wall" round={0.1} />
+          <Box size={[0.54, 0.06, 0.54]} position={[0, 0.46, 0]} color={mode === 'vgpu' ? 'hall' : 'idle'} round={0.3} />
+          <Slab size={[0.28, 0.18, 0.02]} position={[0, 0.16, 0.23]} m={mode === 'vgpu' ? m.hot : m.glass} />
+          <Slab size={[0.02, 0.18, 0.28]} position={[0.23, 0.16, 0]} m={mode === 'vgpu' ? m.hot : m.glass} />
         </group>
       ))}
     </Selectable>
@@ -261,10 +320,30 @@ function ContainerYard() {
   ];
   return (
     <Selectable id="container-yard">
+      <Lane pts={paths.boxGround} w={0.4} />
+      <Lane pts={paths.boxHill} y={HILL_Y} w={0.4} />
+      <Lane pts={paths.report} w={0.3} />
+      {/* the ramp that lifts the container belt onto the hill */}
+      <mesh material={m.belt} position={[RAMP.x, HILL_Y / 2, (RAMP.zFrom + RAMP.zTo) / 2]} rotation={[Math.asin(HILL_Y / RAMP_LEN), 0, 0]} receiveShadow>
+        <boxGeometry args={[0.4, 0.05, RAMP_LEN]} />
+      </mesh>
+      {/* gatehouse with a barrier at the east gate, where the status belt leaves */}
+      <Box size={[0.4, 0.4, 0.4]} position={[x + w / 2 - 0.4, 0.06, z + d / 2 - 0.3]} color="wall" round={0.1} />
+      <Box size={[0.5, 0.05, 0.5]} position={[x + w / 2 - 0.4, 0.46, z + d / 2 - 0.3]} color="roof" round={0.3} />
+      <Slab size={[0.5, 0.04, 0.04]} position={[x + w / 2 - 0.7, 0.3, z + d / 2 - 0.62]} m={m.hot} />
+      {/* loading bay where containers leave the yard */}
+      <Slab size={[0.6, 0.1, 0.6]} position={[-14.7, 0.06, -15.2]} m={m.steel} />
       <Box size={[w, 0.06, d]} position={[x, 0, z]} color="path" round={0.25} />
       {stacks.map(([dx, dz, n], i) =>
         Array.from({ length: n }, (_, l) => (
-          <Slab key={`${i}${l}`} size={[0.5, 0.26, 0.38]} position={[x + dx, 0.06 + l * 0.27, z + dz]} m={m.cont[(i + l) % 5]} />
+          <group key={`${i}${l}`}>
+            <Slab size={[0.5, 0.26, 0.38]} position={[x + dx, 0.06 + l * 0.27, z + dz]} m={m.cont[(i + l) % 5]} />
+            {/* ribs along the front and door bars on the end, so each box reads as a shipping container */}
+            {[-0.15, -0.05, 0.05, 0.15].map((rx) => (
+              <Slab key={rx} size={[0.02, 0.22, 0.01]} position={[x + dx + rx, 0.08 + l * 0.27, z + dz + 0.195]} m={m.dark} />
+            ))}
+            <Slab size={[0.01, 0.2, 0.12]} position={[x + dx + 0.255, 0.09 + l * 0.27, z + dz]} m={m.steel} />
+          </group>
         )),
       )}
       {/* the gantry: two legs on rails, a beam, and a trolley with a hanging container */}
@@ -309,6 +388,8 @@ function ClusterManager() {
         )),
       )}
       <Slab size={[0.4, 0.55, 0.03]} position={[x + 0.55, 0, f + 0.008]} m={m.dark} />
+      {/* hatch where the yard's status reports arrive, on the east face */}
+      <Slab size={[0.04, 0.4, 0.5]} position={[x + w / 2 + 0.005, 0.02, -10.5]} m={m.dark} />
       <group ref={dish} position={[x, h + 0.1, z]}>
         <mesh material={m.steel} position={[0, 0.2, 0]}>
           <cylinderGeometry args={[0.04, 0.04, 0.4, 8]} />
@@ -334,14 +415,18 @@ export function ControlRoom({ active }: { active: boolean }) {
   const speed = (v: number) => (reducedMotion ? 0 : v);
   return (
     <>
+      <Box size={[TERRACE.w, HILL_Y, TERRACE.d]} position={[TERRACE.x, 0, TERRACE.z]} hex={derived.foliageLight} round={0.35} roughness={0.95} />
       <ControlTower sm={r.smActivity} />
       <DispatcherDesk />
       <PartitionedHall on={sharing === 'mig'} />
       <ShiftHall mode={sharing} />
       <ContainerYard />
       <ClusterManager />
-      <Parcels path={paths.mig} count={2} speed={speed(0.5)} y={HILL_Y + 0.04} size={0.16} tint={scene.network} />
-      <Parcels path={paths.shift} count={3} speed={speed(0.6)} y={HILL_Y + 0.04} size={0.16} tint={scene.storage} />
+      <Parcels path={paths.mig} count={3} speed={speed(0.4)} y={HILL_Y + 0.05} size={0.14} tint={scene.network} />
+      <Parcels path={paths.shift} count={4} speed={speed(0.6)} y={HILL_Y + 0.05} size={0.14} tint={scene.storage} />
+      <Parcels path={paths.boxGround} count={2} speed={speed(0.5)} y={0.05} size={0.26} tint={scene.coolant} />
+      <Parcels path={paths.boxHill} count={4} speed={speed(0.7)} y={HILL_Y + 0.05} size={0.26} tint={scene.coolant} />
+      <Parcels path={paths.report} count={3} speed={speed(0.5)} y={0.05} size={0.14} tint={scene.parcelHot} />
       {active && objects.map((o) => <Hotspot key={o.id} itemId={o.id} number={o.number ?? 0} anchor={anchors[o.anchorId ?? o.id]} onSelect={onSelect} />)}
     </>
   );
