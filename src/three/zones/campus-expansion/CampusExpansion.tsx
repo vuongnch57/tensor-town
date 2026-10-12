@@ -79,6 +79,23 @@ function Unit({ slot, kind, arch }: { slot: number; kind: 'owned' | 'rented'; ar
       )}
       <Slab size={[w - 0.5, 0.3, 0.02]} position={[x - 0.05, 0.4, fz + 0.006]} m={m.glass} />
       <Slab size={[0.4, 0.62, 0.03]} position={[x + w / 2 - 0.4, 0, fz + 0.008]} m={m.dark} />
+      {/* door canopy, lamp and window strip on the side wall */}
+      <Slab size={[0.5, 0.05, 0.16]} position={[x + w / 2 - 0.4, 0.66, fz + 0.08]} m={m.steel} />
+      <Slab size={[0.06, 0.06, 0.04]} position={[x + w / 2 - 0.72, 0.5, fz + 0.03]} m={m.hot} />
+      <Slab size={[0.02, 0.3, d - 0.5]} position={[x + w / 2 + 0.006, 0.4, z]} m={m.glass} />
+      {/* roof plant: two fans and a vent stack */}
+      {[-0.5, 0.5].map((dx) => (
+        <group key={dx} position={[x + dx, h + 0.15, z + d / 2 - 0.25]}>
+          <Slab size={[0.28, 0.1, 0.28]} position={[0, 0, 0]} m={m.steel} />
+          <Slab size={[0.22, 0.02, 0.04]} position={[0, 0.1, 0]} m={m.dark} />
+          <Slab size={[0.04, 0.02, 0.22]} position={[0, 0.1, 0]} m={m.dark} />
+        </group>
+      ))}
+      <Slab size={[0.1, 0.3, 0.1]} position={[x - w / 2 + 0.2, h + 0.1, z - d / 2 + 0.2]} m={m.steel} />
+      {/* transformer yard beside the unit, fed by the spine */}
+      <Slab size={[0.3, 0.26, 0.22]} position={[x - w / 2 - 0.3, 0, z - 0.3]} m={m.steel} />
+      <Slab size={[0.06, 0.12, 0.06]} position={[x - w / 2 - 0.4, 0.26, z - 0.3]} m={m.dark} />
+      <Slab size={[0.06, 0.12, 0.06]} position={[x - w / 2 - 0.2, 0.26, z - 0.3]} m={m.dark} />
       {rented && (
         <>
           {Array.from({ length: 6 }, (_, k) => (
@@ -166,6 +183,14 @@ function RentedDepot() {
       ))}
       <Slab size={[0.05, 0.5, 0.05]} position={[x - w / 2 - 0.1, 0, fz]} m={m.steel} />
       <Slab size={[0.5, 0.26, 0.03]} position={[x - w / 2 - 0.36, 0.36, fz]} m={m.hot} />
+      {/* loading bay with two bay doors and a dish on the roof */}
+      {[-0.7, 0.1].map((dx) => (
+        <Slab key={dx} size={[0.5, 0.45, 0.03]} position={[x + dx, 0, fz + 0.01]} m={m.stripe} />
+      ))}
+      <Slab size={[0.05, 0.3, 0.05]} position={[x + w / 2 - 0.3, h + 0.1, z - 0.3]} m={m.steel} />
+      <mesh material={m.steel} position={[x + w / 2 - 0.3, h + 0.45, z - 0.3]} rotation={[0.6, 0.5, 0]}>
+        <cylinderGeometry args={[0.2, 0.05, 0.06, 14]} />
+      </mesh>
       <Lane pts={paths.lease} w={0.24} />
     </Selectable>
   );
@@ -213,6 +238,17 @@ function GateArch() {
         <Slab key={dz} size={[0.08, 0.9, 0.08]} position={[15.7, 0, CORRIDOR_Z + dz]} m={m.steel} />
       ))}
       <Slab size={[0.14, 0.12, 0.9]} position={[15.7, 0.9, CORRIDOR_Z]} m={m.hall} />
+      {/* gatehouse with barrier arm and lamp posts along the corridor */}
+      <Slab size={[0.36, 0.4, 0.36]} position={[15.7, 0, CORRIDOR_Z + 0.62]} m={m.wall} />
+      <Slab size={[0.42, 0.05, 0.42]} position={[15.7, 0.4, CORRIDOR_Z + 0.62]} m={m.dark} />
+      <Slab size={[0.03, 0.12, 0.2]} position={[15.54, 0.12, CORRIDOR_Z + 0.62]} m={m.glass} />
+      <Slab size={[0.05, 0.05, 0.6]} position={[15.7, 0.34, CORRIDOR_Z - 0.35]} m={m.hot} />
+      {[16.2, 17.2, 19.2, 20.4].map((x) => (
+        <group key={x}>
+          <Slab size={[0.04, 0.5, 0.04]} position={[x, 0, CORRIDOR_Z - 0.3]} m={m.steel} />
+          <Slab size={[0.14, 0.04, 0.06]} position={[x, 0.5, CORRIDOR_Z - 0.3]} m={m.hot} />
+        </group>
+      ))}
     </>
   );
 }
