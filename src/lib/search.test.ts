@@ -139,3 +139,20 @@ describe('search: Zone 8', () => {
     expect(search('liquid').comparisons.map((c) => c.id)).toContain('air-vs-liquid');
   });
 });
+
+describe('search: Zone 9', () => {
+  it('finds the campus objects and the concepts', () => {
+    expect(search('scalable unit').items[0].id).toBe('scalable-unit');
+    expect(search('superpod').items.map((i) => i.id)).toContain('superpod-campus');
+    expect(search('basepod').items.map((i) => i.id)).toContain('dgx-basepod');
+    expect(search('nvl72').items.map((i) => i.id)).toContain('gb200-nvl72');
+    expect(search('sovereignty').items[0].id).toBe('data-sovereignty');
+    expect(search('reference architecture').items[0].id).toBe('reference-architecture');
+    expect(search('rented').items.map((i) => i.id)).toContain('rented-capacity');
+    expect(search('hybrid').items.map((i) => i.id)).toContain('on-prem-cloud-hybrid');
+  });
+  it('finds the Zone 9 comparisons', () => {
+    expect(search('superpod').comparisons.map((c) => c.id)).toContain('basepod-vs-superpod');
+    expect(search('hybrid').comparisons.map((c) => c.id)).toContain('on-prem-cloud-hybrid');
+  });
+});

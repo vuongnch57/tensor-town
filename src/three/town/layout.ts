@@ -1,6 +1,7 @@
 import type { ZoneSlug } from '@/content/types';
 import { connections } from '@/content/town';
 import type { SceneColor } from '../core/palette';
+import { DISTRICT_FOOTPRINT as CAMPUS_FOOTPRINT } from '../zones/campus-expansion/layout';
 import { DISTRICT_FOOTPRINT as POWER_FOOTPRINT } from '../zones/power-cooling/layout';
 import { DISTRICT_FOOTPRINT as CONTROL_FOOTPRINT } from '../zones/control-room/layout';
 import { YARD_FOOTPRINT as LINE_FOOTPRINT } from '../zones/production-line/layout';
@@ -49,11 +50,7 @@ export const buildings: Building[] = [
   // Packing Dock
   { x: 11.4, z: -8.5, w: 4.4, d: 3.2, h: 2, roof: 'parcel', door: true, win: [3, 1] },
   // Assembly Row: the production line is its own scene (see zones/production-line)
-  // New Development
-  { x: 17, z: 9, w: 3, d: 2.4, h: 1.6, roof: 'storage' },
-  { x: 20.2, z: 9, w: 2.4, d: 2.4, h: 1.6, roof: 'storage' },
-  { x: 17, z: 12.6, w: 3, d: 2.4, h: 0.06, y0: 0, wall: 'path', roof: 'path', flat: true },
-  { x: 20.2, z: 12.6, w: 2.4, d: 2.4, h: 0.06, y0: 0, wall: 'path', roof: 'path', flat: true },
+  // New Development: the campus expansion is its own scene (see zones/campus-expansion)
 ];
 
 export const cylinders: Cylinder[] = [
@@ -84,7 +81,7 @@ export const districtLayout: District[] = [
   { slug: 'production-line', focus: [18.2, 0.6], marker: [13.6, 2.6, 5.8], zoom: 3.3, view: { azimuth: 12, elevation: 52 } },
   { slug: 'control-room', focus: [-18.2, -11.5], marker: [-14, 9.6, -9], zoom: 2.7, view: { azimuth: 45, elevation: 38 } },
   { slug: 'power-cooling', focus: [-17.0, 3.0], marker: [-20.6, 2.6, 2.4], zoom: 3.0, view: { azimuth: 45, elevation: 38 } },
-  { slug: 'campus-expansion', focus: [18.4, 10.6], marker: [18.5, 2.8, 10.6] },
+  { slug: 'campus-expansion', focus: [17.6, 11.4], marker: [14.2, 3.2, 8.4], zoom: 3.0, view: { azimuth: 45, elevation: 40 } },
 ];
 
 const find = (slug: ZoneSlug): District => {
@@ -109,7 +106,7 @@ export const connectionGeometry: Record<string, ConnGeometry> = {
   'road-gate-factory': { pts: [[0.9, 13.2], [0.9, 4.4]], parcels: true },
   'road-factory-assembly': { pts: [[5.4, -0.6], [13.0, -0.6]], parcels: true },
   'road-harbour-assembly': { pts: [[12.8, 11.4], [12.8, 5], [14.6, 5], [14.6, 3.8]], parcels: true },
-  'road-harbour-newdev': { pts: [[12.8, 11.4], [15.4, 11.4]] },
+  'road-harbour-newdev': { pts: [[12.8, 11.4], [12.8, 10.45], [15.4, 10.45]] },
   'rail-gate-harbour': { pts: [[-12.5, 14.7], [10.6, 14.7], [10.6, 12.7]], parcels: true },
   'rail-tower-gate': { pts: [[-6.4, 8.1], [-6.4, 14.7]] },
   'rail-harbour-factory': { pts: [[11.6, 10.2], [11.6, 4.0]], parcels: true },
@@ -170,6 +167,7 @@ export function footprints(): [number, number, number, number][] {
     LINE_FOOTPRINT,
     CONTROL_FOOTPRINT,
     POWER_FOOTPRINT,
+    CAMPUS_FOOTPRINT,
   ];
 }
 

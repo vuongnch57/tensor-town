@@ -69,6 +69,11 @@ export type ShareSimParams = { sharing: GpuSharing };
 /** Simulation state for Zone 8 (power and cooling): relative rack density 0 to 1, and IT and facility power in MW (illustrative). */
 export type PowerSimParams = { density: number; itMW: number; facilityMW: number };
 
+/** Simulation state for Zone 9 (the campus): which design, who owns it and how many scalable units. */
+export type PodArchitecture = 'basepod' | 'superpod';
+export type Deployment = 'on-prem' | 'cloud' | 'hybrid';
+export type CampusSimParams = { architecture: PodArchitecture; deployment: Deployment; units: number };
+
 export type Item = {
   id: string; // unique across the site, e.g. 'hbm'
   zone: ZoneSlug;
@@ -105,6 +110,8 @@ export type Item = {
   shareSim?: Partial<ShareSimParams>;
   /** Zone 8: simulation state to apply on select. */
   powerSim?: Partial<PowerSimParams>;
+  /** Zone 9: simulation state to apply on select. */
+  campusSim?: Partial<CampusSimParams>;
 };
 
 export type Comparison = {
