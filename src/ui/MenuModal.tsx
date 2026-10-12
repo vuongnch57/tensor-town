@@ -32,6 +32,7 @@ export function MenuModal() {
   const hidden = useFactoryStore((s) => s.hiddenGroups);
   const toggleGroup = useFactoryStore((s) => s.toggleGroup);
   const setTour = useFactoryStore((s) => s.setTourStep);
+  const setIntro = useFactoryStore((s) => s.setIntroOpen);
   const navigate = useNavigate();
   const ref = useRef<HTMLDialogElement>(null);
   const search = useRef<HTMLInputElement>(null);
@@ -161,9 +162,22 @@ export function MenuModal() {
             ))}
           </div>
         </section>
-        <button type="button" onClick={toggleTheme} className="cursor-pointer self-start rounded-md border border-line bg-surface-300 px-4 py-2 font-semibold text-ink">
+        <div className="flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            setTour(null);
+            setIntro(true);
+            goTo('/');
+          }}
+          className="cursor-pointer rounded-md border border-line bg-surface-300 px-4 py-2 font-semibold text-ink"
+        >
+          {chrome.intro.reopen}
+        </button>
+        <button type="button" onClick={toggleTheme} className="cursor-pointer rounded-md border border-line bg-surface-300 px-4 py-2 font-semibold text-ink">
           {chrome.menu.theme}
         </button>
+        </div>
         </>
         )}
       </div>

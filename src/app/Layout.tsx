@@ -33,7 +33,7 @@ export function Layout() {
   }, [setMenuOpen]);
 
   return (
-    <div className={`flex flex-col ${isTown ? 'h-screen' : 'min-h-screen'}`}>
+    <div className={`flex flex-col ${isTown ? 'h-screen h-dvh' : 'min-h-screen'}`}>
       <div className="pointer-events-none absolute left-0 right-0 top-0 z-30 flex items-center gap-3 px-4 pt-3">
         <div className="pointer-events-auto flex items-center gap-3">
           <HamburgerButton />
@@ -52,7 +52,7 @@ export function Layout() {
         <Outlet />
       </main>
       {isTown ? (
-        <footer className="pointer-events-none absolute bottom-2 left-0 right-0 z-10 px-4 text-center text-xs text-muted">{chrome.footer}</footer>
+        <footer className="pointer-events-none absolute bottom-2 left-0 right-0 z-10 px-4 text-center text-xs text-muted max-sm:static max-sm:bg-surface-100 max-sm:py-2">{chrome.footer}</footer>
       ) : (
         <footer className="border-t border-line px-4 py-4 text-center text-sm text-muted md:px-6">{chrome.footer}</footer>
       )}

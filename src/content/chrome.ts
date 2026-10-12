@@ -19,6 +19,18 @@ export const chrome = {
     connections: 'Show connections',
     theme: 'Switch light / dark',
   },
+  intro: {
+    title: 'A whole AI factory, built as a town',
+    text: 'Explore GPUs, memory, networking, operations, power and cooling as the districts of one connected town. Click anything to learn.',
+    points: [
+      { title: 'One district per topic', text: 'Each district is one part of AI infrastructure, linked to the others by roads, rail and cables.' },
+      { title: 'Click to understand', text: 'Open any object to see what it is, its key facts and how it compares with what it is confused with.' },
+      { title: 'Data is the cargo', text: 'Watch parcels travel across the town to see where data flows and where it slows down.' },
+    ],
+    start: 'Start exploring',
+    index: 'Browse the index',
+    reopen: 'About this site',
+  },
   pages: { town: 'Town', index: 'Index', compare: 'Compare', about: 'About' },
   district: {
     connectedTo: 'Connected to',
