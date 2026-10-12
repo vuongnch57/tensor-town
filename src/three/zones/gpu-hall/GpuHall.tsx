@@ -37,6 +37,20 @@ export function HallShell() {
       <Box size={[0.18, 1.1, 4.7]} position={[3.21, 0, -0.65]} color="wall" round={0.06} />
       <Box size={[0.18, 1.1, 0.3]} position={[3.21, 0, 2.85]} color="wall" round={0.06} />
       <Box size={[0.4, 0.1, 4.9]} position={[3.21, 1.1, -0.65]} color="hall" round={0.25} />
+      {/* aisle markings, a gate lamp pair and wall-mounted fans on the back wall */}
+      {[-1.4, 0.0, 1.4].map((z) => (
+        <Box key={z} size={[6.2, 0.01, 0.05]} position={[0, FLOOR, z + 0.7]} color="hall" round={0.4} shadow={false} />
+      ))}
+      {[-1.65, -0.35].map((x) => (
+        <Box key={`g${x}`} size={[0.1, 0.1, 0.1]} position={[x, 1.0, 3.1]} color="parcel" round={0.4} shadow={false} />
+      ))}
+      {[-2.2, 0, 2.2].map((x) => (
+        <group key={`f${x}`} position={[x, 1.05, -2.94]}>
+          {[-0.25, 0, 0.25].map((dx) => (
+            <Box key={dx} size={[0.04, 0.3, 0.02]} position={[dx, -0.15, 0]} color="wall" round={0.4} shadow={false} />
+          ))}
+        </group>
+      ))}
     </group>
   );
 }
@@ -113,6 +127,12 @@ export function StampingPress({ smBusy, position = [1.9, FLOOR, 2.0] }: { smBusy
       <Box size={[0.14, 1.0, 0.14]} position={[-0.38, 0.3, -0.3]} color="roof" round={0.2} />
       <Box size={[0.14, 1.0, 0.14]} position={[0.38, 0.3, -0.3]} color="roof" round={0.2} />
       <Box size={[0.9, 0.2, 0.2]} position={[0, 1.1, -0.3]} color="roof" round={0.2} />
+      {/* control panel with lamps, and a guard rail along the front */}
+      <Box size={[0.3, 0.4, 0.2]} position={[0.62, 0.3, 0.2]} color="wall" round={0.15} />
+      {[0, 1, 2].map((k) => (
+        <Box key={k} size={[0.05, 0.05, 0.03]} position={[0.54 + k * 0.08, 0.6, 0.31]} color={k === 0 ? 'parcel' : 'hall'} round={0.4} shadow={false} />
+      ))}
+      <Box size={[1.0, 0.03, 0.03]} position={[0, 0.5, 0.5]} color="parcel" round={0.4} shadow={false} />
       <mesh ref={head} position={[0, 0.78, 0]} castShadow>
         <boxGeometry args={[0.46, 0.2, 0.46]} />
         <meshStandardMaterial color={scene.network} roughness={0.7} metalness={0} />
