@@ -1,4 +1,4 @@
-import type { GpuSharing, LineNeed, StoragePath, NetworkKind, FabricInterconnect, GpuModel, ModelSize, NumberFormat, PackFormat, Workload } from './types';
+import type { Deployment, GpuSharing, PodArchitecture, LineNeed, StoragePath, NetworkKind, FabricInterconnect, GpuModel, ModelSize, NumberFormat, PackFormat, Workload } from './types';
 
 /** User-facing text for the zone page UI. */
 export const zoneText = {
@@ -214,5 +214,34 @@ export const powerText = {
     },
     floorNote: 'Facility power cannot be lower than IT power, so PUE stays at one or above.',
     illustrative: 'Relative density and a toy switch-over point, not a measurement. The real air-cooling limit is TODO(fact).',
+  },
+};
+
+export const campusText = {
+  simulate: {
+    title: 'Grow the campus',
+    architecture: 'Design',
+    deployment: 'Deployment',
+    units: 'Scalable units',
+    dgx: 'DGX systems',
+    gpus: 'GPUs',
+    owned: 'Own',
+    rented: 'Rent',
+    todo: 'TODO(fact)',
+    architectureOptions: [
+      { value: 'basepod', label: 'BasePOD' },
+      { value: 'superpod', label: 'SuperPOD' },
+    ] as { value: PodArchitecture; label: string }[],
+    deploymentOptions: [
+      { value: 'on-prem', label: 'On-prem' },
+      { value: 'cloud', label: 'Cloud' },
+      { value: 'hybrid', label: 'Hybrid' },
+    ] as { value: Deployment; label: string }[],
+    story: {
+      'on-prem': 'You own every unit: you pay to build them up front, you run them and the data stays with you.',
+      cloud: 'You rent every unit: nothing to build and quick to scale, but you pay for every hour and the data travels.',
+      hybrid: 'You own the steady base and rent the rest: balanced cost, with flexibility for peaks.',
+    } as Record<Deployment, string>,
+    illustrative: 'A teaching picture, not a quote. The size of a BasePOD is TODO(fact).',
   },
 };

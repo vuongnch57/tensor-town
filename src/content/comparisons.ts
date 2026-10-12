@@ -1,6 +1,6 @@
 import type { Comparison } from './types';
 
-// Zone 1 to Zone 8 comparisons. The remaining comparisons arrive with their zones.
+// Zone 1 to Zone 9 comparisons. The remaining comparisons arrive with their zones.
 export const comparisons: Comparison[] = [
   {
     id: 'cpu-vs-gpu',
@@ -185,5 +185,34 @@ export const comparisons: Comparison[] = [
     ],
     whyConfused:
       'Both keep the same chips from overheating and both end at the chillers, so they look like two options for the same room. They differ in what carries the heat: air is simple but thin, and liquid is more work to build but carries much more, which is what dense GPU racks now need.',
+  },
+  {
+    id: 'basepod-vs-superpod',
+    title: 'BasePOD vs SuperPOD',
+    zones: ['campus-expansion'],
+    columns: ['DGX BasePOD', 'DGX SuperPOD'],
+    rows: [
+      { label: 'In the factory', values: ['A single compact block', 'A campus of repeating blocks'] },
+      { label: 'Scale', values: ['Smaller: TODO(fact)', 'Many scalable units of 32 DGX systems (H100 generation)'], best: 1 },
+      { label: 'Built for', values: ['Getting started and mid-size clusters', 'The largest training jobs'] },
+      { label: 'Grows by', values: ['Stepping up to a larger design', 'Adding another identical scalable unit'] },
+    ],
+    whyConfused:
+      'Both are reference designs for DGX clusters with the same ingredients, so the names sound like two sizes of the same thing. They are: the BasePOD is the starter block, and the SuperPOD repeats a standard scalable unit until the cluster is campus-sized.',
+  },
+  {
+    id: 'on-prem-cloud-hybrid',
+    title: 'On-prem vs cloud vs hybrid',
+    zones: ['campus-expansion'],
+    columns: ['On-prem', 'Cloud', 'Hybrid'],
+    rows: [
+      { label: 'In the factory', values: ['A campus you own', 'A hall you rent', 'Own the base, rent the peaks'] },
+      { label: 'Up-front cost', values: ['High', 'Low', 'Medium'], best: 1 },
+      { label: 'Control of data', values: ['Full', 'Shared with the provider', 'Split by choice'], best: 0 },
+      { label: 'Speed to start', values: ['Slow: build first', 'Fast: rent today', 'Fast for peaks'], best: 1 },
+      { label: 'Cost at steady load', values: ['Lower over time', 'Higher over time', 'Mixed'], best: 0 },
+    ],
+    whyConfused:
+      'All three run the same GPUs and the same software, so the choice looks like a matter of taste. The real differences are who pays up front, who controls the data and how steady the work is: steady work favours owning, bursty work favours renting.',
   },
 ];
