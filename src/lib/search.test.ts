@@ -124,3 +124,18 @@ describe('search: Zone 7', () => {
     expect(search('vgpu').comparisons.map((c) => c.id)).toContain('gpu-sharing');
   });
 });
+
+describe('search: Zone 8', () => {
+  it('finds the power and cooling objects and the concepts', () => {
+    expect(search('substation').items[0].id).toBe('substation');
+    expect(search('chiller').items.map((i) => i.id)).toContain('chillers');
+    expect(search('pue').items[0].id).toBe('pue-meter');
+    expect(search('liquid cooling').items.map((i) => i.id)).toContain('liquid-loop');
+    expect(search('air cooling').items.map((i) => i.id)).toContain('air-cooled-hall');
+    expect(search('density').items.map((i) => i.id)).toContain('rack-power-density');
+    expect(search('heat').items.map((i) => i.id)).toContain('gpu-heat-output');
+  });
+  it('finds the air vs liquid comparison', () => {
+    expect(search('liquid').comparisons.map((c) => c.id)).toContain('air-vs-liquid');
+  });
+});
