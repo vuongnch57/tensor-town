@@ -2,7 +2,7 @@ import type { Item } from '../types';
 
 const zone = 'power-cooling' as const;
 
-// No numbers are needed in this zone, so every fact below is a description. The air-cooling limit is not in SPEC §8, so it stays TODO(fact).
+// No numbers are needed in this zone, so every fact below is a description. The air-cooling limit has no single verified figure, so the text says it depends on the facility.
 // Anything beyond SPEC §8 is general, not measured.
 export const powerCoolingItems: Item[] = [
   {
@@ -58,7 +58,7 @@ export const powerCoolingItems: Item[] = [
       'Air cooling blows cold air through the racks and carries the warm air away, usually with the racks arranged in hot and cold aisles so the two streams stay apart. It is simple, familiar and cheap to build, but air carries heat poorly, so there is a limit to how dense a rack it can keep cool.',
     facts: [
       { label: 'Carries heat with', value: 'Moving air' },
-      { label: 'Air-cooling limit', value: 'TODO(fact): add a verified rack density' },
+      { label: 'Air-cooling limit', value: 'No single figure: it depends on the facility, and sources differ (roughly tens of kW per rack)' },
     ],
     compare: {
       with: ['Liquid cooling'],
@@ -163,10 +163,10 @@ export const powerCoolingItems: Item[] = [
     category: 'Power',
     metaphor: 'How much heat is crowded into one cabinet-sized footprint',
     summary:
-      'Rack power density is how much power one rack draws. GPU racks are far denser than traditional server racks, because many accelerators sit close together on fast links. Density decides the cooling: light racks can stay on air, dense ones need liquid, and where the line falls is TODO(fact).',
+      'Rack power density is how much power one rack draws. GPU racks are far denser than traditional server racks, because many accelerators sit close together on fast links. Density decides the cooling: light racks can stay on air, dense ones need liquid, and where the line falls depends on the facility and differs between sources.',
     facts: [
       { label: 'Decides', value: 'Whether air is enough or liquid is needed' },
-      { label: 'Switch-over density', value: 'TODO(fact): add a verified rack density' },
+      { label: 'Switch-over density', value: 'Depends on the facility; no single figure' },
     ],
     related: ['gpu-rack', 'gpu-heat-output', 'air-cooled-hall', 'liquid-loop', 'pue-meter'],
     powerSim: { density: 0.9 },

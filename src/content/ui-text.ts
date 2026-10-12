@@ -213,7 +213,7 @@ export const powerText = {
       liquid: 'Too dense for air: coolant has to reach the chips.',
     },
     floorNote: 'Facility power cannot be lower than IT power, so PUE stays at one or above.',
-    illustrative: 'Relative density and a toy switch-over point, not a measurement. The real air-cooling limit is TODO(fact).',
+    illustrative: 'Relative density and a toy switch-over point, not a measurement. The real air-cooling limit depends on the facility and differs between sources.',
   },
 };
 
@@ -227,7 +227,7 @@ export const campusText = {
     gpus: 'GPUs',
     owned: 'Own',
     rented: 'Rent',
-    todo: 'TODO(fact)',
+    todo: 'Varies by design',
     architectureOptions: [
       { value: 'basepod', label: 'BasePOD' },
       { value: 'superpod', label: 'SuperPOD' },
@@ -242,6 +242,6 @@ export const campusText = {
       cloud: 'You rent every unit: nothing to build and quick to scale, but you pay for every hour and the data travels.',
       hybrid: 'You own the steady base and rent the rest: balanced cost, with flexibility for peaks.',
     } as Record<Deployment, string>,
-    illustrative: 'A teaching picture, not a quote. The size of a BasePOD is TODO(fact).',
+    illustrative: 'A teaching picture, not a quote. BasePOD sizes vary by design; the NDR400 design lists 2 to 8 DGX systems.',
   },
 };

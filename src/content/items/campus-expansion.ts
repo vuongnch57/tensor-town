@@ -3,7 +3,7 @@ import type { Item } from '../types';
 const zone = 'campus-expansion' as const;
 
 // Numbers here come from SPEC §8 only: 32 DGX per scalable unit (H100 generation) and the 72 + 36 of GB200 NVL72.
-// The size of a BasePOD is not in SPEC §8, so it stays TODO(fact). Anything else beyond SPEC §8 is general, not measured.
+// The BasePOD size (2 to 8 DGX, NDR400 design) is in SPEC §8 facts with its source. Anything else beyond SPEC §8 is general, not measured.
 export const campusExpansionItems: Item[] = [
   {
     id: 'scalable-unit',
@@ -39,13 +39,13 @@ export const campusExpansionItems: Item[] = [
       'A DGX SuperPOD joins several scalable units with a shared high-speed network, storage and management, so hundreds of GPUs work as one machine for the largest training jobs. A BasePOD is the smaller starting design: the same ideas at lower scale.',
     facts: [
       { label: 'Built from', value: 'Scalable units of 32 DGX systems (H100 generation)' },
-      { label: 'BasePOD size', value: 'TODO(fact): add a verified DGX count' },
+      { label: 'BasePOD size', value: '2 to 8 DGX systems in the NDR400 design; other designs differ' },
     ],
     compare: {
       with: ['BasePOD'],
       rows: [
         { label: 'In the factory', values: ['Campus of repeating blocks', 'A single compact block'] },
-        { label: 'Scale', values: ['Many scalable units joined together', 'Smaller: TODO(fact)'] },
+        { label: 'Scale', values: ['Many scalable units joined together', 'Smaller: 2 to 8 DGX systems in the NDR400 design'] },
         { label: 'Built for', values: ['The largest training jobs', 'Getting started and mid-size clusters'] },
       ],
       fullCompareId: 'basepod-vs-superpod',
@@ -112,9 +112,9 @@ export const campusExpansionItems: Item[] = [
     category: 'Architecture',
     metaphor: 'The smaller starter campus: one compact block',
     summary:
-      'A DGX BasePOD is a tested design that pairs DGX systems with the network, storage and software around them, sized for teams that are not yet building a SuperPOD. It follows the same pattern, so a BasePOD can be a first step. Its size in DGX systems is TODO(fact).',
+      'A DGX BasePOD is a tested design that pairs DGX systems with the network, storage and software around them, sized for teams that are not yet building a SuperPOD. It follows the same pattern, so a BasePOD can be a first step. Its size varies by design: the NDR400 design lists 2 to 8 DGX systems.',
     facts: [
-      { label: 'Size', value: 'TODO(fact): add a verified DGX count' },
+      { label: 'Size', value: '2 to 8 DGX systems in the NDR400 design; other designs differ' },
       { label: 'Role', value: 'The starting point before a SuperPOD' },
     ],
     related: ['superpod-campus', 'scalable-unit', 'reference-architecture', 'dgx-system'],

@@ -31,7 +31,7 @@ export const gpuHallItems: Item[] = [
     swatch: 'scene-roof',
     summary:
       'The CPU coordinates the work: it prepares data, hands jobs to the GPU and handles everything that is not bulk arithmetic. It is built for varied, step-by-step decisions, not for doing the same sum millions of times at once.',
-    facts: [{ label: 'Typical core count', value: 'TODO(fact): add a verified CPU core count' }],
+    facts: [],
     compare: {
       with: ['GPU'],
       fullCompareId: 'cpu-vs-gpu',

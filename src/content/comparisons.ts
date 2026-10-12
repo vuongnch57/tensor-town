@@ -82,7 +82,7 @@ export const comparisons: Comparison[] = [
       { label: 'In the factory', values: ['The complete building', 'The eight-room core', 'A kit of standard parts'] },
       { label: 'Sold as', values: ['A finished system', 'A board for builders', 'A modular blueprint'] },
       { label: 'Built by', values: ['NVIDIA', 'Server makers, around the core', 'Server makers, in their own layouts'] },
-      { label: 'Detail', values: ['8× H100 GPUs · 4 NVSwitch chips', '8 GPUs joined by NVLink', 'TODO(fact): add verified MGX specifics'] },
+      { label: 'Detail', values: ['8× H100 GPUs · 4 NVSwitch chips', '8 GPUs joined by NVLink', 'Many layouts from standard parts, air or liquid cooled'] },
     ],
     whyConfused:
       'All three appear in server brochures with the same GPUs inside, so they read like three product tiers. They differ in how much NVIDIA builds and how much the buyer does: the whole machine, the GPU core only, or a set of parts to arrange.',
@@ -181,7 +181,7 @@ export const comparisons: Comparison[] = [
       { label: 'Carries heat with', values: ['Moving air', 'A circulating liquid'], best: 1 },
       { label: 'Handles', values: ['Lower rack densities', 'Higher rack densities'], best: 1 },
       { label: 'Build cost', values: ['Lower, familiar design', 'Higher: pipes, pumps and coolant distribution'], best: 0 },
-      { label: 'Limit', values: ['TODO(fact): add a verified rack density', 'Set by the loop and the chillers'] },
+      { label: 'Limit', values: ['Depends on the facility; roughly tens of kW per rack', 'Set by the loop and the chillers'] },
     ],
     whyConfused:
       'Both keep the same chips from overheating and both end at the chillers, so they look like two options for the same room. They differ in what carries the heat: air is simple but thin, and liquid is more work to build but carries much more, which is what dense GPU racks now need.',
@@ -193,7 +193,7 @@ export const comparisons: Comparison[] = [
     columns: ['DGX BasePOD', 'DGX SuperPOD'],
     rows: [
       { label: 'In the factory', values: ['A single compact block', 'A campus of repeating blocks'] },
-      { label: 'Scale', values: ['Smaller: TODO(fact)', 'Many scalable units of 32 DGX systems (H100 generation)'], best: 1 },
+      { label: 'Scale', values: ['Smaller: 2 to 8 DGX systems in the NDR400 design', 'Many scalable units of 32 DGX systems (H100 generation)'], best: 1 },
       { label: 'Built for', values: ['Getting started and mid-size clusters', 'The largest training jobs'] },
       { label: 'Grows by', values: ['Stepping up to a larger design', 'Adding another identical scalable unit'] },
     ],

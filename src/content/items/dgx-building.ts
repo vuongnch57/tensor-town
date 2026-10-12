@@ -157,7 +157,10 @@ export const dgxBuildingItems: Item[] = [
     metaphor: 'A kit of standard parts for building your own layout',
     summary:
       'MGX is a modular blueprint that lets server makers combine GPU, CPU and networking parts in different layouts, rather than choosing between a fixed DGX and an HGX core.',
-    facts: [{ label: 'Details', value: 'TODO(fact): add verified MGX specifics' }],
+    facts: [
+      { label: 'Chassis', value: 'Modular 1U, 2U and 4U designs' },
+      { label: 'Cooling', value: 'Air or liquid' },
+    ],
     related: ['dgx-system', 'hgx-board'],
   },
   {
