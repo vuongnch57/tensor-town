@@ -12,3 +12,28 @@ export function Slab({ size, position, m, rot = 0 }: { size: [number, number, nu
     </mesh>
   );
 }
+
+/** A belt laid under a lane: one flat slab per straight segment, with a thin rail on each side. Lanes are axis-aligned. */
+export function Lane({ pts, y = 0, w = 0.34, belt, rail }: { pts: readonly (readonly [number, number])[]; y?: number; w?: number; belt: MeshStandardMaterial; rail: MeshStandardMaterial }) {
+  return (
+    <>
+      {pts.slice(1).map(([bx, bz], i) => {
+        const [ax, az] = pts[i];
+        const alongX = Math.abs(bx - ax) > Math.abs(bz - az);
+        const len = (alongX ? Math.abs(bx - ax) : Math.abs(bz - az)) + w;
+        const cx = (ax + bx) / 2;
+        const cz = (az + bz) / 2;
+        const size: [number, number, number] = alongX ? [len, 0.05, w] : [w, 0.05, len];
+        const rs: [number, number, number] = alongX ? [len, 0.1, 0.03] : [0.03, 0.1, len];
+        const off = w / 2 + 0.015;
+        return (
+          <group key={i}>
+            <Slab size={size} position={[cx, y, cz]} m={belt} />
+            <Slab size={rs} position={[alongX ? cx : cx - off, y, alongX ? cz - off : cz]} m={rail} />
+            <Slab size={rs} position={[alongX ? cx : cx + off, y, alongX ? cz + off : cz]} m={rail} />
+          </group>
+        );
+      })}
+    </>
+  );
+}

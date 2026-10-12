@@ -66,6 +66,9 @@ export type LineSimParams = { need: LineNeed };
 export type GpuSharing = 'one' | 'mig' | 'time-slicing' | 'vgpu';
 export type ShareSimParams = { sharing: GpuSharing };
 
+/** Simulation state for Zone 8 (power and cooling): relative rack density 0 to 1, and IT and facility power in MW (illustrative). */
+export type PowerSimParams = { density: number; itMW: number; facilityMW: number };
+
 export type Item = {
   id: string; // unique across the site, e.g. 'hbm'
   zone: ZoneSlug;
@@ -100,6 +103,8 @@ export type Item = {
   lineSim?: Partial<LineSimParams>;
   /** Zone 7: simulation state to apply on select. */
   shareSim?: Partial<ShareSimParams>;
+  /** Zone 8: simulation state to apply on select. */
+  powerSim?: Partial<PowerSimParams>;
 };
 
 export type Comparison = {

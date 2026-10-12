@@ -1,6 +1,6 @@
 import type { Comparison } from './types';
 
-// Zone 1 to Zone 7 comparisons. The remaining comparisons arrive with their zones.
+// Zone 1 to Zone 8 comparisons. The remaining comparisons arrive with their zones.
 export const comparisons: Comparison[] = [
   {
     id: 'cpu-vs-gpu',
@@ -170,5 +170,20 @@ export const comparisons: Comparison[] = [
     ],
     whyConfused:
       'All three let more than one job use a single GPU, and nvidia-smi can show a busy GPU in every case. They share it differently: walls give each job its own part of the GPU, a schedule gives each job all of it for a moment, and a booth gives each virtual machine a fixed share.',
+  },
+  {
+    id: 'air-vs-liquid',
+    title: 'Air vs liquid cooling',
+    zones: ['power-cooling'],
+    columns: ['Air cooling', 'Liquid cooling'],
+    rows: [
+      { label: 'In the factory', values: ['Hall with fans and open aisles', 'Pipes of coolant to the chips'] },
+      { label: 'Carries heat with', values: ['Moving air', 'A circulating liquid'], best: 1 },
+      { label: 'Handles', values: ['Lower rack densities', 'Higher rack densities'], best: 1 },
+      { label: 'Build cost', values: ['Lower, familiar design', 'Higher: pipes, pumps and coolant distribution'], best: 0 },
+      { label: 'Limit', values: ['TODO(fact): add a verified rack density', 'Set by the loop and the chillers'] },
+    ],
+    whyConfused:
+      'Both keep the same chips from overheating and both end at the chillers, so they look like two options for the same room. They differ in what carries the heat: air is simple but thin, and liquid is more work to build but carries much more, which is what dense GPU racks now need.',
   },
 ];

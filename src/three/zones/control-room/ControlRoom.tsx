@@ -10,7 +10,7 @@ import { Hotspot } from '../../primitives/Hotspot';
 import { Parcels } from '../../primitives/Parcels';
 import { Selectable, useSceneInteraction } from '../../primitives/Selectable';
 import { Workers } from '../../primitives/Workers';
-import { mat, mix, Slab } from '../kit';
+import { Lane as KitLane, mat, mix, Slab } from '../kit';
 import type { GpuSharing } from '@/content/types';
 import { simulate } from './sim';
 import { anchors, BOX_DOOR_Z, DECK, DESK, HILL_Y, MANAGER, MIG_DOOR_Z, MIG_EAST, MIG_HALL, MIG_WORKERS, paths, RAMP, SHIFT_EAST, SHIFT_HALL, SHIFT_WORKERS, TERRACE, TICKET_DOOR_Z, TOWER, YARD } from './layout';
@@ -39,30 +39,9 @@ const useMats = () =>
     [],
   );
 
-/** A belt laid under a lane: one flat slab per straight segment, with a thin rail on each side. Lanes are axis-aligned. */
 function Lane({ pts, y = 0, w = 0.34 }: { pts: readonly (readonly [number, number])[]; y?: number; w?: number }) {
   const m = useMats();
-  return (
-    <>
-      {pts.slice(1).map(([bx, bz], i) => {
-        const [ax, az] = pts[i];
-        const alongX = Math.abs(bx - ax) > Math.abs(bz - az);
-        const len = (alongX ? Math.abs(bx - ax) : Math.abs(bz - az)) + w;
-        const cx = (ax + bx) / 2;
-        const cz = (az + bz) / 2;
-        const size: [number, number, number] = alongX ? [len, 0.05, w] : [w, 0.05, len];
-        const rail: [number, number, number] = alongX ? [len, 0.1, 0.03] : [0.03, 0.1, len];
-        const off = w / 2 + 0.015;
-        return (
-          <group key={i}>
-            <Slab size={size} position={[cx, y, cz]} m={m.belt} />
-            <Slab size={rail} position={[alongX ? cx : cx - off, y, alongX ? cz - off : cz]} m={m.steel} />
-            <Slab size={rail} position={[alongX ? cx : cx + off, y, alongX ? cz + off : cz]} m={m.steel} />
-          </group>
-        );
-      })}
-    </>
-  );
+  return <KitLane pts={pts} y={y} w={w} belt={m.belt} rail={m.steel} />;
 }
 
 const RAMP_LEN = Math.hypot(HILL_Y, RAMP.zTo - RAMP.zFrom);

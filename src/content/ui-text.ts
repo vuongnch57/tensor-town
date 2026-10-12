@@ -195,3 +195,24 @@ export const shareText = {
     ] as { value: GpuSharing; label: string }[],
   },
 };
+
+export const powerText = {
+  simulate: {
+    title: 'Size the cooling',
+    density: 'Rack density',
+    it: 'IT power',
+    facility: 'Facility power',
+    suggested: 'Suggested cooling',
+    pue: 'PUE',
+    overhead: 'Overhead',
+    mw: (v: number) => `${Math.round(v * 10) / 10} MW`,
+    level: (d: number) => (d <= 0.25 ? 'Light' : d <= 0.6 ? 'Medium' : d <= 0.8 ? 'Dense' : 'Very dense'),
+    cooling: { air: 'Air', liquid: 'Liquid' },
+    why: {
+      air: 'Fans and open aisles can carry this much heat away.',
+      liquid: 'Too dense for air: coolant has to reach the chips.',
+    },
+    floorNote: 'Facility power cannot be lower than IT power, so PUE stays at one or above.',
+    illustrative: 'Relative density and a toy switch-over point, not a measurement. The real air-cooling limit is TODO(fact).',
+  },
+};
