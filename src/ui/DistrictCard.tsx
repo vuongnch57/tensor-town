@@ -14,7 +14,7 @@ export function DistrictCard({ slug }: { slug: ZoneSlug }) {
   if (!d || !zone) return null;
   const objects = itemsInZone(slug).filter((i) => i.kind === 'object');
   return (
-    <section aria-live="polite" className="absolute bottom-10 left-4 z-20 max-sm:bottom-9 w-[min(380px,calc(100%-32px))] rounded-lg border border-line bg-surface-200 p-5 shadow-panel max-sm:p-4">
+    <section aria-live="polite" className="absolute bottom-10 left-4 z-20 max-sm:bottom-14 w-[min(380px,calc(100%-32px))] rounded-lg border border-line bg-surface-200 p-5 shadow-panel max-sm:p-4">
       <div className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">{chrome.district.zone} {d.number} · {zone.title}</div>
       <h2 className="mt-1 text-xl font-semibold leading-7">{d.name}</h2>
       <p className="mt-1 text-sm leading-5 text-muted max-sm:line-clamp-2">{d.text}</p>
