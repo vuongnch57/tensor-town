@@ -15,7 +15,7 @@ export function ComparePage() {
     <section className="mx-auto w-full max-w-[1100px] px-4 pb-12 pt-20 md:px-6">
       <h1 className="text-[28px] font-bold leading-[34px]">{compareText.title}</h1>
       <p className="mt-2 text-muted">{compareText.intro}</p>
-      <div className="mt-6 grid gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
+      <div className="mt-6 grid grid-cols-[minmax(0,1fr)] gap-6 md:grid-cols-[240px_minmax(0,1fr)]">
         <nav aria-label={compareText.listLabel}>
           <ul className="m-0 flex list-none gap-2 overflow-x-auto p-0 md:flex-col md:overflow-visible">
             {comparisons.map((x) => (
