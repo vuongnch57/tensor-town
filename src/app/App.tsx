@@ -1,5 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { chrome } from '@/content/chrome';
 import { Layout } from './Layout';
 import { IndexPage } from '@/pages/IndexPage';
@@ -27,6 +29,8 @@ export function App() {
           <Route path="*" element={town} />
         </Route>
       </Routes>
+      <Analytics />
+      <SpeedInsights />
     </BrowserRouter>
   );
 }
