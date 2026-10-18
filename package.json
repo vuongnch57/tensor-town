@@ -13,6 +13,8 @@
     "@react-three/drei": "^9.122.0",
     "@react-three/fiber": "^8.18.0",
     "@react-three/postprocessing": "^2.19.1",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "maath": "^0.10.8",
     "n8ao": "^2.0.1",
     "postprocessing": "^6.39.5",
