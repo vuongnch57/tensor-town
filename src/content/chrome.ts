@@ -2,6 +2,7 @@
 export const chrome = {
   siteName: 'AI Factory',
   footer: 'Personal project, not affiliated with NVIDIA. Simulated numbers are illustrative.',
+  author: { label: 'Built by Glenn', url: 'https://builtbyglenn.com' },
   townHint: 'Choose a numbered marker to fly into a district',
   backToTown: '‹ Back to town',
   menu: {
