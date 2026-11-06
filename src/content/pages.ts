@@ -37,7 +37,7 @@ export const aboutText = {
   what: {
     title: 'What this is',
     body: [
-      'AI Factory explains how the infrastructure behind AI fits together by turning it into a town. Each part of the AI factory is a part of the town, and they are joined by roads, rail, conveyors, pipes, cables and sensor lines, because in a real data center the parts depend on each other.',
+      'Tensor Town explains how the infrastructure behind AI fits together by turning it into a town. Each part of the AI factory is a part of the town, and they are joined by roads, rail, conveyors, pipes, cables and sensor lines, because in a real data center the parts depend on each other.',
       'The town is one scene. Choose a district to fly into it, then choose any numbered object to read what it is, how it works and how it differs from the things it is usually confused with.',
     ],
   },

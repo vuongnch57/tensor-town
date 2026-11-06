@@ -1,4 +1,4 @@
-# AI Factory
+# Tensor Town
 
 An explorable isometric 3D reference to AI data-center infrastructure: GPUs as production halls, memory as
 warehouses, networks as roads and rails. A static React + three.js site. See `SPEC.md` for the full spec and
