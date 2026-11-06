@@ -1,6 +1,6 @@
-# AI Factory — project instructions
+# Tensor Town — project instructions
 
-This repo builds **AI Factory**, an explorable isometric 3D reference site about AI data-center infrastructure.
+This repo builds **Tensor Town** (formerly "AI Factory"), an explorable isometric 3D reference site about AI data-center infrastructure.
 
 ## Source of truth
 - `SPEC.md` is the full specification. Read it completely before any work, and re-read the relevant section before each phase.

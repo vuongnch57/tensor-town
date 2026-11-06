@@ -1,4 +1,4 @@
-# AI Factory — Explorable 3D Reference Site
+# Tensor Town — Explorable 3D Reference Site
 
 **Specification for implementation by Claude Code**
 Owner: Glenn · Version 3.0 (DRAFT, awaiting owner approval) · October 2026
@@ -172,7 +172,7 @@ On the Town page a few slow parcels move along every connection so the town read
 
 ### 3.6 Navigation: hamburger modal
 
-- A single small icon button (about 40 px) in the top-left corner on every page; the wordmark "AI Factory" sits beside it in `small` type. Nothing else is permanently visible in the header.
+- A single small icon button (about 40 px) in the top-left corner on every page; the wordmark "Tensor Town" sits beside it in `small` type. Nothing else is permanently visible in the header.
 - Activating it opens a **modal** (dialog) centred on desktop, full-screen sheet on mobile, over a dimmed scene. Focus is trapped, Esc and the close button close it, focus returns to the button.
 - Modal content, in order: search field (`/` also opens the modal with search focused); **Districts** (9 rows with number, name and the item count); **Pages** (Town, Index, Compare, About); **Show connections** toggles (§3.5); theme toggle.
 - Search results replace the Districts list while typing; Enter opens the first result and closes the modal.
@@ -220,7 +220,7 @@ src/
 - **Selection feedback:** the selected object gets an emissive tint and its hotspot turns `accent`; other objects dim slightly. Hovering an index row highlights its object.
 
 ### 4.5 Visual tokens
-Use the AI Factory design system tokens (§4.12): UI tokens `surface-*`, `line`, `ink`, `muted`, `accent`, `warn`; scene tokens `scene-*` (hall orange, storage blue, network lilac, parcel sand, parcel-hot coral, idle grey). Font: Be Vietnam Pro. Dark theme for the 2D UI; the 3D scene keeps daylight colours in both themes.
+Use the Tensor Town design system tokens (§4.12): UI tokens `surface-*`, `line`, `ink`, `muted`, `accent`, `warn`; scene tokens `scene-*` (hall orange, storage blue, network lilac, parcel sand, parcel-hot coral, idle grey). Font: Be Vietnam Pro. Dark theme for the 2D UI; the 3D scene keeps daylight colours in both themes.
 
 ### 4.6 Item model (core abstraction)
 Every clickable thing is an **item**. Objects have a scene anchor and a hotspot number; concepts do not.
@@ -342,7 +342,7 @@ Use them for **style and level of finish only**. Do not copy their brand names, 
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ [≡] AI Factory                                                           │
+│ [≡] Tensor Town                                                          │
 │                                                                          │
 │        ⑦ Control Tower                                                   │
 │  ⑧ Power Station      ~ river ~~~~~~~~~~~~~~~                            │
@@ -359,7 +359,7 @@ The scene fills the viewport. Footer text (§9) is a single small line at the bo
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ [≡] AI Factory / Factory Quarter · Zone 1           ‹ Back to town       │
+│ [≡] Tensor Town / Factory Quarter · Zone 1          ‹ Back to town       │
 ├──────────────┬──────────────────────────────────────┬────────────────────┤
 │ ZONE 1 INDEX │ Factory Quarter         [Click any…] │ MEMORY·ZONE 1·#7   │
 │ 8 objects·3  │                                      │ HBM                │

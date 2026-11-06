@@ -52,11 +52,19 @@ export function Layout() {
         <Outlet />
       </main>
       {isTown ? (
-        <footer className="pointer-events-none absolute bottom-2 left-0 right-0 z-10 px-4 text-center text-xs text-muted max-sm:static max-sm:bg-surface-100 max-sm:py-2">{chrome.footer}</footer>
+        <footer className="pointer-events-none absolute bottom-2 left-0 right-0 z-10 px-4 text-center text-xs text-muted max-sm:static max-sm:bg-surface-100 max-sm:py-2">{chrome.footer} <AuthorLink /></footer>
       ) : (
-        <footer className="border-t border-line px-4 py-4 text-center text-sm text-muted md:px-6">{chrome.footer}</footer>
+        <footer className="border-t border-line px-4 py-4 text-center text-sm text-muted md:px-6">{chrome.footer} <AuthorLink /></footer>
       )}
       <MenuModal />
     </div>
+  );
+}
+
+function AuthorLink() {
+  return (
+    <a href={chrome.author.url} className="pointer-events-auto text-muted underline">
+      {chrome.author.label}
+    </a>
   );
 }
